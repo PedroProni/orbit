@@ -1,0 +1,18 @@
+export const APP_NAME = 'Orbit';
+export const API_BASE = '/backend';
+export const LEGACY_SESSION_STORAGE_KEY = 'orbit.session';
+export const CSRF_HEADER = 'x-orbit-csrf';
+export const PUBLIC_PATHS = ['/login', '/forgot-password', '/set-password'];
+export const FAVORITES_STORAGE_KEY = 'orbit.favorites';
+export const RECENT_LISTS_STORAGE_KEY = 'orbit.recentLists';
+export const RECENT_LISTS_MAX = 5;
+export const VIEW_DISPLAY_STORAGE_PREFIX = 'orbit.display.';
+export const LOCALE_COOKIE = 'NEXT_LOCALE';
+export const DEFAULT_LOCALE = 'en';
+export const LOCALES = ['pt', 'en'] as const;
+export const ACCESS_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ACCESS_LOGIN === 'true';
+export const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_DEV_LOGIN === 'true';
+export const TASK_PAGE_SIZE = 200;
+export const ALL_TASKS_KEY = '__all__';
+export const REALTIME_EVENTS = ['task.created', 'task.updated', 'task.deleted', 'comment.created', 'comment.updated', 'comment.deleted'];
+export const LOCALE_COOKIE_MAX_AGE = 31536000;

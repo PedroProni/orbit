@@ -1,0 +1,3 @@
+export const CONTEXT_MENU_WIDTH_PX = 200;
+export const CONTEXT_MENU_ITEM_HEIGHT_PX = 34;
+export const CONTEXT_MENU_PADDING_PX = 16;

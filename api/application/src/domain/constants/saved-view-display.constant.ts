@@ -1,0 +1,3 @@
+export const SAVED_VIEW_MAX_COLUMNS = 100;
+export const SAVED_VIEW_COLUMN_MAX_LENGTH = 120;
+export const SAVED_VIEW_WIP_MAX = 999;

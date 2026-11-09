@@ -1,0 +1,2 @@
+export const TASK_CHECKLIST_NAME_MAX = 200;
+export const TASK_CHECKLIST_ITEM_MAX = 500;

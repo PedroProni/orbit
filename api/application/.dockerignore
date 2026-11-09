@@ -1,0 +1,26 @@
+# Sensitive env files
+.env
+.env.*
+!.env.example
+
+# Credentials
+.aws/
+*.pem
+*.key
+
+# Cache and OS files
+*.log
+*.DS_Store
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+dist/
+coverage/
+tmp/
+
+# Dev only
+test/
+*.md
+.git

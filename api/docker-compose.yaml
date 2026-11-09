@@ -1,0 +1,61 @@
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - '${ORBIT_MONGO_PORT:-27017}:27017'
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  minio:
+    image: ${ORBIT_MINIO_IMAGE:-minio/minio:latest}
+    command: server /data --console-address ':9001'
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-orbit}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-orbit-secret}
+    ports:
+      - '${ORBIT_MINIO_PORT:-9000}:9000'
+      - '${ORBIT_MINIO_CONSOLE_PORT:-9001}:9001'
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
+  orbit-api:
+    build:
+      context: ./application
+    ports:
+      - '${ORBIT_API_PORT:-3000}:3000'
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/orbit
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      ENABLE_DEV_LOGIN: ${ENABLE_DEV_LOGIN:-false}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET:-}
+      LOCAL_DOMAIN: http://localhost:${ORBIT_WEB_PORT:-56511}
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      S3_REGION: us-east-1
+      S3_BUCKET: ${S3_BUCKET:-orbit}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-orbit}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-orbit-secret}
+    depends_on:
+      - mongodb
+      - minio
+    restart: unless-stopped
+
+  orbit-web:
+    build:
+      context: ../../front/orbit-web
+      args:
+        ORBIT_API_URL: http://orbit-api:3000
+        NEXT_PUBLIC_DEV_LOGIN: ${ENABLE_DEV_LOGIN:-false}
+    ports:
+      - '${ORBIT_WEB_PORT:-56511}:56511'
+    depends_on:
+      - orbit-api
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+  minio-data:

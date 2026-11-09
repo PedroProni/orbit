@@ -1,0 +1,1 @@
+export const INLINE_INPUT_CLASS = 'w-full rounded border border-transparent bg-transparent px-1.5 py-1 outline-none transition-colors placeholder:text-muted hover:bg-panel2 focus:border-line focus:bg-panel2';

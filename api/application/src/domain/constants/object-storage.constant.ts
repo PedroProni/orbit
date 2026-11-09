@@ -1,0 +1,1 @@
+export const OBJECT_STORAGE_TOKEN = Symbol('OBJECT_STORAGE_TOKEN');

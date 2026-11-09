@@ -1,0 +1,105 @@
+'use client';
+
+import { useRef, useState } from 'react';
+import { ArrowDown, ArrowUp, SlidersHorizontal } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Popover } from '@/components/ui/popover';
+import { Select } from '@/components/ui/select';
+import { useCapabilities } from '@/hooks/use-capabilities';
+import { useStatusLabel } from '@/hooks/use-status-label';
+import { useUiStore } from '@/stores/ui.store';
+import { BoardGroupBy, BoardSwimlane, CardField, ViewSortBy } from '@/types/view-display.types';
+import { CARD_FIELD_OPTIONS, GROUP_BY_OPTIONS, SORT_OPTIONS, SWIMLANE_OPTIONS, WIP_LIMIT_MAX } from './display-menu.constants';
+import { DisplayMenuProps } from './display-menu.types';
+
+export function DisplayMenu({ space }: DisplayMenuProps) {
+  const t = useTranslations('display');
+  const statusLabel = useStatusLabel();
+  const view = useUiStore((s) => s.view);
+  const display = useUiStore((s) => s.display);
+  const setDisplay = useUiStore((s) => s.setDisplay);
+  const filters = useUiStore((s) => s.filters);
+  const setFilters = useUiStore((s) => s.setFilters);
+  const { isGuest } = useCapabilities();
+  const anchor = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const isBoard = view === 'board';
+  const groupOptions = GROUP_BY_OPTIONS.filter((option) => !(isGuest && option === 'assignee'));
+  const laneOptions = SWIMLANE_OPTIONS.filter((option) => !(isGuest && option === 'assignee'));
+  const setLimit = (column: string, raw: string) => {
+    const others = display.wipLimits.filter((item) => item.column !== column);
+    const limit = Number(raw);
+    setDisplay({ wipLimits: raw && Number.isInteger(limit) && limit >= 1 && limit <= WIP_LIMIT_MAX ? [...others, { column, limit }] : others });
+  };
+  const toggleField = (field: CardField) => setDisplay({ cardFields: display.cardFields.includes(field) ? display.cardFields.filter((item) => item !== field) : [...display.cardFields, field] });
+  return (
+    <>
+      <button ref={anchor} type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((current) => !current)} className="flex items-center gap-1.5 rounded border border-line px-2 py-1 text-sm text-muted transition-colors hover:text-fg">
+        <SlidersHorizontal size={13} />
+        {t('button')}
+      </button>
+      <Popover open={open} anchorRef={anchor} onClose={() => setOpen(false)} label={t('button')} role="dialog" align="end" className="w-72 max-w-[calc(100vw-2rem)]">
+        <div className="max-h-[70vh] space-y-3 overflow-y-auto p-3 text-sm">
+          {isBoard ? (
+            <>
+              <label className="block space-y-1">
+                <span className="text-xs text-muted">{t('groupBy')}</span>
+                <Select ariaLabel={t('groupBy')} value={display.groupBy} options={groupOptions.map((option) => ({ value: option, label: t(`group.${option}`) }))} onChange={(value) => setDisplay({ groupBy: value as BoardGroupBy, collapsedColumns: [] })} />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-xs text-muted">{t('swimlane')}</span>
+                <Select ariaLabel={t('swimlane')} value={display.swimlane} options={laneOptions.map((option) => ({ value: option, label: t(`lane.${option}`) }))} onChange={(value) => setDisplay({ swimlane: value as BoardSwimlane })} />
+              </label>
+            </>
+          ) : null}
+          <div className="space-y-1">
+            <span className="text-xs text-muted">{t('sortBy')}</span>
+            <div className="flex items-center gap-1">
+              <Select ariaLabel={t('sortBy')} value={display.sortBy} options={SORT_OPTIONS.map((option) => ({ value: option, label: t(`sort.${option}`) }))} onChange={(value) => setDisplay({ sortBy: value as ViewSortBy })} className="min-w-0 flex-1" />
+              <button type="button" disabled={display.sortBy === 'manual'} aria-label={display.sortDirection === 'asc' ? t('sortAscending') : t('sortDescending')} onClick={() => setDisplay({ sortDirection: display.sortDirection === 'asc' ? 'desc' : 'asc' })} className="rounded border border-line p-1.5 text-muted hover:text-fg disabled:opacity-50">
+                {display.sortDirection === 'asc' ? <ArrowUp size={13} /> : <ArrowDown size={13} />}
+              </button>
+            </div>
+          </div>
+          {isBoard ? (
+            <fieldset>
+              <legend className="mb-1 text-xs text-muted">{t('cardFields')}</legend>
+              <div className="grid grid-cols-2 gap-1">
+                {CARD_FIELD_OPTIONS.map((field) => (
+                  <label key={field} className="flex items-center gap-1.5 text-xs">
+                    <input type="checkbox" checked={display.cardFields.includes(field)} onChange={() => toggleField(field)} />
+                    {t(`field.${field}`)}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+          {isBoard ? (
+            <label className="flex items-center gap-2 text-xs">
+              <input type="checkbox" checked={display.hideEmpty} onChange={(e) => setDisplay({ hideEmpty: e.target.checked })} />
+              {t('hideEmpty')}
+            </label>
+          ) : null}
+          <label className="flex items-center gap-2 text-xs">
+            <input type="checkbox" checked={filters.includeClosed} onChange={(e) => setFilters({ includeClosed: e.target.checked })} />
+            {t('showClosed')}
+          </label>
+          {isBoard && display.groupBy === 'status' ? (
+            <fieldset>
+              <legend className="mb-1 text-xs text-muted">{t('wipLimits')}</legend>
+              <p className="mb-1 text-[11px] text-muted">{t('wipHint')}</p>
+              <div className="space-y-1">
+                {(space?.statuses ?? []).map((status) => (
+                  <label key={status.name} className="flex items-center gap-2 text-xs">
+                    <span className="min-w-0 flex-1 truncate">{statusLabel(status.name)}</span>
+                    <input type="number" min={1} max={WIP_LIMIT_MAX} aria-label={t('wipLimitFor', { column: statusLabel(status.name) })} value={display.wipLimits.find((item) => item.column === status.name)?.limit ?? ''} onChange={(e) => setLimit(status.name, e.target.value)} className="w-16 rounded border border-line bg-panel2 px-1.5 py-0.5" />
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+        </div>
+      </Popover>
+    </>
+  );
+}

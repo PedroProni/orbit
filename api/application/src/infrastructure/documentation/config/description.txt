@@ -1,0 +1,10 @@
+VISÃO GERAL
+-----------
+O sistema foi desenvolvido em NestJS, com MongoDB como banco de dados e aplicação de conceitos de DDD (Domain-Driven Design).
+
+
+TECNOLOGIAS UTILIZADAS
+-----------------------
+- Framework: NestJS
+- Banco de Dados: MongoDB
+- Documentação: Swagger

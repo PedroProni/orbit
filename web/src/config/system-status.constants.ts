@@ -1,0 +1,1 @@
+export const SYSTEM_STATUS_KEYS: Readonly<Record<string, string>> = { backlog: 'backlog', 'to-do': 'toDo', stuck: 'stuck', 'in development': 'inDevelopment', 'waiting review': 'waitingReview', 'in review': 'inReview', completed: 'completed' };

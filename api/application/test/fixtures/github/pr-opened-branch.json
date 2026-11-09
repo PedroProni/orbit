@@ -1,0 +1,17 @@
+{
+  "action": "opened",
+  "number": 102,
+  "repository": {
+    "full_name": "org/acme-bet"
+  },
+  "pull_request": {
+    "number": 102,
+    "title": "fix sem id",
+    "body": null,
+    "html_url": "https://github.com/org/acme-bet/pull/102",
+    "merged": false,
+    "head": {
+      "ref": "fix/__TASK__-regras"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+export const SESSION_COOKIE_NAME = 'orbit_session';
+export const CSRF_HEADER = 'x-orbit-csrf';
+export const SAFE_HTTP_METHODS: readonly string[] = ['GET', 'HEAD', 'OPTIONS'];
+export const INVITE_TTL_SECONDS = 60 * 60 * 24 * 7;
+export const RESET_TTL_SECONDS = 60 * 60;
+export const PASSWORD_MIN_LENGTH = 10;
+export const PASSWORD_MAX_LENGTH = 200;
+export const THROTTLE_WINDOW_SECONDS = 60 * 15;
+export const LOGIN_ACCOUNT_LIMIT = 10;
+export const LOGIN_IP_LIMIT = 30;
+export const FORGOT_ACCOUNT_LIMIT = 3;
+export const PASSWORD_CHANGE_LIMIT = 10;
+export const USER_AGENT_MAX_LENGTH = 300;
+export const ACCESS_TOKEN_BYTES = 32;

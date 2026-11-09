@@ -1,0 +1,3 @@
+export const PALETTE_MAX_RESULTS = 30;
+export const PALETTE_SEARCH_MIN_CHARS = 2;
+export const PALETTE_SEARCH_DEBOUNCE_MS = 200;

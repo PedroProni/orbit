@@ -1,0 +1,17 @@
+{
+  "action": "opened",
+  "number": 101,
+  "repository": {
+    "full_name": "org/acme-bet"
+  },
+  "pull_request": {
+    "number": 101,
+    "title": "[P4T] fix __TASK__ saldo",
+    "body": null,
+    "html_url": "https://github.com/org/acme-bet/pull/101",
+    "merged": false,
+    "head": {
+      "ref": "feat/fix-balance"
+    }
+  }
+}

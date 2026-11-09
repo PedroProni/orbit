@@ -1,0 +1,17 @@
+{
+  "action": "closed",
+  "number": 103,
+  "repository": {
+    "full_name": "org/acme-bet"
+  },
+  "pull_request": {
+    "number": 103,
+    "title": "[P4T] __TASK__ abandoned",
+    "body": null,
+    "html_url": "https://github.com/org/acme-bet/pull/103",
+    "merged": false,
+    "head": {
+      "ref": "feat/x"
+    }
+  }
+}

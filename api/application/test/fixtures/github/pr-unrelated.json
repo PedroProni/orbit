@@ -1,0 +1,17 @@
+{
+  "action": "opened",
+  "number": 104,
+  "repository": {
+    "full_name": "org/acme-bet"
+  },
+  "pull_request": {
+    "number": 104,
+    "title": "chore: bump deps",
+    "body": null,
+    "html_url": "https://github.com/org/acme-bet/pull/104",
+    "merged": false,
+    "head": {
+      "ref": "chore/deps"
+    }
+  }
+}
