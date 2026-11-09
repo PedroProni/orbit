@@ -13,10 +13,19 @@ export class HierarchyPresenter {
   }
 
   static list(list: TaskListEntity) {
-    return { id: list.getId(), spaceId: list.getSpaceId(), folderId: list.getFolderId(), name: list.getName(), kind: list.getKind(), startDate: list.getStartDate(), endDate: list.getEndDate(), order: list.getOrder() };
+    return {
+      id: list.getId(),
+      spaceId: list.getSpaceId(),
+      folderId: list.getFolderId(),
+      name: list.getName(),
+      kind: list.getKind(),
+      startDate: list.getStartDate(),
+      endDate: list.getEndDate(),
+      order: list.getOrder(),
+    };
   }
 
   static customField(field: CustomFieldDefinitionEntity) {
-    return { id: field.getId(), spaceId: field.getSpaceId(), name: field.getName(), type: field.getType(), options: field.getOptions() };
+    return { id: field.getId(), spaceId: field.getSpaceId(), name: field.getName(), type: field.getType(), options: field.getOptions(), listIds: field.getListIds() };
   }
 }

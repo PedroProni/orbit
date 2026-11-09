@@ -1,3 +1,4 @@
+import { API_BASE } from '@/config/app.constants';
 import { ATTACHMENT_BLOCKED_EXTENSIONS, ATTACHMENT_DEFAULT_MIME, ATTACHMENT_MAX_BYTES } from './attachments.constants';
 import { FileValidation } from './attachments.types';
 
@@ -19,3 +20,5 @@ export function validateFile(file: File): FileValidation {
   if (ATTACHMENT_BLOCKED_EXTENSIONS.includes(extensionOf(file.name))) return { errorKey: 'blockedType', values: { name: file.name, ext: extensionOf(file.name) } };
   return { errorKey: null, values: {} };
 }
+
+export const attachmentContentUrl = (id: string): string => `${API_BASE}/attachments/${id}/content`;

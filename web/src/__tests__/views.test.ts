@@ -6,7 +6,31 @@ import { computeWorkload } from '@/components/tasks/workload';
 import { sortTasks } from '@/components/tasks/table-sort';
 import { Member, Task } from '@/types/api.types';
 
-const task = (over: Partial<Task>): Task => ({ id: 'x', listId: 'l', spaceId: 's', parentId: null, title: 't', descriptionMd: '', status: 'to-do', priority: null, tags: [], assigneeIds: [], watcherIds: [], points: null, startDate: null, dueDate: null, checklists: [], customFields: [], creatorId: 'u', dateClosed: null, archived: false, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', ...over });
+const task = (over: Partial<Task>): Task => ({
+  id: 'x',
+  listId: 'l',
+  spaceId: 's',
+  parentId: null,
+  title: 't',
+  descriptionMd: '',
+  status: 'to-do',
+  priority: null,
+  tags: [],
+  assigneeIds: [],
+  watcherIds: [],
+  points: null,
+  startDate: null,
+  dueDate: null,
+  checklists: [],
+  customFields: [],
+  links: { figma: null, notion: null, printsFolder: null },
+  creatorId: 'u',
+  dateClosed: null,
+  archived: false,
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+  ...over,
+});
 
 describe('calendar grid', () => {
   it('always has 42 cells starting on a Sunday and contains the whole month', () => {

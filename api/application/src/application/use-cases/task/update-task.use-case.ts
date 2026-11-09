@@ -52,7 +52,12 @@ export class UpdateTaskUseCase {
     }
     if (command.title !== undefined) {
       if (command.title.trim() !== before.title && !task.getParentId() && !TaskCreationPolicy.hasAllowedPrefix(command.title.trim(), space.getTitlePrefixes())) {
-        throw new BadRequestException(`Title must start with one of: ${space.getTitlePrefixes().map((p) => `[${p}]`).join(', ')}`);
+        throw new BadRequestException(
+          `Title must start with one of: ${space
+            .getTitlePrefixes()
+            .map(p => `[${p}]`)
+            .join(', ')}`,
+        );
       }
       guardDomain(() => task.changeTitle(command.title!));
     }
@@ -64,19 +69,23 @@ export class UpdateTaskUseCase {
       if (status !== command.status && StatusAliasPolicy.isCancelled(command.status)) command = { ...command, addTags: [...(command.addTags ?? []), CANCELLED_TAG] };
     }
     if (command.priority !== undefined) task.changePriority(command.priority);
-    const normalize = (values: string[] | undefined) => [...new Set((values ?? []).map((t) => t.trim().toLowerCase()).filter(Boolean))];
+    const normalize = (values: string[] | undefined) => [...new Set((values ?? []).map(t => t.trim().toLowerCase()).filter(Boolean))];
     const tagOps = command.tags === undefined && (command.addTags || command.removeTags) ? { add: normalize(command.addTags), remove: normalize(command.removeTags) } : null;
-    const assigneeOps = command.assigneeIds === undefined && (command.addAssigneeIds || command.removeAssigneeIds) ? { add: [...new Set(command.addAssigneeIds ?? [])], remove: [...new Set(command.removeAssigneeIds ?? [])] } : null;
+    const assigneeOps =
+      command.assigneeIds === undefined && (command.addAssigneeIds || command.removeAssigneeIds)
+        ? { add: [...new Set(command.addAssigneeIds ?? [])], remove: [...new Set(command.removeAssigneeIds ?? [])] }
+        : null;
     if (command.tags !== undefined || command.addTags || command.removeTags) {
       const base = command.tags ?? task.getTags();
-      const removed = new Set((command.removeTags ?? []).map((t) => t.trim().toLowerCase()));
-      task.replaceTags([...base, ...(command.addTags ?? [])].filter((t) => !removed.has(t.trim().toLowerCase())));
-      if (!task.getParentId() && !TaskCreationPolicy.hasRequiredTag(task.getTags(), space.getRequiredTags())) throw new BadRequestException(`At least one tag is required: ${space.getRequiredTags().join(', ')}`);
+      const removed = new Set((command.removeTags ?? []).map(t => t.trim().toLowerCase()));
+      task.replaceTags([...base, ...(command.addTags ?? [])].filter(t => !removed.has(t.trim().toLowerCase())));
+      if (!task.getParentId() && !TaskCreationPolicy.hasRequiredTag(task.getTags(), space.getRequiredTags()))
+        throw new BadRequestException(`At least one tag is required: ${space.getRequiredTags().join(', ')}`);
     }
     if (command.assigneeIds !== undefined || command.addAssigneeIds || command.removeAssigneeIds) {
       const base = command.assigneeIds ?? task.getAssigneeIds();
       const removed = new Set(command.removeAssigneeIds ?? []);
-      const next = [...base, ...(command.addAssigneeIds ?? [])].filter((id) => !removed.has(id));
+      const next = [...base, ...(command.addAssigneeIds ?? [])].filter(id => !removed.has(id));
       if (!(await this.members.allActive(principal.workspaceId, next))) throw new BadRequestException('Unknown user in assignees');
       task.replaceAssignees(next);
     }
@@ -92,14 +101,15 @@ export class UpdateTaskUseCase {
       await this.customFieldValidation.validate(this.fields, principal.workspaceId, space.getId(), command.customFields);
       task.replaceCustomFields(command.customFields);
     }
+    if (command.links !== undefined) guardDomain(() => task.setLinks(command.links!));
     if (command.checklists !== undefined) task.replaceChecklists(ChecklistNormalizer.normalize(command.checklists));
     if (command.archived !== undefined) task.setArchived(command.archived);
 
     const after = task.toProps() as unknown as Record<string, unknown>;
     const previous = before as unknown as Record<string, unknown>;
-    const changed = Object.keys(after).filter((key) => key !== 'updatedAt' && JSON.stringify(after[key]) !== JSON.stringify(previous[key]));
+    const changed = Object.keys(after).filter(key => key !== 'updatedAt' && JSON.stringify(after[key]) !== JSON.stringify(previous[key]));
     if (changed.length === 0) return TaskPresenter.toView(task);
-    const scalarChanged = changed.filter((key) => !(key === 'tags' && tagOps) && !(key === 'assigneeIds' && assigneeOps));
+    const scalarChanged = changed.filter(key => !(key === 'tags' && tagOps) && !(key === 'assigneeIds' && assigneeOps));
     let saved = scalarChanged.length > 0 ? await this.tasks.patch(task, scalarChanged) : task;
     if (tagOps || assigneeOps) {
       await this.tasks.modifySets(taskId, principal.workspaceId, { tags: tagOps ?? undefined, assigneeIds: assigneeOps ?? undefined });
@@ -115,10 +125,19 @@ export class UpdateTaskUseCase {
     const diff: Record<string, { before: unknown; after: unknown }> = {};
     for (const key of changed) if (key !== 'descriptionMd' && key !== 'checklists') diff[key] = { before: previous[key], after: after[key] };
     await this.audit.record(principal, 'task.updated', 'task', taskId, { changed, diff });
-    const addedAssignees = saved.getAssigneeIds().filter((id) => !before.assigneeIds.includes(id));
+    const addedAssignees = saved.getAssigneeIds().filter(id => !before.assigneeIds.includes(id));
     await this.notifications.notify(principal.workspaceId, addedAssignees, NotificationType.ASSIGNMENT, taskId, principal.userId);
-    if (changed.includes('status')) await this.notifications.notify(principal.workspaceId, [...saved.getAssigneeIds(), ...saved.getWatcherIds()], NotificationType.STATUS_CHANGE, taskId, principal.userId);
-    this.realtime.publish({ workspaceId: principal.workspaceId, type: 'task.updated', taskId, listId: saved.getListId(), actorId: principal.userId, status: saved.getStatus(), statusChanged: changed.includes('status') });
+    if (changed.includes('status'))
+      await this.notifications.notify(principal.workspaceId, [...saved.getAssigneeIds(), ...saved.getWatcherIds()], NotificationType.STATUS_CHANGE, taskId, principal.userId);
+    this.realtime.publish({
+      workspaceId: principal.workspaceId,
+      type: 'task.updated',
+      taskId,
+      listId: saved.getListId(),
+      actorId: principal.userId,
+      status: saved.getStatus(),
+      statusChanged: changed.includes('status'),
+    });
     return TaskPresenter.toView(saved);
   }
 }

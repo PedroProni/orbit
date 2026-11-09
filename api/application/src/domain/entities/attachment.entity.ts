@@ -1,4 +1,5 @@
 import { AttachmentEntityProps } from '@domain/props/attachment-entity.props';
+import { AttachmentGallery } from '@domain/enums/attachment.enums';
 
 export class AttachmentEntity {
   private readonly _id: string;
@@ -11,6 +12,7 @@ export class AttachmentEntity {
   private sizeBytes: number;
   private uploaderId: string;
   private confirmed: boolean;
+  private readonly gallery: AttachmentGallery | null;
   private readonly createdAt: Date;
   private updatedAt: Date;
 
@@ -25,6 +27,7 @@ export class AttachmentEntity {
     this.sizeBytes = props.sizeBytes;
     this.uploaderId = props.uploaderId;
     this.confirmed = props.confirmed;
+    this.gallery = props.gallery;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
@@ -69,6 +72,14 @@ export class AttachmentEntity {
     return this.confirmed;
   }
 
+  getGallery(): AttachmentGallery | null {
+    return this.gallery;
+  }
+
+  isPrint(): boolean {
+    return this.gallery === AttachmentGallery.PRINTS;
+  }
+
   getCreatedAt(): Date {
     return this.createdAt;
   }
@@ -78,7 +89,21 @@ export class AttachmentEntity {
   }
 
   toProps(): AttachmentEntityProps {
-    return { _id: this._id, workspaceId: this.workspaceId, taskId: this.taskId, commentId: this.commentId, storageKey: this.storageKey, filename: this.filename, mimeType: this.mimeType, sizeBytes: this.sizeBytes, uploaderId: this.uploaderId, confirmed: this.confirmed, createdAt: this.createdAt, updatedAt: this.updatedAt };
+    return {
+      _id: this._id,
+      workspaceId: this.workspaceId,
+      taskId: this.taskId,
+      commentId: this.commentId,
+      storageKey: this.storageKey,
+      filename: this.filename,
+      mimeType: this.mimeType,
+      sizeBytes: this.sizeBytes,
+      uploaderId: this.uploaderId,
+      confirmed: this.confirmed,
+      gallery: this.gallery,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 
   confirm(): void {

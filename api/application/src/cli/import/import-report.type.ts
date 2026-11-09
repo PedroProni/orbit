@@ -1,3 +1,5 @@
+import { FieldListsSummary } from './clickup-field-lists.type';
+
 export interface ImportMismatch {
   entity: string;
   clickupId: string;
@@ -64,6 +66,7 @@ export interface ImportReport {
   mismatches: ImportMismatch[];
   notCopied: Record<string, ImportNotCopied>;
   files: ImportFilesSummary | null;
+  fieldLists: FieldListsSummary | null;
   dateOrigins: ImportDateOrigin[];
   statusMapping: ImportStatusMapping[];
   statusOrigins: ImportStatusOrigin[];

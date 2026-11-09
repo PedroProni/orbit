@@ -1,4 +1,4 @@
-import { Checklist, Member, SavedView, TaskCustomFieldValue, TaskKind, TaskPriority } from '@/types/api.types';
+import { AttachmentGallery, Checklist, Member, SavedView, TaskCustomFieldValue, TaskKind, TaskLinks, TaskPriority } from '@/types/api.types';
 
 export interface LoginResponse {
   accessToken: string;
@@ -21,6 +21,7 @@ export interface TaskPatch {
   customFields?: TaskCustomFieldValue[];
   checklists?: Checklist[];
   archived?: boolean;
+  links?: Partial<TaskLinks>;
 }
 
 export interface CreateTaskInput {
@@ -67,4 +68,5 @@ export interface UploadFileMeta {
   mimeType: string;
   sizeBytes: number;
   commentId?: string;
+  gallery?: AttachmentGallery;
 }

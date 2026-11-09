@@ -33,6 +33,7 @@ import { CreateListUseCase } from '@application/use-cases/hierarchy/create-list.
 import { UpdateListUseCase } from '@application/use-cases/hierarchy/update-list.use-case';
 import { DeleteListUseCase } from '@application/use-cases/hierarchy/delete-list.use-case';
 import { CreateCustomFieldUseCase } from '@application/use-cases/custom-field/create-custom-field.use-case';
+import { UpdateCustomFieldUseCase } from '@application/use-cases/custom-field/update-custom-field.use-case';
 import { ListCustomFieldsUseCase } from '@application/use-cases/custom-field/list-custom-fields.use-case';
 import { DeleteCustomFieldUseCase } from '@application/use-cases/custom-field/delete-custom-field.use-case';
 import { CreateTaskUseCase } from '@application/use-cases/task/create-task.use-case';
@@ -46,6 +47,7 @@ import { RealtimeService } from '@application/services/realtime.service';
 import { NotificationService } from '@application/services/notification.service';
 import { WorkspaceMembersService } from '@application/services/workspace-members.service';
 import { CustomFieldValidationService } from '@application/services/custom-field-validation.service';
+import { CustomFieldListsService } from '@application/services/custom-field-lists.service';
 import { CreateCommentUseCase } from '@application/use-cases/comment/create-comment.use-case';
 import { EditCommentUseCase } from '@application/use-cases/comment/edit-comment.use-case';
 import { DeleteCommentUseCase } from '@application/use-cases/comment/delete-comment.use-case';
@@ -82,6 +84,11 @@ import { DocsUseCase } from '@application/use-cases/doc/docs.use-case';
 import { GoalsUseCase } from '@application/use-cases/goal/goals.use-case';
 import { DashboardsUseCase } from '@application/use-cases/dashboard/dashboards.use-case';
 import { GuestAccessService } from '@application/services/guest-access.service';
+import { TaskAccessService } from '@application/services/task-access.service';
+import { ListTaskPullRequestsUseCase } from '@application/use-cases/task/list-task-pull-requests.use-case';
+import { LinkTaskPullRequestUseCase } from '@application/use-cases/task/link-task-pull-request.use-case';
+import { UnlinkTaskPullRequestUseCase } from '@application/use-cases/task/unlink-task-pull-request.use-case';
+import { ListTaskPrintsUseCase } from '@application/use-cases/attachment/list-task-prints.use-case';
 import { TaskQueryFilterService } from '@application/services/task-query-filter.service';
 import { FormsUseCase } from '@application/use-cases/form/forms.use-case';
 import { AutomationsUseCase } from '@application/use-cases/automation/automations.use-case';
@@ -114,6 +121,7 @@ export default [
   CreateCustomFieldUseCase,
   ListCustomFieldsUseCase,
   DeleteCustomFieldUseCase,
+  UpdateCustomFieldUseCase,
   CreateTaskUseCase,
   UpdateTaskUseCase,
   GetTaskUseCase,
@@ -124,6 +132,7 @@ export default [
   NotificationService,
   WorkspaceMembersService,
   CustomFieldValidationService,
+  CustomFieldListsService,
   CreateCommentUseCase,
   EditCommentUseCase,
   DeleteCommentUseCase,
@@ -159,6 +168,11 @@ export default [
   GoalsUseCase,
   DashboardsUseCase,
   GuestAccessService,
+  TaskAccessService,
+  ListTaskPullRequestsUseCase,
+  LinkTaskPullRequestUseCase,
+  UnlinkTaskPullRequestUseCase,
+  ListTaskPrintsUseCase,
   TaskQueryFilterService,
   FormsUseCase,
   AutomationsUseCase,

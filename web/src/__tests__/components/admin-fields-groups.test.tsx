@@ -7,7 +7,7 @@ import { MEMBERS } from '../helpers/fixtures';
 import { adminSpace, principal } from '../helpers/admin-fixtures';
 import { CustomFieldsAdminPage } from '@/components/admin/custom-fields-admin-page';
 import { GroupsAdminPage } from '@/components/admin/groups-admin-page';
-import { customFieldProblem } from '@/components/admin/custom-field.helpers';
+import { customFieldProblem, nextFieldListIds } from '@/components/admin/custom-field.helpers';
 import { ApiError } from '@/lib/api-client';
 import { adminService } from '@/services/admin.service';
 import { orbitService } from '@/services/orbit.service';
@@ -29,6 +29,7 @@ const FIELD: CustomFieldDefinition = {
     { id: 'o1', label: 'P4T', color: '#000000' },
     { id: 'o2', label: 'MTB', color: '#ffffff' },
   ],
+  listIds: null,
 };
 
 describe('custom fields screen', () => {
@@ -41,11 +42,32 @@ describe('custom fields screen', () => {
   afterEach(() => cleanup());
 
   it('lists the fields of the chosen space', async () => {
-    vi.spyOn(orbitService, 'customFields').mockResolvedValue([FIELD, { ...FIELD, id: 'cf2', name: 'Spec', type: 'url', options: [] }]);
+    vi.spyOn(orbitService, 'customFields').mockResolvedValue([FIELD, { ...FIELD, id: 'cf2', name: 'Spec', type: 'url', options: [], listIds: null }]);
     renderWithProviders(<CustomFieldsAdminPage />);
     expect(await screen.findByText('Customer')).toBeTruthy();
     expect(screen.getByText('2 options')).toBeTruthy();
     expect(screen.getByText('Link')).toBeTruthy();
+  });
+
+  it('scopes a field to the lists picked, and back to all lists', async () => {
+    vi.spyOn(orbitService, 'customFields').mockResolvedValue([{ ...FIELD, listIds: ['l2', 'gone'] }]);
+    const update = vi.spyOn(adminService, 'updateCustomField').mockResolvedValue(FIELD);
+    renderWithProviders(<CustomFieldsAdminPage />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Lists for field Customer' }));
+    expect(screen.getByRole('button', { name: 'Lists for field Customer' }).textContent).toBe('1 list');
+    const picker = screen.getByRole('dialog', { name: 'Lists for field Customer' });
+    expect((within(picker).getByRole('checkbox', { name: 'Q4 / Sprint 12' }) as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(within(picker).getByRole('checkbox', { name: 'Backlog list' }));
+    await waitFor(() => expect(update).toHaveBeenLastCalledWith('cf1', { listIds: null }));
+    fireEvent.click(within(picker).getByRole('checkbox', { name: 'All lists' }));
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+  });
+
+  it('computes the next list scope without ever leaving it empty', () => {
+    expect(nextFieldListIds(null, 'l1', ['l1', 'l2'])).toEqual(['l1']);
+    expect(nextFieldListIds(['l1'], 'l2', ['l1', 'l2'])).toBeNull();
+    expect(nextFieldListIds(['l1'], 'l1', ['l1', 'l2'])).toBeNull();
+    expect(nextFieldListIds(['l1', 'l2'], 'l2', ['l1', 'l2', 'l3'])).toEqual(['l1']);
   });
 
   it('asks for options on a list field and creates it with them', async () => {

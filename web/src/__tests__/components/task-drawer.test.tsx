@@ -16,7 +16,7 @@ vi.mock('@/hooks/use-orbit', () => ({
       id,
       listId: 'l1',
       spaceId: 's1',
-      parentId: null,
+      parentId: id === 'sub1' ? 't1' : null,
       title: 'Fix login',
       descriptionMd: 'Body',
       status: 'to-do',
@@ -29,6 +29,7 @@ vi.mock('@/hooks/use-orbit', () => ({
       dueDate: null,
       checklists: [],
       customFields: [],
+      links: { figma: null, notion: null, printsFolder: null },
       creatorId: 'u1',
       dateClosed: null,
       archived: false,
@@ -87,14 +88,14 @@ describe('TaskDrawer', () => {
   it('renders the two columns with comments and the activity section', () => {
     renderWithProviders(<TaskDrawer />);
     expect(screen.getByRole('dialog', { name: 'Task details' })).toBeTruthy();
-    expect(screen.getByRole('region', { name: 'Activity' })).toBeTruthy();
-    expect(screen.getByText('Comments')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Comments' })).toBeTruthy();
+    expect(screen.getByRole('form', { name: 'Write a comment (markdown)' })).toBeTruthy();
     expect((screen.getByLabelText('Task title') as HTMLTextAreaElement).value).toBe('Fix login');
   });
 
   it('lays the properties out as label and value rows, with watchers on the bell and planning spread over them', () => {
     renderWithProviders(<TaskDrawer />);
-    for (const label of ['Status', 'Dates', 'Time estimate', 'Track time', 'Repeat', 'Assignees', 'Priority', 'Points', 'Tags']) expect(screen.getAllByText(label).length).toBeGreaterThan(0);
+    for (const label of ['Status', 'Dates', 'Time estimate', 'Track time', 'Assignees', 'Priority', 'Points', 'Tags']) expect(screen.getAllByText(label).length).toBeGreaterThan(0);
     expect(screen.getByRole('combobox', { name: 'Type' })).toBeTruthy();
     expect((screen.getByRole('spinbutton', { name: 'Estimate (min)' }) as HTMLInputElement).placeholder).toBe('90 min');
     expect(screen.getByText('30 min')).toBeTruthy();
@@ -102,6 +103,21 @@ describe('TaskDrawer', () => {
     expect(screen.getByLabelText('Start date')).toBeTruthy();
     expect(screen.getByLabelText('Due date')).toBeTruthy();
     expect(screen.queryByRole('region', { name: 'Planning' })).toBeNull();
+  });
+
+  it('puts Repeat inside the due date picker of a task', () => {
+    renderWithProviders(<TaskDrawer />);
+    expect(screen.queryByRole('region', { name: 'Repeat' })).toBeNull();
+    fireEvent.click(screen.getByLabelText('Due date'));
+    expect(screen.getByRole('region', { name: 'Repeat' })).toBeTruthy();
+  });
+
+  it('has no Repeat in the due date picker of a subtask', () => {
+    useUiStore.setState({ openTaskId: 'sub1' });
+    renderWithProviders(<TaskDrawer />);
+    fireEvent.click(screen.getByLabelText('Due date'));
+    expect(screen.getByRole('dialog', { name: 'Due date' })).toBeTruthy();
+    expect(screen.queryByRole('region', { name: 'Repeat' })).toBeNull();
   });
 
   it('opens checklist, subtask and dependency editors only from the action links', () => {
@@ -184,8 +200,8 @@ describe('TaskDrawer', () => {
 
   it('starts a fresh comment draft when another task opens in the same drawer', () => {
     renderWithProviders(<TaskDrawer />);
-    fireEvent.change(screen.getByLabelText('Write a comment (markdown)'), { target: { value: 'rascunho da t1' } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Write a comment (markdown)' }), { target: { value: 'rascunho da t1' } });
     act(() => useUiStore.setState({ openTaskId: 't2' }));
-    expect((screen.getByLabelText('Write a comment (markdown)') as HTMLTextAreaElement).value).toBe('');
+    expect((screen.getByRole('combobox', { name: 'Write a comment (markdown)' }) as HTMLTextAreaElement).value).toBe('');
   });
 });

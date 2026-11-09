@@ -1,7 +1,7 @@
 import { dayFromIso, formatDay } from '@/lib/calendar-day';
 import { CustomFieldDefinition, SpaceNode, StatusDefinition, Task, TaskCustomFieldValue } from '@/types/api.types';
 import { CustomFieldChange } from './task-activity.types';
-import { STATUS_COLOR_TOKENS } from './tasks.constants';
+import { STATUS_COLOR_TOKENS, TAG_CHIP_COLORS } from './tasks.constants';
 import { TaskPatch } from '@/services/orbit.types';
 
 export const findSpaceByList = (hierarchy: SpaceNode[] | undefined, listId: string): SpaceNode | undefined => hierarchy?.find((space) => space.lists.some((l) => l.id === listId));
@@ -13,6 +13,12 @@ export const groupByStatus = (tasks: Task[], statuses: string[]): Record<string,
 };
 
 export const statusColor = (status: StatusDefinition): string => STATUS_COLOR_TOKENS[status.name.toLowerCase()] ?? status.color;
+
+export const tagColor = (tag: string): string => {
+  let hash = 0;
+  for (const char of tag.toLowerCase()) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return TAG_CHIP_COLORS[hash % TAG_CHIP_COLORS.length];
+};
 
 export const formatInstantDay = (iso: string | null, locale: string): string => (iso ? new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }) : '');
 
@@ -60,6 +66,7 @@ export const applyTaskPatch = (task: Task, patch: TaskPatch): Task => ({
   ...(patch.customFields !== undefined ? { customFields: patch.customFields } : {}),
   ...(patch.checklists !== undefined ? { checklists: patch.checklists } : {}),
   ...(patch.archived !== undefined ? { archived: patch.archived } : {}),
+  ...(patch.links !== undefined ? { links: { ...task.links, ...patch.links } } : {}),
   ...(patch.addTags || patch.removeTags ? { tags: applyIdChanges(task.tags, patch.addTags, patch.removeTags) } : {}),
   ...(patch.addAssigneeIds || patch.removeAssigneeIds ? { assigneeIds: applyIdChanges(task.assigneeIds, patch.addAssigneeIds, patch.removeAssigneeIds) } : {}),
 });

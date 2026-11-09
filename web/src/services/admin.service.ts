@@ -1,6 +1,6 @@
 import { api } from '@/lib/api-client';
 import { CustomFieldDefinition, FolderNode, ListNode, SpaceNode } from '@/types/api.types';
-import { CustomFieldInput, ListInput, SpacePatch, UserGroup, UserGroupInput } from './admin.types';
+import { CustomFieldInput, CustomFieldPatch, ListInput, SpacePatch, UserGroup, UserGroupInput } from './admin.types';
 
 const send = (method: string, body?: unknown): RequestInit => ({
   method,
@@ -17,6 +17,7 @@ export const adminService = {
   updateList: (id: string, input: Partial<ListInput>) => api<ListNode>(`/lists/${id}`, send('PATCH', input)),
   deleteList: (id: string) => api<void>(`/lists/${id}`, send('DELETE')),
   createCustomField: (spaceId: string, input: CustomFieldInput) => api<CustomFieldDefinition>(`/spaces/${spaceId}/custom-fields`, send('POST', input)),
+  updateCustomField: (id: string, patch: CustomFieldPatch) => api<CustomFieldDefinition>(`/custom-fields/${id}`, send('PATCH', patch)),
   deleteCustomField: (id: string) => api<void>(`/custom-fields/${id}`, send('DELETE')),
   groups: () => api<UserGroup[]>('/user-groups'),
   createGroup: (input: UserGroupInput) => api<UserGroup>('/user-groups', send('POST', input)),

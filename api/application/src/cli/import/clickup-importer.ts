@@ -22,6 +22,11 @@ import { UserRole, UserStatus } from '@domain/enums/user.enums';
 import { SprintKind } from '@domain/enums/list.enums';
 import { DailyLogPolicy } from '@domain/policies/daily-log.policy';
 import { DAILY_LOG_HEADING_PREFIX } from '@domain/constants/daily-log.constant';
+import { TaskCustomFieldValue } from '@domain/types/task-custom-field-value.type';
+import { TaskLinks } from '@domain/types/task-links.type';
+import { TaskLinkKey } from '@domain/types/task-link-key.type';
+import { TASK_LINK_KEYS } from '@domain/constants/task-links.constant';
+import { TaskLinksPolicy } from '@domain/policies/task-links.policy';
 import { newId } from '@common/helpers/functions/id.helper';
 import { ClickupAttachmentLinks } from './clickup-attachment-links';
 import { ClickupCommentReader } from './clickup-comment-reader';
@@ -39,6 +44,10 @@ import { ATTACHMENT_SOURCES_COLLECTION, CLICKUP_ROLE_MAP, DATE_ORIGINS_COLLECTIO
 import { ImportDateOrigin, ImportFilesSummary, ImportReport, ImportStatusMapping, ImportStatusOrigin } from './import-report.type';
 import { ImportOptions } from './import-options.type';
 import { ImportedList, ImportedTask } from './clickup-importer.type';
+import { ClickupFieldListsImporter } from './clickup-field-lists.importer';
+import { ClickupFieldAliasResolver } from './clickup-field-alias.resolver';
+import { StoredTaskLinksRow } from './clickup-field-lists.type';
+import { FieldListsSummary } from './clickup-field-lists.type';
 
 export class ClickupImporter {
   private readonly ledger = new ImportLedger();
@@ -48,6 +57,8 @@ export class ClickupImporter {
   private readonly statusMapping: ImportStatusMapping[] = [];
   private readonly pendingStubs = new Map<string, any>();
   private files: ImportFilesSummary | null = null;
+  private fieldLists: FieldListsSummary | null = null;
+  private fieldAliases = ClickupFieldAliasResolver.build(new Map());
   private workspaceId = '';
   private startedAt = '';
   private zone = DEFAULT_WORKSPACE_ZONE;
@@ -61,19 +72,39 @@ export class ClickupImporter {
   async run(options: ImportOptions): Promise<ImportReport> {
     this.startedAt = new Date().toISOString();
     this.zone = options.zone;
+    if (options.phase === 'fields') {
+      this.fieldLists = await new ClickupFieldListsImporter(this.client, this.ledger).run(this.store, options.log);
+      return this.report('finished');
+    }
     if (options.phase !== 'files') await this.copyData(options);
     if (options.phase !== 'data') await this.copyFiles(options);
     return this.report('finished');
   }
 
   private report(stage: string): ImportReport {
-    return { startedAt: this.startedAt, finishedAt: new Date().toISOString(), stage, zone: this.zone, requests: this.client.getRequestCount(), fileRequests: this.client.getDownloadCount(), maxRequestsInAnyMinute: this.client.getMaxPerMinute(), counts: this.ledger.counts, mismatches: this.ledger.mismatches, notCopied: this.ledger.notCopied, files: this.files, dateOrigins: this.dateOrigins, statusMapping: this.statusMapping, statusOrigins: this.statusOrigins };
+    return {
+      startedAt: this.startedAt,
+      finishedAt: new Date().toISOString(),
+      stage,
+      zone: this.zone,
+      requests: this.client.getRequestCount(),
+      fileRequests: this.client.getDownloadCount(),
+      maxRequestsInAnyMinute: this.client.getMaxPerMinute(),
+      counts: this.ledger.counts,
+      mismatches: this.ledger.mismatches,
+      notCopied: this.ledger.notCopied,
+      files: this.files,
+      fieldLists: this.fieldLists,
+      dateOrigins: this.dateOrigins,
+      statusMapping: this.statusMapping,
+      statusOrigins: this.statusOrigins,
+    };
   }
 
   private async copyFiles(options: ImportOptions): Promise<void> {
     if (!this.objects) throw new Error('Object storage is required to copy files');
     const importer = new ClickupFilesImporter(this.client, this.store, this.objects);
-    this.files = await importer.run(options.log, (summary) => {
+    this.files = await importer.run(options.log, summary => {
       this.files = summary;
       options.checkpoint?.(this.report('files'));
     });
@@ -81,7 +112,7 @@ export class ClickupImporter {
 
   private async copyData(options: ImportOptions): Promise<void> {
     const teams = (await this.client.get<{ teams: any[] }>('/team')).teams;
-    const team = options.teamId ? teams.find((t) => String(t.id) === options.teamId) : teams[0];
+    const team = options.teamId ? teams.find(t => String(t.id) === options.teamId) : teams[0];
     if (!team) throw new Error('Team not found');
     await this.importWorkspaceAndUsers(team);
     const rawSpaces = new Map<string, any>();
@@ -115,7 +146,7 @@ export class ClickupImporter {
     const teamIds = new Set<string>();
     for (let page = 0; page < 200; page++) {
       const res = await this.client.get<{ tasks: any[] }>(`/team/${team.id}/task?${TASK_QUERY}&page=${page}`);
-      res.tasks.forEach((t) => teamIds.add(String(t.id)));
+      res.tasks.forEach(t => teamIds.add(String(t.id)));
       if (res.tasks.length < 100) break;
     }
     for (const id of teamIds) if (!tasks.has(id)) this.ledger.mismatch('task', id, 'present in the team-wide listing but not in any list listing');
@@ -151,8 +182,12 @@ export class ClickupImporter {
     const now = new Date();
     this.workspaceId = String(team.id);
     const currentWorkspace = await this.store.findById('workspaces', this.workspaceId);
-    await this.store.upsert('workspaces', [DomainWorkspaceMapper.toPersistence(new WorkspaceEntity({ _id: this.workspaceId, name: team.name, slug: currentWorkspace?.slug ?? 'main', createdAt: currentWorkspace?.created_at ?? now, updatedAt: now }))]);
-    const existing = new Map((await this.store.find('users', { clickup_id: { $ne: null } })).map((u) => [String(u.clickup_id), u]));
+    await this.store.upsert('workspaces', [
+      DomainWorkspaceMapper.toPersistence(
+        new WorkspaceEntity({ _id: this.workspaceId, name: team.name, slug: currentWorkspace?.slug ?? 'main', createdAt: currentWorkspace?.created_at ?? now, updatedAt: now }),
+      ),
+    ]);
+    const existing = new Map((await this.store.find('users', { clickup_id: { $ne: null } })).map(u => [String(u.clickup_id), u]));
     for (const [clickupId, user] of existing) this.userMap.set(clickupId, String(user._id));
     const docs = team.members.map((m: any) => {
       const clickupId = String(m.user.id);
@@ -161,7 +196,20 @@ export class ClickupImporter {
       this.userMap.set(clickupId, id);
       const role = (current?.role ?? CLICKUP_ROLE_MAP[m.user.role] ?? 'member') as UserRole;
       const status = (current?.status ?? UserStatus.ACTIVE) as UserStatus;
-      return DomainUserMapper.toPersistence(new UserEntity({ _id: id, workspaceId: this.workspaceId, email: String(m.user.email).toLowerCase(), name: m.user.username || m.user.email, avatarUrl: m.user.profilePicture ?? null, clickupId, role, status, createdAt: ClickupImportMapper.date(m.user.date_joined) ?? now, updatedAt: now }));
+      return DomainUserMapper.toPersistence(
+        new UserEntity({
+          _id: id,
+          workspaceId: this.workspaceId,
+          email: String(m.user.email).toLowerCase(),
+          name: m.user.username || m.user.email,
+          avatarUrl: m.user.profilePicture ?? null,
+          clickupId,
+          role,
+          status,
+          createdAt: ClickupImportMapper.date(m.user.date_joined) ?? now,
+          updatedAt: now,
+        }),
+      );
     });
     this.ledger.track('users', team.members.length, await this.store.upsert('users', docs));
   }
@@ -173,9 +221,14 @@ export class ClickupImporter {
       const res = await this.client.get<{ folders: any[] }>(`/space/${spaceId}/folder?archived=${archived}`);
       for (const f of res.folders) folders.set(String(f.id), { ...f, archivedFlag: archived });
     }
-    const folderDocs = [...folders.values()].map((f, i) => DomainFolderMapper.toPersistence(new FolderEntity({ _id: String(f.id), workspaceId: this.workspaceId, spaceId, name: f.name, order: Number(f.orderindex ?? i), createdAt: now, updatedAt: now })));
+    const folderDocs = [...folders.values()].map((f, i) =>
+      DomainFolderMapper.toPersistence(new FolderEntity({ _id: String(f.id), workspaceId: this.workspaceId, spaceId, name: f.name, order: Number(f.orderindex ?? i), createdAt: now, updatedAt: now })),
+    );
     this.ledger.track('folders', folders.size, await this.store.upsert('folders', folderDocs));
-    const parents: Array<{ folderId: string | null; path: string }> = [{ folderId: null, path: `/space/${spaceId}/list` }, ...[...folders.keys()].map((id) => ({ folderId: id, path: `/folder/${id}/list` }))];
+    const parents: Array<{ folderId: string | null; path: string }> = [
+      { folderId: null, path: `/space/${spaceId}/list` },
+      ...[...folders.keys()].map(id => ({ folderId: id, path: `/folder/${id}/list` })),
+    ];
     const seen = new Set<string>();
     const docs: any[] = [];
     const origins: any[] = [];
@@ -193,7 +246,24 @@ export class ClickupImporter {
           const kind = SPRINT_LIST_PATTERN.test(String(l.name)) ? SprintKind.SPRINT : SprintKind.LIST;
           if (kind === SprintKind.SPRINT) this.ledger.track('sprints', 1, 1);
           if (archived) this.ledger.track('lists_archived', 1, 1);
-          docs.push(DomainTaskListMapper.toPersistence(new TaskListEntity({ _id: id, workspaceId: this.workspaceId, spaceId, folderId: parent.folderId, name: l.name, kind, startDate: start?.day ?? null, endDate: end?.day ?? null, order: Number(l.orderindex ?? i), clickupId: id, createdAt: now, updatedAt: now })));
+          docs.push(
+            DomainTaskListMapper.toPersistence(
+              new TaskListEntity({
+                _id: id,
+                workspaceId: this.workspaceId,
+                spaceId,
+                folderId: parent.folderId,
+                name: l.name,
+                kind,
+                startDate: start?.day ?? null,
+                endDate: end?.day ?? null,
+                order: Number(l.orderindex ?? i),
+                clickupId: id,
+                createdAt: now,
+                updatedAt: now,
+              }),
+            ),
+          );
           origins.push({ _id: id, archived, start_raw: start?.raw ?? null, due_raw: end?.raw ?? null, statuses_overridden: Boolean(l.override_statuses) });
         });
       }
@@ -208,7 +278,17 @@ export class ClickupImporter {
       const now = new Date();
       const current = await this.store.findById('spaces', id);
       const statuses = ClickupStatusCatalog.build(current?.statuses ?? []);
-      const entity = new SpaceEntity({ _id: id, workspaceId: this.workspaceId, name: raw.name, statuses, requiredTags: current?.required_tags ?? [], titlePrefixes: current?.title_prefixes ?? [], nextTaskSeq: current?.next_task_seq ?? 1, createdAt: current?.created_at ?? now, updatedAt: now });
+      const entity = new SpaceEntity({
+        _id: id,
+        workspaceId: this.workspaceId,
+        name: raw.name,
+        statuses,
+        requiredTags: current?.required_tags ?? [],
+        titlePrefixes: current?.title_prefixes ?? [],
+        nextTaskSeq: current?.next_task_seq ?? 1,
+        createdAt: current?.created_at ?? now,
+        updatedAt: now,
+      });
       out.set(id, entity);
       this.ledger.track('statuses', catalogs.get(id)!.getEntries().length, statuses.length);
       this.ledger.track('spaces', 1, await this.store.upsert('spaces', [DomainSpaceMapper.toPersistence(entity)]));
@@ -219,7 +299,9 @@ export class ClickupImporter {
   private recordStatusMapping(tasks: Map<string, ImportedTask>, spaces: Map<string, SpaceEntity>, catalogs: Map<string, ClickupStatusCatalog>): void {
     const counts = new Map<string, number>();
     for (const { raw, spaceId } of tasks.values()) {
-      const key = `${spaceId}:${String(raw.status?.status ?? '').trim().toLowerCase()}`;
+      const key = `${spaceId}:${String(raw.status?.status ?? '')
+        .trim()
+        .toLowerCase()}`;
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
     for (const [spaceId, catalog] of catalogs) {
@@ -231,20 +313,26 @@ export class ClickupImporter {
   }
 
   private async importCustomFields(lists: ImportedList[], tasks: Map<string, ImportedTask>): Promise<void> {
-    const raws = new Map<string, { raw: any; spaceId: string }>();
-    for (const list of lists) {
-      try {
-        const { fields } = await this.client.get<{ fields: any[] }>(`/list/${list.id}/field`);
-        for (const field of fields ?? []) raws.set(String(field.id), { raw: field, spaceId: list.spaceId });
-      } catch (error) {
-        this.ledger.mismatch('custom_field', list.id, `fields of the list could not be read: ${(error as Error).message}`);
+    const collector = new ClickupFieldListsImporter(this.client, this.ledger);
+    const raws = await collector.collect(lists);
+    const fromLists = new Set(raws.keys());
+    for (const { raw, spaceId } of tasks.values()) {
+      for (const field of raw.custom_fields ?? []) {
+        const id = String(field.id);
+        if (fromLists.has(id)) continue;
+        const current = raws.get(id) ?? { raw: field, spaceId, listIds: new Set<string>() };
+        if (raw.list?.id) current.listIds.add(String(raw.list.id));
+        raws.set(id, current);
       }
     }
-    for (const { raw, spaceId } of tasks.values()) for (const field of raw.custom_fields ?? []) if (!raws.has(String(field.id))) raws.set(String(field.id), { raw: field, spaceId });
+    const bySpace = ClickupFieldListsImporter.spaceLists(lists);
+    this.fieldAliases = ClickupFieldAliasResolver.build(raws);
+    for (const m of this.fieldAliases.mismatches) this.ledger.mismatch('custom_field', m.fieldId, `field "${m.name}" would become the ${m.link} link but is not a URL field; not copied`);
     const now = new Date();
     const docs: any[] = [];
     let unsupported = 0;
-    for (const [id, { raw, spaceId }] of raws) {
+    for (const [id, field] of this.fieldAliases.definitions) {
+      const { raw, spaceId } = field;
       const type = ClickupCustomFieldMapper.type(raw);
       if (!type) {
         unsupported++;
@@ -252,10 +340,31 @@ export class ClickupImporter {
         continue;
       }
       const current = await this.store.findById('custom_field_definitions', id);
-      docs.push(DomainCustomFieldDefinitionMapper.toPersistence(new CustomFieldDefinitionEntity({ _id: id, workspaceId: this.workspaceId, spaceId, name: raw.name, type, options: ClickupCustomFieldMapper.options(raw), createdAt: current?.created_at ?? now, updatedAt: now })));
+      docs.push(
+        DomainCustomFieldDefinitionMapper.toPersistence(
+          new CustomFieldDefinitionEntity({
+            _id: id,
+            workspaceId: this.workspaceId,
+            spaceId,
+            name: raw.name,
+            type,
+            options: ClickupCustomFieldMapper.options(raw),
+            listIds: ClickupFieldListsImporter.scopeOf(field, bySpace),
+            createdAt: current?.created_at ?? now,
+            updatedAt: now,
+          }),
+        ),
+      );
     }
     this.ledger.track('custom_fields', docs.length, await this.store.upsert('custom_field_definitions', docs));
     this.ledger.skip('custom_fields_unsupported', unsupported, 'Orbit only has dropdown, URL and date fields');
+    this.ledger.skip('custom_fields_removed', this.fieldAliases.removed.size, 'field removed from Orbit by product decision, or link field that is not a URL');
+    this.ledger.skip('custom_fields_as_links', this.fieldAliases.links.size, 'Figma and Notion fields are task links in Orbit, not custom fields');
+  }
+
+  private async storedTaskLinks(): Promise<Map<string, Partial<TaskLinks>>> {
+    const rows = (await this.store.find('tasks', { $or: TASK_LINK_KEYS.map(key => ({ [`links.${key}`]: { $ne: null } })) })) as StoredTaskLinksRow[];
+    return new Map(rows.map(row => [String(row._id), row.links ?? {}]));
   }
 
   private resolveUser(rawId: unknown, taskId: string, role: string, stubs: Map<string, any>): string | null {
@@ -267,7 +376,23 @@ export class ClickupImporter {
     const id = newId();
     this.userMap.set(key, id);
     const now = new Date();
-    stubs.set(key, DomainUserMapper.toPersistence(new UserEntity({ _id: id, workspaceId: this.workspaceId, email: `clickup-${key}@import.invalid`, name: `Usuário ${key}`, avatarUrl: null, clickupId: key, role: UserRole.MEMBER, status: UserStatus.DISABLED, createdAt: now, updatedAt: now })));
+    stubs.set(
+      key,
+      DomainUserMapper.toPersistence(
+        new UserEntity({
+          _id: id,
+          workspaceId: this.workspaceId,
+          email: `clickup-${key}@import.invalid`,
+          name: `Usuário ${key}`,
+          avatarUrl: null,
+          clickupId: key,
+          role: UserRole.MEMBER,
+          status: UserStatus.DISABLED,
+          createdAt: now,
+          updatedAt: now,
+        }),
+      ),
+    );
     this.ledger.mismatch('user', key, `${role} on ${taskId} is not a member of the team; imported as disabled stub`);
     return id;
   }
@@ -279,6 +404,9 @@ export class ClickupImporter {
     const dependencies = new Map<string, any>();
     let valuesCopied = 0;
     let valuesSkipped = 0;
+    let valuesRemoved = 0;
+    let linksCopied = 0;
+    const storedLinks = await this.storedTaskLinks();
     let linked = 0;
     let estimates = 0;
     let inlineFiles = 0;
@@ -294,15 +422,34 @@ export class ClickupImporter {
       const creator = this.authorOf(raw.creator?.id, id, 'creator');
       const assignees = (raw.assignees ?? []).map((a: any) => this.resolveUser(a.id, id, 'assignee', this.pendingStubs)).filter(Boolean) as string[];
       const watchers = (raw.watchers ?? []).map((a: any) => this.resolveUser(a.id, id, 'watcher', this.pendingStubs)).filter(Boolean) as string[];
-      const customFields = [];
+      const customFields: TaskCustomFieldValue[] = [];
+      const links: TaskLinks = TaskLinksPolicy.normalize(storedLinks.get(id));
+      const fromClickup = new Set<TaskLinkKey>();
       for (const field of raw.custom_fields ?? []) {
         if (field.value === undefined || field.value === null || field.value === '') continue;
+        const fieldId = String(field.id);
+        if (this.fieldAliases.removed.has(fieldId)) {
+          valuesRemoved++;
+          continue;
+        }
         const value = ClickupCustomFieldMapper.value(field);
-        if (value) {
+        if (!value) {
+          valuesSkipped++;
+          continue;
+        }
+        const link = this.fieldAliases.links.get(fieldId);
+        if (!link) {
           customFields.push(value);
           valuesCopied++;
-        } else {
-          valuesSkipped++;
+          continue;
+        }
+        const url = String(value.value);
+        if (!fromClickup.has(link)) {
+          links[link] = url;
+          fromClickup.add(link);
+          linksCopied++;
+        } else if (links[link] !== url) {
+          this.ledger.mismatch('task_link', id, `two values for the ${link} link from "${field.name}": kept ${links[link]}, not copied ${url}`);
         }
       }
       if (raw.parent && !tasks.has(String(raw.parent))) this.ledger.mismatch('task', id, `parent ${raw.parent} was not fetched`);
@@ -313,7 +460,10 @@ export class ClickupImporter {
           this.ledger.mismatch('dependency', id, `dependency ${taskId} -> ${dependsOnId} points to a task that was not fetched`);
           continue;
         }
-        dependencies.set(`${taskId}:${dependsOnId}`, DomainTaskDependencyMapper.toPersistence(new TaskDependencyEntity({ _id: `${taskId}:${dependsOnId}`, workspaceId: this.workspaceId, taskId, dependsOnId, createdAt: now, updatedAt: now })));
+        dependencies.set(
+          `${taskId}:${dependsOnId}`,
+          DomainTaskDependencyMapper.toPersistence(new TaskDependencyEntity({ _id: `${taskId}:${dependsOnId}`, workspaceId: this.workspaceId, taskId, dependsOnId, createdAt: now, updatedAt: now })),
+        );
       }
       linked += raw.linked_tasks?.length ?? 0;
       if (raw.time_estimate) estimates++;
@@ -321,34 +471,49 @@ export class ClickupImporter {
       if (INLINE_FILE_URL_PATTERN.test(description)) inlineFiles++;
       const due = ClickupDatePolicy.resolve(raw.due_date, raw.due_date_time, this.zone);
       const start = ClickupDatePolicy.resolve(raw.start_date, raw.start_date_time, this.zone);
-      for (const [field, date] of [['due', due], ['start', start]] as const) if (date) this.dateOrigins.push({ taskId: id, field, raw: date.raw, instant: date.instant.toISOString(), hasTime: date.hasTime, localDay: date.localDay });
-      if (due || start) origins.push({ _id: id, due: due ? { raw: due.raw, instant: due.instant, has_time: due.hasTime, local_day: due.localDay } : null, start: start ? { raw: start.raw, instant: start.instant, has_time: start.hasTime, local_day: start.localDay } : null, zone: this.zone });
+      for (const [field, date] of [
+        ['due', due],
+        ['start', start],
+      ] as const)
+        if (date) this.dateOrigins.push({ taskId: id, field, raw: date.raw, instant: date.instant.toISOString(), hasTime: date.hasTime, localDay: date.localDay });
+      if (due || start)
+        origins.push({
+          _id: id,
+          due: due ? { raw: due.raw, instant: due.instant, has_time: due.hasTime, local_day: due.localDay } : null,
+          start: start ? { raw: start.raw, instant: start.instant, has_time: start.hasTime, local_day: start.localDay } : null,
+          zone: this.zone,
+        });
       const created = ClickupImportMapper.date(raw.date_created) ?? new Date();
-      docs.push(DomainTaskMapper.toPersistence(new TaskEntity({
-        _id: id,
-        workspaceId: this.workspaceId,
-        spaceId,
-        listId: String(raw.list.id),
-        parentId: raw.parent ? String(raw.parent) : null,
-        title: String(raw.name ?? '').trim() || UNTITLED,
-        descriptionMd: description,
-        status,
-        priority: ClickupImportMapper.priority(raw.priority),
-        tags: mapped.tags,
-        assigneeIds: [...new Set(assignees)],
-        watcherIds: [...new Set(watchers)],
-        points: raw.points === null || raw.points === undefined ? null : Number(raw.points),
-        startDate: start?.day ?? null,
-        dueDate: due?.day ?? null,
-        customFields,
-        checklists: ClickupImportMapper.checklists(raw.checklists, (cid) => this.resolveUser(cid, id, 'checklist assignee', this.pendingStubs)),
-        creatorId: creator,
-        dateClosed: ClickupImportMapper.closedAt(raw, space.isClosedStatus(status), ClickupImportMapper.date(raw.date_updated) ?? created),
-        archived: archived || raw.archived === true,
-        clickupId: id,
-        createdAt: created,
-        updatedAt: ClickupImportMapper.date(raw.date_updated) ?? created,
-      })));
+      docs.push(
+        DomainTaskMapper.toPersistence(
+          new TaskEntity({
+            _id: id,
+            workspaceId: this.workspaceId,
+            spaceId,
+            listId: String(raw.list.id),
+            parentId: raw.parent ? String(raw.parent) : null,
+            title: String(raw.name ?? '').trim() || UNTITLED,
+            descriptionMd: description,
+            status,
+            priority: ClickupImportMapper.priority(raw.priority),
+            tags: mapped.tags,
+            assigneeIds: [...new Set(assignees)],
+            watcherIds: [...new Set(watchers)],
+            points: raw.points === null || raw.points === undefined ? null : Number(raw.points),
+            startDate: start?.day ?? null,
+            dueDate: due?.day ?? null,
+            customFields,
+            links,
+            checklists: ClickupImportMapper.checklists(raw.checklists, cid => this.resolveUser(cid, id, 'checklist assignee', this.pendingStubs)),
+            creatorId: creator,
+            dateClosed: ClickupImportMapper.closedAt(raw, space.isClosedStatus(status), ClickupImportMapper.date(raw.date_updated) ?? created),
+            archived: archived || raw.archived === true,
+            clickupId: id,
+            createdAt: created,
+            updatedAt: ClickupImportMapper.date(raw.date_updated) ?? created,
+          }),
+        ),
+      );
     }
     await this.storeStubs();
     this.ledger.track('tasks', tasks.size, await this.store.upsert('tasks', docs));
@@ -357,6 +522,8 @@ export class ClickupImporter {
     this.ledger.track('dependencies', dependencies.size, await this.store.upsert('task_dependencies', [...dependencies.values()]));
     this.ledger.track('custom_field_values', valuesCopied + valuesSkipped, valuesCopied);
     this.ledger.skip('custom_field_values', valuesSkipped, 'value of a field type Orbit does not have, or an option that no longer exists');
+    this.ledger.skip('custom_field_values_removed', valuesRemoved, 'value of a field removed from Orbit by product decision');
+    this.ledger.track('task_links', linksCopied, linksCopied);
     this.ledger.skip('linked_tasks', linked, 'Orbit has blockers but no plain link between tasks');
     this.ledger.skip('time_estimates', estimates, 'estimates live in the planning record, not part of this copy');
     this.ledger.skip('inline_file_links', inlineFiles, 'descriptions keep their images as links to ClickUp, the files that are also attachments are copied');
@@ -371,7 +538,7 @@ export class ClickupImporter {
       for (const tag of tags ?? []) catalog.add(String(tag.name).toLowerCase());
     }
     this.ledger.track('tags', new Set([...catalog, ...used]).size, used.size);
-    this.ledger.skip('tags_without_tasks', [...catalog].filter((t) => !used.has(t)).length, 'Orbit keeps tags on tasks, a tag no task uses has nowhere to live');
+    this.ledger.skip('tags_without_tasks', [...catalog].filter(t => !used.has(t)).length, 'Orbit keeps tags on tasks, a tag no task uses has nowhere to live');
   }
 
   private async importComments(taskIds: string[], options: ImportOptions): Promise<void> {
@@ -408,7 +575,22 @@ export class ClickupImporter {
     const text = String(c.comment_text ?? '');
     const when = ClickupImportMapper.date(c.date) ?? new Date();
     const author = this.authorOf(c.user?.id, taskId, 'comment author');
-    return DomainCommentMapper.toPersistence(new CommentEntity({ _id: String(c.id), workspaceId: this.workspaceId, taskId, authorId: author, bodyMd: text, mentionIds: [], attachmentIds, dailyLogDate: text.startsWith(DAILY_LOG_HEADING_PREFIX) ? DailyLogPolicy.dateKey(when) : null, editedAt: null, clickupId: String(c.id), createdAt: when, updatedAt: when }));
+    return DomainCommentMapper.toPersistence(
+      new CommentEntity({
+        _id: String(c.id),
+        workspaceId: this.workspaceId,
+        taskId,
+        authorId: author,
+        bodyMd: text,
+        mentionIds: [],
+        attachmentIds,
+        dailyLogDate: text.startsWith(DAILY_LOG_HEADING_PREFIX) ? DailyLogPolicy.dateKey(when) : null,
+        editedAt: null,
+        clickupId: String(c.id),
+        createdAt: when,
+        updatedAt: when,
+      }),
+    );
   }
 
   private async importCommentFiles(comments: any[], taskId: string): Promise<void> {
@@ -435,16 +617,37 @@ export class ClickupImporter {
   }
 
   private async storeAttachmentRecords(rawFiles: any[], taskId: string, commentId: string | null, countKey: string): Promise<void> {
-    const live = rawFiles.filter((a) => !a.deleted && !a.is_folder && a.url);
+    const live = rawFiles.filter(a => !a.deleted && !a.is_folder && a.url);
     const docs: any[] = [];
     const sources: any[] = [];
     for (const file of live) {
       const id = String(file.id);
       const current = await this.store.findById('attachments', id);
       const filename = String(file.title ?? id);
-      const safeName = filename.replace(/[^A-Za-z0-9._-]/g, '_').replace(/\.{2,}/g, '_').slice(0, 120);
+      const safeName = filename
+        .replace(/[^A-Za-z0-9._-]/g, '_')
+        .replace(/\.{2,}/g, '_')
+        .slice(0, 120);
       const when = ClickupImportMapper.date(file.date) ?? new Date();
-      docs.push(DomainAttachmentMapper.toPersistence(new AttachmentEntity({ _id: id, workspaceId: this.workspaceId, taskId, commentId: commentId ?? current?.comment_id ?? null, storageKey: current?.storage_key ?? `${this.workspaceId}/${taskId}/${id}-${safeName}`, filename, mimeType: String(file.mimetype ?? 'application/octet-stream'), sizeBytes: current?.confirmed ? Number(current.size_bytes) : Number(file.size ?? 0), uploaderId: this.authorOf(file.user?.id, taskId, 'attachment uploader'), confirmed: current?.confirmed === true, createdAt: when, updatedAt: when })));
+      docs.push(
+        DomainAttachmentMapper.toPersistence(
+          new AttachmentEntity({
+            _id: id,
+            workspaceId: this.workspaceId,
+            taskId,
+            commentId: commentId ?? current?.comment_id ?? null,
+            storageKey: current?.storage_key ?? `${this.workspaceId}/${taskId}/${id}-${safeName}`,
+            filename,
+            mimeType: String(file.mimetype ?? 'application/octet-stream'),
+            sizeBytes: current?.confirmed ? Number(current.size_bytes) : Number(file.size ?? 0),
+            uploaderId: this.authorOf(file.user?.id, taskId, 'attachment uploader'),
+            confirmed: current?.confirmed === true,
+            gallery: current?.gallery ?? null,
+            createdAt: when,
+            updatedAt: when,
+          }),
+        ),
+      );
       sources.push({ _id: id, task_id: taskId, url: ClickupAttachmentLinks.withoutToken(file.url), size: Number(file.size ?? 0), date: file.date ?? null });
     }
     this.ledger.track(countKey, live.length, await this.store.upsert('attachments', docs));
@@ -452,11 +655,18 @@ export class ClickupImporter {
   }
 
   private async finalizeCounts(): Promise<void> {
-    const checks: Array<[string, string]> = [['spaces', 'spaces'], ['folders', 'folders'], ['lists', 'task_lists'], ['tasks', 'tasks']];
+    const checks: Array<[string, string]> = [
+      ['spaces', 'spaces'],
+      ['folders', 'folders'],
+      ['lists', 'task_lists'],
+      ['tasks', 'tasks'],
+    ];
     for (const [key, collection] of checks) {
       const entry = this.ledger.counts[key];
       if (!entry) continue;
-      entry.stored = await this.store.count(collection, { workspace_id: this.workspaceId, clickup_id: { $ne: null } }).then((withId) => (withId > 0 ? withId : this.store.count(collection, { workspace_id: this.workspaceId })));
+      entry.stored = await this.store
+        .count(collection, { workspace_id: this.workspaceId, clickup_id: { $ne: null } })
+        .then(withId => (withId > 0 ? withId : this.store.count(collection, { workspace_id: this.workspaceId })));
     }
     const tasks = this.ledger.counts['tasks'];
     const teamWide = this.ledger.counts['tasks_team_wide'];

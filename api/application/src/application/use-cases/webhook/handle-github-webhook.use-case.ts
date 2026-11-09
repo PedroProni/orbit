@@ -1,19 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PULL_REQUEST_LINK_INJECT_TOKEN, TASK_INJECT_TOKEN, WEBHOOK_DELIVERY_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
+import { PULL_REQUEST_LINK_INJECT_TOKEN, SPACE_INJECT_TOKEN, TASK_INJECT_TOKEN, WEBHOOK_DELIVERY_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
 import { PullRequestLinkRepository } from '@domain/repositories/pull-request-link.repository';
 import { TaskRepository } from '@domain/repositories/task.repository';
 import { WebhookDeliveryRepository } from '@domain/repositories/webhook-delivery.repository';
 import { PullRequestLinkEntity } from '@domain/entities/pull-request-link.entity';
 import { WebhookDeliveryEntity } from '@domain/entities/webhook-delivery.entity';
-import { PullRequestState } from '@domain/enums/pull-request-link.enums';
+import { PullRequestLinkSource, PullRequestState } from '@domain/enums/pull-request-link.enums';
 import { AuditActorType } from '@domain/enums/audit-log.enums';
 import { UserRole } from '@domain/enums/user.enums';
 import { REVIEW_STATUS_NAME, GITHUB_ACTOR_ID } from '@domain/constants/github-webhook.constant';
+import { DUPLICATE_KEY_CODE } from '@domain/constants/mongo-error.constant';
 import { DailyLogPolicy } from '@domain/policies/daily-log.policy';
 import { TaskReferencePolicy } from '@domain/policies/task-reference.policy';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
 import { newId } from '@common/helpers/functions/id.helper';
-import { SPACE_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
 import { GithubPullRequestPayload } from '@domain/types/github-pull-request-payload.type';
 import { GithubWebhookOutcome } from '@domain/types/github-webhook-outcome.type';
 import { SpaceRepository } from '@domain/repositories/space.repository';
@@ -46,15 +46,7 @@ export class HandleGithubWebhookUseCase {
       const repository = payload.repository.full_name;
       const url = pr.html_url ?? '';
       const title = pr.title ?? '';
-      const existing = await this.links.findOne({ repository, number: pr.number, task_id: taskId });
-      const previous = existing?.getState();
-      if (existing) {
-        existing.sync(title, url, state);
-        await this.links.patch(existing, ['title', 'url', 'state']);
-      } else {
-        const now = new Date();
-        await this.links.create(new PullRequestLinkEntity({ _id: newId(), workspaceId: task.getWorkspaceId(), taskId, repository, number: pr.number, url, title, state, createdAt: now, updatedAt: now }));
-      }
+      const previous = await this.upsertLink(task.getWorkspaceId(), taskId, repository, pr.number, url, title, state);
       linked.push(taskId);
       if (state === PullRequestState.OPEN && previous !== PullRequestState.OPEN) await this.moveToReview(principal, task.getId(), task.getSpaceId(), task.getStatus());
       if (state === PullRequestState.MERGED && previous !== PullRequestState.MERGED) {
@@ -64,13 +56,37 @@ export class HandleGithubWebhookUseCase {
     return { status: 'processed', linked };
   }
 
+  private async upsertLink(workspaceId: string, taskId: string, repository: string, number: number, url: string, title: string, state: PullRequestState): Promise<PullRequestState | null | undefined> {
+    const existing = await this.links.findForTask(taskId, repository, number);
+    if (existing) return this.syncLink(existing, title, url, state);
+    const now = new Date();
+    try {
+      await this.links.create(
+        new PullRequestLinkEntity({ _id: newId(), workspaceId, taskId, repository, number, url, title, state, source: PullRequestLinkSource.WEBHOOK, createdBy: null, createdAt: now, updatedAt: now }),
+      );
+      return undefined;
+    } catch (error) {
+      if ((error as { code?: number }).code !== DUPLICATE_KEY_CODE) throw error;
+      const raced = await this.links.findForTask(taskId, repository, number);
+      if (!raced) throw error;
+      return this.syncLink(raced, title, url, state);
+    }
+  }
+
+  private async syncLink(link: PullRequestLinkEntity, title: string, url: string, state: PullRequestState): Promise<PullRequestState | null> {
+    const previous = link.getState();
+    link.sync(title, url, state);
+    await this.links.patch(link, ['title', 'url', 'state']);
+    return previous;
+  }
+
   private async claim(deliveryId: string, event: string): Promise<boolean> {
     const now = new Date();
     try {
       await this.deliveries.create(new WebhookDeliveryEntity({ _id: newId(), deliveryId, event, createdAt: now, updatedAt: now }));
       return true;
     } catch (error) {
-      if ((error as { code?: number }).code === 11000) return false;
+      if ((error as { code?: number }).code === DUPLICATE_KEY_CODE) return false;
       throw error;
     }
   }

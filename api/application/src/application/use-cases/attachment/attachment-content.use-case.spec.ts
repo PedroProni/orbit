@@ -7,7 +7,14 @@ import { ATTACHMENT_DOWNLOAD_TTL_SECONDS } from '@domain/constants/attachment.co
 
 const principal = (role: UserRole): AuthPrincipal => ({ workspaceId: 'w1', actorType: AuditActorType.USER, actorId: 'u1', userId: 'u1', role, scopes: [], sessionId: 's1' });
 
-const attachment = (confirmed = true) => ({ getConfirmed: () => confirmed, getTaskId: () => 't1', getStorageKey: () => 'w1/t1/a1', getFilename: () => 'print.png' });
+const attachment = (confirmed = true, print = false) => ({
+  getId: () => 'a1',
+  getConfirmed: () => confirmed,
+  isPrint: () => print,
+  getTaskId: () => 't1',
+  getStorageKey: () => 'w1/t1/a1',
+  getFilename: () => 'print.png',
+});
 
 const task = (descriptionMd: string, listId = 'l1') => ({ getId: () => 't1', getWorkspaceId: () => 'w1', getListId: () => listId, getDescriptionMd: () => descriptionMd });
 
@@ -53,6 +60,20 @@ describe('AttachmentContentUseCase', () => {
     ];
     for (const [allowed, taskFound] of cases) {
       const { useCase, storage } = build(allowed, taskFound);
+      await expect(useCase.execute(principal(UserRole.GUEST), 'a1')).rejects.toBeInstanceOf(NotFoundException);
+      expect(storage.presignDownload).not.toHaveBeenCalled();
+    }
+  });
+
+  it('lets a guest open a print of the gallery of a task in a shared list, but never one of a task outside those lists', async () => {
+    const shared = build(['l1'], task(''), attachment(true, true));
+    await expect(shared.useCase.execute(principal(UserRole.GUEST), 'a1')).resolves.toEqual({ url: 'https://signed/url', statusCode: 302 });
+    for (const [allowed, taskFound] of [
+      [['l2'], task('')],
+      [[], task('')],
+      [['l1'], null],
+    ] as [string[], unknown][]) {
+      const { useCase, storage } = build(allowed, taskFound, attachment(true, true));
       await expect(useCase.execute(principal(UserRole.GUEST), 'a1')).rejects.toBeInstanceOf(NotFoundException);
       expect(storage.presignDownload).not.toHaveBeenCalled();
     }

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { PullRequestState } from '@domain/enums/pull-request-link.enums';
+import { PullRequestLinkSource, PullRequestState } from '@domain/enums/pull-request-link.enums';
 
 export type PullRequestLinkDocument = HydratedDocument<PullRequestLink>;
 
@@ -27,9 +27,15 @@ export class PullRequestLink {
   @Prop({ type: String })
   title!: string;
 
-  @Prop({ type: String, enum: Object.values(PullRequestState) })
-  state!: PullRequestState;
+  @Prop({ type: String, enum: [...Object.values(PullRequestState), null], default: null })
+  state!: PullRequestState | null;
+
+  @Prop({ type: String, enum: Object.values(PullRequestLinkSource), default: PullRequestLinkSource.WEBHOOK })
+  source!: PullRequestLinkSource;
+
+  @Prop({ type: String, default: null })
+  created_by!: string | null;
 }
 
 export const PullRequestLinkSchema = SchemaFactory.createForClass(PullRequestLink);
-PullRequestLinkSchema.index({"repository":1,"number":1,"task_id":1}, {"unique":true});
+PullRequestLinkSchema.index({ repository: 1, number: 1, task_id: 1 }, { unique: true });

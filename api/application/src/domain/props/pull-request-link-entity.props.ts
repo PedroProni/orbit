@@ -1,4 +1,4 @@
-import { PullRequestState } from '@domain/enums/pull-request-link.enums';
+import { PullRequestLinkSource, PullRequestState } from '@domain/enums/pull-request-link.enums';
 
 export interface PullRequestLinkEntityProps {
   _id: string;
@@ -8,7 +8,9 @@ export interface PullRequestLinkEntityProps {
   number: number;
   url: string;
   title: string;
-  state: PullRequestState;
+  state: PullRequestState | null;
+  source: PullRequestLinkSource;
+  createdBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

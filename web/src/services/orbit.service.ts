@@ -1,5 +1,5 @@
 import { api, toQuery } from '@/lib/api-client';
-import { AppNotification, AssigneeCounts, Attachment, AttachmentDownload, AttachmentUploadRequest, CustomFieldDefinition, SavedView, Member, NotificationPage, Principal, SearchResult, Task, TaskActivityEntry, TaskComment, TaskFilters, TaskPage } from '@/types/api.types';
+import { AppNotification, AssigneeCounts, Attachment, AttachmentDownload, AttachmentUploadRequest, CustomFieldDefinition, SavedView, Member, NotificationPage, Principal, PullRequestLink, SearchResult, Task, TaskActivityEntry, TaskComment, TaskFilters, TaskPage } from '@/types/api.types';
 import { CreateTaskInput, LoginResponse, TaskPatch, UploadFileMeta } from '@/services/orbit.types';
 import { HierarchyResponse } from '@/services/hierarchy.types';
 import { normalizeSpace } from '@/services/hierarchy.helpers';
@@ -33,6 +33,10 @@ export const orbitService = {
   deleteComment: (id: string) => api<void>(`/comments/${id}`, { method: 'DELETE' }),
   attachments: (taskId: string) => api<Attachment[]>(`/tasks/${taskId}/attachments`),
   requestUpload: (taskId: string, file: UploadFileMeta) => api<AttachmentUploadRequest>(`/tasks/${taskId}/attachments`, { method: 'POST', body: JSON.stringify(file) }),
+  prints: (taskId: string) => api<Attachment[]>(`/tasks/${taskId}/prints`),
+  pullRequests: (taskId: string) => api<PullRequestLink[]>(`/tasks/${taskId}/pull-requests`),
+  linkPullRequest: (taskId: string, url: string) => api<PullRequestLink>(`/tasks/${taskId}/pull-requests`, { method: 'POST', body: JSON.stringify({ url }) }),
+  unlinkPullRequest: (taskId: string, linkId: string) => api<void>(`/tasks/${taskId}/pull-requests/${linkId}`, { method: 'DELETE' }),
   confirmUpload: (id: string) => api<Attachment>(`/attachments/${id}/confirm`, { method: 'POST' }),
   attachmentDownload: (id: string) => api<AttachmentDownload>(`/attachments/${id}/download`),
   removeAttachment: (id: string) => api<void>(`/attachments/${id}`, { method: 'DELETE' }),

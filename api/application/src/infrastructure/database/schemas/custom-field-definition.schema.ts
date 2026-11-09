@@ -24,6 +24,9 @@ export class CustomFieldDefinition {
 
   @Prop({ type: [Object], default: [] })
   options!: CustomFieldOption[];
+
+  @Prop({ type: [String], default: null })
+  list_ids!: string[] | null;
 }
 
 export const CustomFieldDefinitionSchema = SchemaFactory.createForClass(CustomFieldDefinition);

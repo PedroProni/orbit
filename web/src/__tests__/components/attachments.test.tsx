@@ -11,7 +11,7 @@ import { Attachment } from '@/types/api.types';
 
 vi.mock('@/lib/upload', () => ({ putWithProgress: vi.fn() }));
 
-const att = (over: Partial<Attachment> = {}): Attachment => ({ id: 'a1', taskId: 't1', commentId: null, filename: 'spec.pdf', mimeType: 'application/pdf', sizeBytes: 2048, uploaderId: 'u1', confirmed: true, createdAt: '2026-01-01T00:00:00Z', ...over });
+const att = (over: Partial<Attachment> = {}): Attachment => ({ id: 'a1', taskId: 't1', commentId: null, filename: 'spec.pdf', mimeType: 'application/pdf', sizeBytes: 2048, uploaderId: 'u1', confirmed: true, gallery: null, createdAt: '2026-01-01T00:00:00Z', ...over });
 
 function Harness() {
   const controller = useUploads('t1');

@@ -4,8 +4,9 @@ import { useEffect, useRef } from 'react';
 import { useUiStore } from '@/stores/ui.store';
 import { SHORTCUT_VIEW_KEYS, SHORTCUT_CHORD_MS } from '@/hooks/use-shortcuts.constants';
 import { isTyping } from '@/lib/typing-target';
+import { triggerNewTask } from '@/lib/new-task-trigger';
 
-export function useShortcuts() {
+export function useShortcuts(canCreate: boolean) {
   const setPaletteOpen = useUiStore((s) => s.setPaletteOpen);
   const setView = useUiStore((s) => s.setView);
   const chord = useRef<number>(0);
@@ -26,14 +27,14 @@ export function useShortcuts() {
       if (e.key === '/') {
         e.preventDefault();
         document.querySelector<HTMLInputElement>('[data-shortcut="search"]')?.focus();
-      } else if (e.key === 'c') {
+      } else if (e.key === 'c' && canCreate) {
         e.preventDefault();
-        document.querySelector<HTMLButtonElement>('[data-shortcut="new-task"]')?.click();
+        triggerNewTask();
       } else if (e.key === 'g') {
         chord.current = Date.now();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [setPaletteOpen, setView]);
+  }, [setPaletteOpen, setView, canCreate]);
 }

@@ -5,4 +5,5 @@ export interface CreateCustomFieldCommand {
   name: string;
   type: CustomFieldType;
   options: string[];
+  listIds: string[] | null;
 }

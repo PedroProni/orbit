@@ -4,7 +4,7 @@ import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Popover } from './popover';
-import { SELECT_VARIANT_CLASS, TYPEAHEAD_RESET_MS } from './select.constants';
+import { SELECT_CHEVRON_CLASS, SELECT_VARIANT_CLASS, TYPEAHEAD_RESET_MS } from './select.constants';
 import { clampIndex, matchOption } from './select.helpers';
 import { SelectProps } from './select.types';
 
@@ -17,6 +17,7 @@ export function Select({ value, options, onChange, ariaLabel, placeholder, disab
   const [active, setActive] = useState(0);
   const selectedIndex = options.findIndex((option) => option.value === value);
   const selected = options[selectedIndex];
+  const showPlaceholder = !selected || (value === '' && !!placeholder);
   const optionId = (index: number) => `${id}-option-${index}`;
 
   useEffect(() => {
@@ -84,10 +85,10 @@ export function Select({ value, options, onChange, ariaLabel, placeholder, disab
         className={cn('inline-flex min-w-0 items-center justify-between gap-1.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60', SELECT_VARIANT_CLASS[variant], className)}
       >
         <span className="flex min-w-0 items-center gap-1.5 truncate">
-          {selected?.icon}
-          <span className="truncate">{selected?.label ?? placeholder}</span>
+          {showPlaceholder || variant === 'pill' ? null : selected?.icon}
+          <span className={cn('truncate', showPlaceholder && 'text-muted')}>{showPlaceholder ? placeholder : selected?.label}</span>
         </span>
-        {disabled ? null : <ChevronDown size={14} aria-hidden="true" className={cn('shrink-0 text-muted transition-transform duration-[var(--motion-fast)]', open && 'rotate-180')} />}
+        {disabled ? null : <ChevronDown size={14} aria-hidden="true" className={cn('shrink-0 text-muted transition-[transform,opacity] duration-[var(--motion-fast)]', SELECT_CHEVRON_CLASS[variant], open && 'rotate-180 opacity-100')} />}
       </button>
       <Popover open={open} anchorRef={triggerRef} onClose={() => setOpen(false)} matchWidth className="max-w-[min(20rem,calc(100vw-1rem))]">
         <ul ref={listRef} id={`${id}-list`} role="listbox" aria-label={ariaLabel} className="max-h-64 overflow-y-auto p-1 text-sm">

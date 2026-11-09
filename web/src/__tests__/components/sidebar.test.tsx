@@ -5,7 +5,6 @@ import { renderWithProviders } from '../helpers/render-with-providers';
 import { makeSpace } from '../helpers/fixtures';
 import { Sidebar } from '@/components/shell/sidebar';
 import { useFavoritesStore } from '@/stores/favorites.store';
-import { useCreateTaskStore } from '@/stores/create-task.store';
 
 const mocks = vi.hoisted(() => ({ params: {} as { listId?: string }, state: { isLoading: false, data: [] as unknown[] | undefined }, member: false, guest: false }));
 
@@ -95,21 +94,19 @@ describe('Sidebar', () => {
     expect(screen.queryByText('Favorites')).toBeNull();
   });
 
-  it('opens the create form from New task on the current list for a member, and hides it from a guest', () => {
+  it('has no New task button under the workspace switcher for members or guests', () => {
     mocks.state = { isLoading: false, data: [space] };
     mocks.params = { listId: 'l2' };
+    mocks.member = true;
+    const { unmount, container } = renderWithProviders(<Sidebar />);
+    expect(screen.queryByRole('button', { name: 'New task' })).toBeNull();
+    expect(container.querySelector('[data-shortcut="new-task"]')).toBeNull();
+    unmount();
     mocks.member = false;
     mocks.guest = true;
-    const { unmount } = renderWithProviders(<Sidebar />);
-    expect(screen.queryByRole('button', { name: 'New task' })).toBeNull();
-    unmount();
-    mocks.guest = false;
-    mocks.member = true;
-    useCreateTaskStore.setState({ open: false, session: 0, defaults: { listId: null } });
     renderWithProviders(<Sidebar />);
-    fireEvent.click(screen.getByRole('button', { name: 'New task' }));
-    expect(useCreateTaskStore.getState()).toMatchObject({ open: true, session: 1, defaults: { listId: 'l2' } });
-    mocks.member = false;
+    expect(screen.queryByRole('button', { name: 'New task' })).toBeNull();
+    mocks.guest = false;
     mocks.params = {};
   });
 });

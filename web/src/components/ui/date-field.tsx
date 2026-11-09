@@ -10,7 +10,7 @@ import { DateFieldProps } from './date-field.types';
 import { Popover } from './popover';
 import { SELECT_VARIANT_CLASS } from './select.constants';
 
-export function DateField({ value, onChange, ariaLabel, disabled = false, variant = 'field', className }: DateFieldProps) {
+export function DateField({ value, onChange, ariaLabel, placeholder, footer, disabled = false, variant = 'field', className }: DateFieldProps) {
   const t = useTranslations('ui');
   const locale = useLocale();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -30,20 +30,24 @@ export function DateField({ value, onChange, ariaLabel, disabled = false, varian
         aria-expanded={open}
         value={value}
         onClick={() => setOpen((current) => !current)}
-        className={cn('inline-flex min-w-0 items-center justify-between gap-1.5 text-left tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-60', SELECT_VARIANT_CLASS[variant], className)}
+        className={cn('inline-flex min-w-0 items-center gap-1.5 text-left tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-60', variant === 'inline' ? 'justify-start' : 'justify-between', SELECT_VARIANT_CLASS[variant], className)}
       >
-        <span className={cn('truncate', !value && 'text-muted')}>{value ? (variant === 'inline' ? formatCompactDay(value, locale) : formatDay(value, locale)) : t('noDate')}</span>
-        {disabled ? null : <Calendar size={13} aria-hidden="true" className="shrink-0 text-muted" />}
+        {variant === 'inline' ? <Calendar size={13} aria-hidden="true" className="shrink-0 text-muted" /> : null}
+        <span className={cn('truncate', !value && 'text-muted')}>{value ? (variant === 'inline' ? formatCompactDay(value, locale) : formatDay(value, locale)) : (placeholder ?? t('noDate'))}</span>
+        {disabled || variant === 'inline' ? null : <Calendar size={13} aria-hidden="true" className="shrink-0 text-muted" />}
       </button>
       <Popover open={open} anchorRef={triggerRef} onClose={close} role="dialog" label={ariaLabel}>
         {open ? (
-          <DateCalendar
-            value={value}
-            onSelect={(day) => {
-              close();
-              if (day !== value) onChange(day);
-            }}
-          />
+          <>
+            <DateCalendar
+              value={value}
+              onSelect={(day) => {
+                close();
+                if (day !== value) onChange(day);
+              }}
+            />
+            {footer ? <div className="border-t border-line">{footer}</div> : null}
+          </>
         ) : null}
       </Popover>
     </>

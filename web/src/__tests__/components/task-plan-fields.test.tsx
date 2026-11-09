@@ -7,7 +7,7 @@ import { makeTask } from '../helpers/fixtures';
 import { TaskDependencies } from '@/components/tasks/task-dependencies';
 import { TaskEstimateField } from '@/components/tasks/task-estimate-field';
 import { TaskKindField } from '@/components/tasks/task-kind-field';
-import { TaskRepeatField } from '@/components/tasks/task-repeat-field';
+import { TaskRepeatSection } from '@/components/tasks/task-repeat-section';
 import { TaskTrackTimeField } from '@/components/tasks/task-track-time-field';
 import { workspaceService } from '@/services/workspace.service';
 import { useSessionStore } from '@/stores/session.store';
@@ -72,25 +72,20 @@ describe('task plan fields', () => {
     await waitFor(() => expect(stop).toHaveBeenCalledWith('t1'));
   });
 
-  it('says Empty with no repeat, saves the chosen frequency and interval, and removes an existing one', async () => {
+  it('saves the chosen frequency and interval from the Repeat section, and shows and removes an existing one', async () => {
     const set = vi.spyOn(workspaceService, 'setRecurrence').mockResolvedValue({ frequency: 'monthly', interval: 2, nextRunAt: '2026-12-01T00:00:00Z', active: true });
-    const { unmount } = renderWithProviders(<TaskRepeatField taskId="t1" onError={vi.fn()} />);
-    const trigger = screen.getByRole('button', { name: 'Repeat' });
-    await waitFor(() => expect(trigger.textContent).toBe('Empty'));
-    fireEvent.click(trigger);
-    const dialog = screen.getByRole('dialog', { name: 'Repeat' });
-    chooseOption(within(dialog).getByRole('combobox', { name: 'Frequency' }), 'Monthly');
-    fireEvent.change(within(dialog).getByRole('spinbutton', { name: 'Interval' }), { target: { value: '2' } });
-    expect(within(dialog).queryByRole('button', { name: 'Remove repeat' })).toBeNull();
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Save repeat' }));
+    const { unmount } = renderWithProviders(<TaskRepeatSection taskId="t1" onError={vi.fn()} />);
+    const section = screen.getByRole('region', { name: 'Repeat' });
+    expect(within(section).queryByRole('button', { name: 'Remove repeat' })).toBeNull();
+    chooseOption(within(section).getByRole('combobox', { name: 'Frequency' }), 'Monthly');
+    fireEvent.change(within(section).getByRole('spinbutton', { name: 'Interval' }), { target: { value: '2' } });
+    fireEvent.click(within(section).getByRole('button', { name: 'Save repeat' }));
     await waitFor(() => expect(set).toHaveBeenCalledWith('t1', { frequency: 'monthly', interval: 2 }));
     unmount();
     vi.mocked(workspaceService.recurrence).mockResolvedValue({ frequency: 'weekly', interval: 3, nextRunAt: '2026-12-01T00:00:00Z', active: true });
     const remove = vi.spyOn(workspaceService, 'removeRecurrence').mockResolvedValue(undefined);
-    renderWithProviders(<TaskRepeatField taskId="t1" onError={vi.fn()} />);
-    const current = screen.getByRole('button', { name: 'Repeat' });
-    await waitFor(() => expect(current.textContent).toBe('Weekly, every 3'));
-    fireEvent.click(current);
+    renderWithProviders(<TaskRepeatSection taskId="t1" onError={vi.fn()} />);
+    expect(await screen.findByText('Weekly, every 3')).toBeTruthy();
     expect((screen.getByRole('spinbutton', { name: 'Interval' }) as HTMLInputElement).value).toBe('3');
     fireEvent.click(screen.getByRole('button', { name: 'Remove repeat' }));
     await waitFor(() => expect(remove).toHaveBeenCalledWith('t1'));

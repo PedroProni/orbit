@@ -13,7 +13,7 @@ export function TaskDrawer() {
   const [shownId, setShownId] = useState(openId);
   if (openId && openId !== shownId) setShownId(openId);
   return (
-    <Dialog open={openId !== null} onClose={() => openTask(null)} label={t('title')} closeLabel={t('close')} variant="drawer" panelClassName="h-full w-full max-w-6xl overflow-hidden border-l border-line bg-panel shadow-floating">
+    <Dialog open={openId !== null} onClose={() => openTask(null)} label={t('title')} closeLabel={t('close')} variant="drawer" panelClassName="h-full w-full max-w-[1400px] overflow-hidden border-l border-line bg-panel shadow-floating">
       {shownId ? <TaskDrawerContent key={shownId} taskId={shownId} /> : null}
     </Dialog>
   );

@@ -1,8 +1,9 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsObject, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
 import { TaskPriority } from '@domain/enums/task.enums';
 import { CustomFieldValueDto } from '@shared/dtos/task/custom-field-value.dto';
 import { ChecklistDto } from '@shared/dtos/task/checklist.dto';
+import { TaskLinksDto } from '@shared/dtos/task/task-links.dto';
 
 export class UpdateTaskDto {
   @IsOptional()
@@ -20,7 +21,7 @@ export class UpdateTaskDto {
   status?: string;
 
   @IsOptional()
-  @ValidateIf((o) => o.priority !== null)
+  @ValidateIf(o => o.priority !== null)
   @IsEnum(TaskPriority)
   priority?: TaskPriority | null;
 
@@ -60,18 +61,18 @@ export class UpdateTaskDto {
   watcherIds?: string[];
 
   @IsOptional()
-  @ValidateIf((o) => o.points !== null)
+  @ValidateIf(o => o.points !== null)
   @IsNumber()
   @Min(0)
   points?: number | null;
 
   @IsOptional()
-  @ValidateIf((o) => o.startDate !== null)
+  @ValidateIf(o => o.startDate !== null)
   @IsDateString()
   startDate?: string | null;
 
   @IsOptional()
-  @ValidateIf((o) => o.dueDate !== null)
+  @ValidateIf(o => o.dueDate !== null)
   @IsDateString()
   dueDate?: string | null;
 
@@ -80,6 +81,12 @@ export class UpdateTaskDto {
   @ValidateNested({ each: true })
   @Type(() => CustomFieldValueDto)
   customFields?: CustomFieldValueDto[];
+
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => TaskLinksDto)
+  links?: TaskLinksDto;
 
   @IsOptional()
   @IsArray()

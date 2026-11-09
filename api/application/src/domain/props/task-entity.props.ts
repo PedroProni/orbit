@@ -1,3 +1,4 @@
+import { TaskLinks } from '@domain/types/task-links.type';
 import { TaskPriority } from '@domain/enums/task.enums';
 import { TaskCustomFieldValue } from '@domain/types/task-custom-field-value.type';
 import { Checklist } from '@domain/types/checklist.type';
@@ -19,6 +20,7 @@ export interface TaskEntityProps {
   startDate: Date | null;
   dueDate: Date | null;
   customFields: TaskCustomFieldValue[];
+  links: TaskLinks;
   checklists: Checklist[];
   creatorId: string;
   dateClosed: Date | null;

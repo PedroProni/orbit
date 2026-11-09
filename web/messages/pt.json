@@ -39,8 +39,7 @@
     "favorites": "Favoritos",
     "workspaces": "Espaços de trabalho",
     "favorite": "Adicionar {name} aos favoritos",
-    "unfavorite": "Remover {name} dos favoritos",
-    "newTask": "Nova tarefa"
+    "unfavorite": "Remover {name} dos favoritos"
   },
   "search": {
     "label": "Buscar",
@@ -193,9 +192,47 @@
     "showEmptyFields": "{count, plural, one {Mostrar # campo vazio} other {Mostrar # campos vazios}}",
     "hideEmptyFields": "Ocultar campos vazios",
     "dates": "Datas",
-    "timeEstimate": "Estimativa de tempo",
+    "timeEstimate": "Tempo estimado",
     "trackTime": "Registrar tempo",
-    "repeat": "Repetir"
+    "repeat": "Repetir",
+    "nextStatus": "Mover para {status}",
+    "closeStatus": "Marcar como {status}",
+    "previousTask": "Tarefa anterior",
+    "nextTask": "Próxima tarefa",
+    "breadcrumb": "Localização",
+    "shareTask": "Copiar link da tarefa",
+    "favoriteTask": "Adicionar aos favoritos",
+    "unfavoriteTask": "Remover dos favoritos",
+    "start": "Início",
+    "due": "Entrega",
+    "addDescription": "Adicionar descrição",
+    "editDescription": "Editar descrição",
+    "createdOn": "Criada em {date}",
+    "github": "GitHub",
+    "figma": "Figma",
+    "notion": "Notion",
+    "prints": "Prints",
+    "printsFolder": "Pasta de prints",
+    "addGithubLink": "Adicionar link do GitHub",
+    "addFigma": "Adicionar Figma",
+    "addNotion": "Adicionar doc do Notion",
+    "addPrints": "Adicionar prints",
+    "addImages": "Adicionar imagens",
+    "printsGallery": "Galeria de prints",
+    "removePrint": "Remover",
+    "removePrintNamed": "Remover {name}",
+    "invalidLink": "Use um link que comece com http:// ou https://",
+    "editLink": "Editar {name}",
+    "clearLink": "Limpar {name}",
+    "pullRequests": "Pull requests",
+    "linkPullRequest": "Vincular PR",
+    "pullRequestPlaceholder": "https://github.com/dono/repo/pull/123",
+    "unlinkPullRequest": "Desvincular {name}",
+    "pullRequestState": {
+      "open": "aberto",
+      "merged": "mesclado",
+      "closed": "fechado"
+    }
   },
   "table": {
     "columns": {
@@ -364,6 +401,7 @@
     "title": "Atividade",
     "empty": "Nenhuma atividade ainda",
     "someone": "Alguém",
+    "github": "GitHub",
     "created": "criou esta tarefa",
     "updated": "atualizou esta tarefa",
     "changed": "alterou {fields}",
@@ -381,8 +419,13 @@
       "spaceId": "espaço",
       "parentId": "tarefa pai",
       "archived": "arquivada",
-      "customFields": "campos personalizados"
-    }
+      "customFields": "campos personalizados",
+      "links": "links",
+      "pullRequests": "pull requests"
+    },
+    "statusChanged": "mudou o status de <before></before> para <after></after>",
+    "pullRequestLinked": "vinculou o pull request {pr}",
+    "pullRequestUnlinked": "desvinculou o pull request {pr}"
   },
   "ui": {
     "close": "Fechar",
@@ -447,7 +490,8 @@
       "attachments": "anexos"
     },
     "docCreated": "Doc criado: {name}",
-    "statusMissing": "O espaço \"{space}\" não tem o status \"{status}\", então a tarefa continua onde estava"
+    "statusMissing": "O espaço \"{space}\" não tem o status \"{status}\", então a tarefa continua onde estava",
+    "pullRequestUnlinkFailed": "Não foi possível desvincular o pull request"
   },
   "attachments": {
     "title": "Anexos",
@@ -494,7 +538,9 @@
     "folderNotEmpty": "Esta pasta ainda tem listas. Mova ou exclua as listas antes.",
     "statusInUse": "Um status removido ainda é usado por tarefas. Mova essas tarefas para outro status antes.",
     "defaultStatusLocked": "Os sete status padrão não podem ser removidos, renomeados nem movidos.",
-    "statusDuplicate": "Cada status precisa de um nome diferente."
+    "statusDuplicate": "Cada status precisa de um nome diferente.",
+    "pullRequestUrl": "Esse link não é de um pull request do GitHub",
+    "printsImagesOnly": "Prints precisam ser imagens"
   },
   "authErrors": {
     "invalidCredentials": "E-mail ou senha incorretos.",
@@ -812,7 +858,7 @@
       "colorOption": "Cor {position}"
     },
     "customFields": {
-      "subtitle": "Campos extras exibidos em todas as tarefas do espaço.",
+      "subtitle": "Campos extras exibidos nas tarefas do espaço. Escolha as listas em que cada um aparece.",
       "empty": "Nenhum campo personalizado neste espaço.",
       "add": "Novo campo",
       "createTitle": "Novo campo personalizado",
@@ -828,7 +874,11 @@
       "optionCount": "{count, plural, one {# opção} other {# opções}}",
       "deleteFor": "Excluir campo {name}",
       "deleteTitle": "Excluir campo personalizado",
-      "confirmDelete": "Excluir o campo {name}? Os valores preenchidos nas tarefas deixam de aparecer."
+      "confirmDelete": "Excluir o campo {name}? Os valores preenchidos nas tarefas deixam de aparecer.",
+      "allLists": "Todas as listas",
+      "listCount": "{count, plural, one {# lista} other {# listas}}",
+      "listsFor": "Listas do campo {name}",
+      "listsHint": "Mostrar este campo nas tarefas destas listas"
     },
     "groupsPage": {
       "subtitle": "Dê nome a um conjunto de pessoas para achar e mencionar todas juntas.",

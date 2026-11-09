@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { CustomFieldInput, ListInput, StatusInput, UserGroup, UserGroupInput } from '@/services/admin.types';
-import { FolderNode, ListNode, Member, SpaceNode } from '@/types/api.types';
+import { CustomFieldDefinition, FolderNode, ListNode, Member, SpaceNode } from '@/types/api.types';
 
 export interface AdminPageFrameProps {
   title: string;
@@ -66,6 +66,11 @@ export interface CustomFieldDialogProps {
   open: boolean;
   onSubmit: (input: CustomFieldInput) => Promise<unknown>;
   onClose: () => void;
+}
+
+export interface CustomFieldListsPickerProps {
+  field: CustomFieldDefinition;
+  space: SpaceNode;
 }
 
 export type CustomFieldProblem = 'nameRequired' | 'optionsRequired' | null;

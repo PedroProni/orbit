@@ -39,8 +39,7 @@
     "favorites": "Favorites",
     "workspaces": "Workspaces",
     "favorite": "Add {name} to favorites",
-    "unfavorite": "Remove {name} from favorites",
-    "newTask": "New task"
+    "unfavorite": "Remove {name} from favorites"
   },
   "search": {
     "label": "Search",
@@ -195,7 +194,45 @@
     "dates": "Dates",
     "timeEstimate": "Time estimate",
     "trackTime": "Track time",
-    "repeat": "Repeat"
+    "repeat": "Repeat",
+    "nextStatus": "Move to {status}",
+    "closeStatus": "Mark as {status}",
+    "previousTask": "Previous task",
+    "nextTask": "Next task",
+    "breadcrumb": "Location",
+    "shareTask": "Copy task link",
+    "favoriteTask": "Add to favorites",
+    "unfavoriteTask": "Remove from favorites",
+    "start": "Start",
+    "due": "Due",
+    "addDescription": "Add description",
+    "editDescription": "Edit description",
+    "createdOn": "Created {date}",
+    "github": "GitHub",
+    "figma": "Figma",
+    "notion": "Notion",
+    "prints": "Prints",
+    "printsFolder": "Prints folder",
+    "addGithubLink": "Add GitHub link",
+    "addFigma": "Add Figma",
+    "addNotion": "Add Notion doc",
+    "addPrints": "Add prints",
+    "addImages": "Add images",
+    "printsGallery": "Prints gallery",
+    "removePrint": "Remove",
+    "removePrintNamed": "Remove {name}",
+    "invalidLink": "Use a link that starts with http:// or https://",
+    "editLink": "Edit {name}",
+    "clearLink": "Clear {name}",
+    "pullRequests": "Pull requests",
+    "linkPullRequest": "Link PR",
+    "pullRequestPlaceholder": "https://github.com/owner/repo/pull/123",
+    "unlinkPullRequest": "Unlink {name}",
+    "pullRequestState": {
+      "open": "open",
+      "merged": "merged",
+      "closed": "closed"
+    }
   },
   "table": {
     "columns": {
@@ -364,6 +401,7 @@
     "title": "Activity",
     "empty": "No activity yet",
     "someone": "Someone",
+    "github": "GitHub",
     "created": "created this task",
     "updated": "updated this task",
     "changed": "changed {fields}",
@@ -381,8 +419,13 @@
       "spaceId": "space",
       "parentId": "parent task",
       "archived": "archived",
-      "customFields": "custom fields"
-    }
+      "customFields": "custom fields",
+      "links": "links",
+      "pullRequests": "pull requests"
+    },
+    "statusChanged": "changed status from <before></before> to <after></after>",
+    "pullRequestLinked": "linked pull request {pr}",
+    "pullRequestUnlinked": "unlinked pull request {pr}"
   },
   "ui": {
     "close": "Close",
@@ -447,7 +490,8 @@
       "attachments": "attachments"
     },
     "docCreated": "Doc created: {name}",
-    "statusMissing": "The space \"{space}\" has no status \"{status}\", so this task stays where it was"
+    "statusMissing": "The space \"{space}\" has no status \"{status}\", so this task stays where it was",
+    "pullRequestUnlinkFailed": "Could not unlink the pull request"
   },
   "attachments": {
     "title": "Attachments",
@@ -494,7 +538,9 @@
     "folderNotEmpty": "This folder still has lists. Move or delete them first.",
     "statusInUse": "A status you removed is still used by tasks. Move those tasks to another status first.",
     "defaultStatusLocked": "The seven default statuses cannot be removed, renamed or moved.",
-    "statusDuplicate": "Each status needs a different name."
+    "statusDuplicate": "Each status needs a different name.",
+    "pullRequestUrl": "That is not a GitHub pull request link",
+    "printsImagesOnly": "Prints must be images"
   },
   "authErrors": {
     "invalidCredentials": "Email or password is incorrect.",
@@ -812,7 +858,7 @@
       "colorOption": "Color {position}"
     },
     "customFields": {
-      "subtitle": "Extra fields shown on every task of the space.",
+      "subtitle": "Extra fields shown on tasks of the space. Pick the lists where each one appears.",
       "empty": "No custom fields in this space.",
       "add": "New field",
       "createTitle": "New custom field",
@@ -828,7 +874,11 @@
       "optionCount": "{count, plural, one {# option} other {# options}}",
       "deleteFor": "Delete field {name}",
       "deleteTitle": "Delete custom field",
-      "confirmDelete": "Delete the field {name}? Values filled on tasks stop showing."
+      "confirmDelete": "Delete the field {name}? Values filled on tasks stop showing.",
+      "allLists": "All lists",
+      "listCount": "{count, plural, one {# list} other {# lists}}",
+      "listsFor": "Lists for field {name}",
+      "listsHint": "Show this field on tasks of these lists"
     },
     "groupsPage": {
       "subtitle": "Name a set of people to find and mention them together.",

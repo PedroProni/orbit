@@ -2,6 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { TaskPriority } from '@domain/enums/task.enums';
 import { TaskCustomFieldValue } from '@domain/types/task-custom-field-value.type';
+import { TaskLinks } from '@domain/types/task-links.type';
+import { EMPTY_TASK_LINKS } from '@domain/constants/task-links.constant';
 import { Checklist } from '@domain/types/checklist.type';
 
 export type TaskDocument = HydratedDocument<Task>;
@@ -56,6 +58,9 @@ export class Task {
   @Prop({ type: [Object], default: [] })
   custom_fields!: TaskCustomFieldValue[];
 
+  @Prop({ type: Object, default: () => ({ ...EMPTY_TASK_LINKS }) })
+  links!: TaskLinks;
+
   @Prop({ type: [Object], default: [] })
   checklists!: Checklist[];
 
@@ -73,5 +78,5 @@ export class Task {
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
-TaskSchema.index({"workspace_id":1,"updated_at":-1});
-TaskSchema.index({"title":"text","description_md":"text"});
+TaskSchema.index({ workspace_id: 1, updated_at: -1 });
+TaskSchema.index({ title: 'text', description_md: 'text' });

@@ -20,13 +20,40 @@ import { SearchController } from '@presentation/controllers/search.controllers';
 import { ClickupCompatController } from '@presentation/controllers/compat/clickup-compat.controllers';
 
 import { GithubWebhookController } from '@presentation/controllers/github-webhook.controllers';
+import { TaskPullRequestController } from '@presentation/controllers/task-pull-request.controllers';
 
 import { SavedViewController } from '@presentation/controllers/saved-view.controllers';
 
 import { PlanningController } from '@presentation/controllers/planning.controllers';
 import { DocController, GoalController, DashboardController } from '@presentation/controllers/knowledge.controllers';
 import { FormController, PublicFormController, AutomationController, ChatController, UserGroupController, GuestAccessController, InboxController } from '@presentation/controllers/workspace-extras.controllers';
-const controllers: any = [AuthController, UserController, ApiTokenController, HierarchyController, CustomFieldController, TaskController, CommentController, NotificationController, AttachmentController, SearchController, ClickupCompatController, GithubWebhookController, SavedViewController, PlanningController, DocController, GoalController, DashboardController, FormController, PublicFormController, AutomationController, ChatController, UserGroupController, GuestAccessController, InboxController];
+const controllers: any = [
+  AuthController,
+  UserController,
+  ApiTokenController,
+  HierarchyController,
+  CustomFieldController,
+  TaskController,
+  TaskPullRequestController,
+  CommentController,
+  NotificationController,
+  AttachmentController,
+  SearchController,
+  ClickupCompatController,
+  GithubWebhookController,
+  SavedViewController,
+  PlanningController,
+  DocController,
+  GoalController,
+  DashboardController,
+  FormController,
+  PublicFormController,
+  AutomationController,
+  ChatController,
+  UserGroupController,
+  GuestAccessController,
+  InboxController,
+];
 
 @Module({
   imports: [ApplicationModule, AuthModule],

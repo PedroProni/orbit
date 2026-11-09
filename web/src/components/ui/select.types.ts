@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-export type SelectVariant = 'field' | 'ghost' | 'inline';
+export type SelectVariant = 'field' | 'ghost' | 'inline' | 'pill';
 
 export interface SelectOption {
   value: string;

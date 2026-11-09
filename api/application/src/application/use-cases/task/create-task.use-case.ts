@@ -7,6 +7,7 @@ import { TaskRepository } from '@domain/repositories/task.repository';
 import { TaskListRepository } from '@domain/repositories/task-list.repository';
 import { CustomFieldDefinitionRepository } from '@domain/repositories/custom-field-definition.repository';
 import { TaskEntity } from '@domain/entities/task.entity';
+import { EMPTY_TASK_LINKS } from '@domain/constants/task-links.constant';
 import { NotificationType } from '@domain/enums/notification.enums';
 import { TaskCreationPolicy } from '@domain/policies/task-creation.policy';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
@@ -49,9 +50,15 @@ export class CreateTaskUseCase {
     const status = space.resolveStatus(requestedStatus);
     if (!status) throw new BadRequestException('Unknown status for this space');
     const cancelled = status !== requestedStatus && StatusAliasPolicy.isCancelled(requestedStatus);
-    const tags = [...new Set([...command.tags, ...(cancelled ? [CANCELLED_TAG] : [])].map((t) => t.trim().toLowerCase()).filter(Boolean))];
+    const tags = [...new Set([...command.tags, ...(cancelled ? [CANCELLED_TAG] : [])].map(t => t.trim().toLowerCase()).filter(Boolean))];
     if (!parent) {
-      if (!TaskCreationPolicy.hasAllowedPrefix(command.title, space.getTitlePrefixes())) throw new BadRequestException(`Title must start with one of: ${space.getTitlePrefixes().map((p) => `[${p}]`).join(', ')}`);
+      if (!TaskCreationPolicy.hasAllowedPrefix(command.title, space.getTitlePrefixes()))
+        throw new BadRequestException(
+          `Title must start with one of: ${space
+            .getTitlePrefixes()
+            .map(p => `[${p}]`)
+            .join(', ')}`,
+        );
       if (!TaskCreationPolicy.hasRequiredTag(tags, space.getRequiredTags())) throw new BadRequestException(`At least one tag is required: ${space.getRequiredTags().join(', ')}`);
     }
     const people = [...command.assigneeIds, ...command.watcherIds];
@@ -75,6 +82,7 @@ export class CreateTaskUseCase {
       startDate: null,
       dueDate: null,
       customFields: command.customFields,
+      links: { ...EMPTY_TASK_LINKS },
       checklists: [],
       creatorId: principal.userId,
       dateClosed: space.isClosedStatus(status) ? now : null,
@@ -89,10 +97,21 @@ export class CreateTaskUseCase {
       task.changePoints(command.points);
     });
     const saved = await this.tasks.create(task);
-    if (command.taskKind) await this.plans.create(new TaskPlanEntity({ _id: newId(), workspaceId: principal.workspaceId, taskId: saved.getId(), estimateMinutes: null, taskKind: command.taskKind, createdAt: now, updatedAt: now }));
+    if (command.taskKind)
+      await this.plans.create(
+        new TaskPlanEntity({ _id: newId(), workspaceId: principal.workspaceId, taskId: saved.getId(), estimateMinutes: null, taskKind: command.taskKind, createdAt: now, updatedAt: now }),
+      );
     await this.audit.record(principal, 'task.created', 'task', saved.getId(), { title: saved.getTitle(), listId: saved.getListId(), ...(command.taskKind ? { taskKind: command.taskKind } : {}) });
     await this.notifications.notify(principal.workspaceId, saved.getAssigneeIds(), NotificationType.ASSIGNMENT, saved.getId(), principal.userId);
-    this.realtime.publish({ workspaceId: principal.workspaceId, type: 'task.created', taskId: saved.getId(), listId: saved.getListId(), actorId: principal.userId, status: saved.getStatus(), statusChanged: true });
+    this.realtime.publish({
+      workspaceId: principal.workspaceId,
+      type: 'task.created',
+      taskId: saved.getId(),
+      listId: saved.getListId(),
+      actorId: principal.userId,
+      status: saved.getStatus(),
+      statusChanged: true,
+    });
     return TaskPresenter.toView(saved);
   }
 }

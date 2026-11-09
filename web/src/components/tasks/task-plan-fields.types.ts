@@ -15,3 +15,7 @@ export interface TaskPlanPatch {
   estimateMinutes?: number | null;
   taskKind?: string;
 }
+
+export interface TaskRepeatIndicatorProps {
+  taskId: string;
+}

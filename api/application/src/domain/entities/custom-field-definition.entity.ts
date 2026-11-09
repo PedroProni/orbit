@@ -9,6 +9,7 @@ export class CustomFieldDefinitionEntity {
   private name: string;
   private type: CustomFieldType;
   private options: CustomFieldOption[];
+  private listIds: string[] | null;
   private readonly createdAt: Date;
   private updatedAt: Date;
 
@@ -19,6 +20,7 @@ export class CustomFieldDefinitionEntity {
     this.name = props.name;
     this.type = props.type;
     this.options = props.options;
+    this.listIds = props.listIds;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
@@ -47,6 +49,10 @@ export class CustomFieldDefinitionEntity {
     return this.options;
   }
 
+  getListIds(): string[] | null {
+    return this.listIds;
+  }
+
   getCreatedAt(): Date {
     return this.createdAt;
   }
@@ -61,8 +67,13 @@ export class CustomFieldDefinitionEntity {
     this.updatedAt = new Date();
   }
 
+  attachToLists(listIds: string[] | null): void {
+    this.listIds = listIds === null ? null : [...new Set(listIds)].sort();
+    this.updatedAt = new Date();
+  }
+
   hasOption(optionId: string): boolean {
-    return this.options.some((o) => o.id === optionId);
+    return this.options.some(o => o.id === optionId);
   }
 
   validateValue(value: string | number | null): void {
@@ -73,6 +84,16 @@ export class CustomFieldDefinitionEntity {
   }
 
   toProps(): CustomFieldDefinitionEntityProps {
-    return { _id: this._id, workspaceId: this.workspaceId, spaceId: this.spaceId, name: this.name, type: this.type, options: this.options, createdAt: this.createdAt, updatedAt: this.updatedAt };
+    return {
+      _id: this._id,
+      workspaceId: this.workspaceId,
+      spaceId: this.spaceId,
+      name: this.name,
+      type: this.type,
+      options: this.options,
+      listIds: this.listIds,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

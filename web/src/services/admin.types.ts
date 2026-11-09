@@ -23,6 +23,11 @@ export interface CustomFieldInput {
   options: string[];
 }
 
+export interface CustomFieldPatch {
+  name?: string;
+  listIds?: string[] | null;
+}
+
 export interface UserGroup {
   id: string;
   name: string;

@@ -1,6 +1,6 @@
 import { ImportReport } from './import-report.type';
 
-export type ImportPhase = 'all' | 'data' | 'files';
+export type ImportPhase = 'all' | 'data' | 'files' | 'fields';
 
 export interface ImportOptions {
   teamId?: string;

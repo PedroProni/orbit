@@ -18,6 +18,7 @@ export class TaskPresenter {
       startDate: task.getStartDate(),
       dueDate: task.getDueDate(),
       customFields: task.getCustomFields(),
+      links: task.getLinks(),
       checklists: task.getChecklists(),
       creatorId: task.getCreatorId(),
       dateClosed: task.getDateClosed(),

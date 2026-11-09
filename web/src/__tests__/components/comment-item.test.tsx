@@ -40,7 +40,7 @@ describe('CommentItem', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(mocks.edit).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(screen.queryByLabelText('Edit')).toBeNull();
+    expect(screen.queryByRole('textbox', { name: 'Edit' })).toBeNull();
     expect(screen.getByText('texto original')).toBeTruthy();
   });
 
@@ -65,6 +65,14 @@ describe('CommentItem', () => {
     show();
     expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Delete' })).toBeTruthy();
+  });
+
+  it('names GitHub as the author of a webhook comment and Someone for an unknown author', () => {
+    const { unmount } = show({ authorId: 'github' });
+    expect(screen.getByText('GitHub')).toBeTruthy();
+    unmount();
+    show({ authorId: 'gone' });
+    expect(screen.getByText('Someone')).toBeTruthy();
   });
 
   it('marks an edited comment', () => {

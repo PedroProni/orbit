@@ -24,7 +24,7 @@ export class AttachmentContentUseCase {
     const allowed = await this.guests.allowedListIds(principal);
     if (allowed) {
       const task = await this.tasks.findByIdInWorkspace(attachment.getTaskId(), principal.workspaceId);
-      if (!task || !allowed.includes(task.getListId()) || !AttachmentContentPolicy.isShownIn(task.getDescriptionMd(), attachmentId)) throw new NotFoundException('Attachment not found');
+      if (!task || !allowed.includes(task.getListId()) || !AttachmentContentPolicy.guestCanSee(task.getDescriptionMd(), attachment)) throw new NotFoundException('Attachment not found');
     }
     const url = await this.storage.presignDownload(attachment.getStorageKey(), attachment.getFilename(), ATTACHMENT_DOWNLOAD_TTL_SECONDS);
     return { url, statusCode: 302 };

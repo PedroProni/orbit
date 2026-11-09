@@ -2,6 +2,7 @@ import { CreateTaskInput } from '@/services/orbit.types';
 import { isoFromDay } from '@/lib/calendar-day';
 import { SpaceNode, Task, TaskFilters, TaskPriority, StatusDefinition } from '@/types/api.types';
 import { COMPOSER_PRIORITY_KEYS, TEMP_TASK_PREFIX } from './task-composer.constants';
+import { EMPTY_TASK_LINKS } from './tasks.constants';
 import { ComposerDraft, ComposerPresets, ComposerRule, ComposerTarget } from './task-composer.types';
 
 const swapPreset = (values: string[], before: string[], after: string[]): string[] => [...new Set([...values.filter((value) => !before.includes(value)), ...after])];
@@ -84,6 +85,7 @@ export function makeTempTask(id: string, listId: string, spaceId: string, status
     dueDate: input.dueDate ?? null,
     checklists: [],
     customFields: input.customFields ?? [],
+    links: { ...EMPTY_TASK_LINKS },
     creatorId: '',
     dateClosed: null,
     archived: false,

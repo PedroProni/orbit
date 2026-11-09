@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-
+import { AttachmentGallery } from '@domain/enums/attachment.enums';
 
 export type AttachmentDocument = HydratedDocument<Attachment>;
 
@@ -35,6 +35,9 @@ export class Attachment {
 
   @Prop({ type: Boolean })
   confirmed!: boolean;
+
+  @Prop({ type: String, enum: [...Object.values(AttachmentGallery), null], default: null })
+  gallery!: AttachmentGallery | null;
 }
 
 export const AttachmentSchema = SchemaFactory.createForClass(Attachment);

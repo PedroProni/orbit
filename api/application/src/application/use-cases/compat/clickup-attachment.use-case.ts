@@ -24,12 +24,40 @@ export class ClickupAttachmentUseCase {
     if (file.buffer.length > ATTACHMENT_MAX_BYTES) throw new BadRequestException('File too large');
     if (!(await this.tasks.findByIdInWorkspace(taskId, principal.workspaceId))) throw new NotFoundException('Task not found');
     const id = newId();
-    const safeName = file.originalname.replace(/[^A-Za-z0-9._-]/g, '_').replace(/\.{2,}/g, '_').slice(0, 120);
+    const safeName = file.originalname
+      .replace(/[^A-Za-z0-9._-]/g, '_')
+      .replace(/\.{2,}/g, '_')
+      .slice(0, 120);
     const key = `${principal.workspaceId}/${taskId}/${id}-${safeName}`;
     await this.storage.put(key, file.buffer, file.mimetype);
     const now = new Date();
-    await this.attachments.create(new AttachmentEntity({ _id: id, workspaceId: principal.workspaceId, taskId, commentId: null, storageKey: key, filename: file.originalname, mimeType: file.mimetype, sizeBytes: file.buffer.length, uploaderId: principal.userId, confirmed: true, createdAt: now, updatedAt: now }));
+    await this.attachments.create(
+      new AttachmentEntity({
+        _id: id,
+        workspaceId: principal.workspaceId,
+        taskId,
+        commentId: null,
+        storageKey: key,
+        filename: file.originalname,
+        mimeType: file.mimetype,
+        sizeBytes: file.buffer.length,
+        uploaderId: principal.userId,
+        confirmed: true,
+        gallery: null,
+        createdAt: now,
+        updatedAt: now,
+      }),
+    );
     await this.audit.record(principal, 'attachment.created', 'attachment', id, { taskId, filename: file.originalname });
-    return { id, version: 0, date: now.getTime(), title: file.originalname, extension: file.originalname.split('.').pop() ?? '', thumbnail_small: null, thumbnail_large: null, url: `/attachments/${id}/download` };
+    return {
+      id,
+      version: 0,
+      date: now.getTime(),
+      title: file.originalname,
+      extension: file.originalname.split('.').pop() ?? '',
+      thumbnail_small: null,
+      thumbnail_large: null,
+      url: `/attachments/${id}/download`,
+    };
   }
 }

@@ -70,6 +70,32 @@ export interface CustomFieldDefinition {
   name: string;
   type: CustomFieldType;
   options: CustomFieldOption[];
+  listIds: string[] | null;
+}
+
+export interface TaskLinks {
+  figma: string | null;
+  notion: string | null;
+  printsFolder: string | null;
+}
+
+export type TaskLinkKey = keyof TaskLinks;
+
+export type PullRequestState = 'open' | 'closed' | 'merged';
+
+export type PullRequestSource = 'webhook' | 'manual';
+
+export interface PullRequestLink {
+  id: string;
+  taskId: string;
+  repository: string;
+  number: number;
+  url: string;
+  title: string;
+  state: PullRequestState | null;
+  source: PullRequestSource;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Task {
@@ -89,6 +115,7 @@ export interface Task {
   dueDate: string | null;
   checklists: Checklist[];
   customFields: TaskCustomFieldValue[];
+  links: TaskLinks;
   creatorId: string;
   dateClosed: string | null;
   archived: boolean;
@@ -195,8 +222,11 @@ export interface Attachment {
   sizeBytes: number;
   uploaderId: string;
   confirmed: boolean;
+  gallery: AttachmentGallery | null;
   createdAt: string;
 }
+
+export type AttachmentGallery = 'prints';
 
 export interface AttachmentUploadRequest extends Attachment {
   uploadUrl: string;

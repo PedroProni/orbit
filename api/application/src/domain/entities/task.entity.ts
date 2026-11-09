@@ -2,6 +2,8 @@ import { TaskPriority } from '@domain/enums/task.enums';
 import { TaskCustomFieldValue } from '@domain/types/task-custom-field-value.type';
 import { Checklist } from '@domain/types/checklist.type';
 import { TaskEntityProps } from '@domain/props/task-entity.props';
+import { TaskLinks } from '@domain/types/task-links.type';
+import { TaskLinksPolicy } from '@domain/policies/task-links.policy';
 
 export class TaskEntity {
   private readonly _id: string;
@@ -20,6 +22,7 @@ export class TaskEntity {
   private startDate: Date | null;
   private dueDate: Date | null;
   private customFields: TaskCustomFieldValue[];
+  private links: TaskLinks;
   private checklists: Checklist[];
   private creatorId: string;
   private dateClosed: Date | null;
@@ -45,6 +48,7 @@ export class TaskEntity {
     this.startDate = props.startDate;
     this.dueDate = props.dueDate;
     this.customFields = props.customFields;
+    this.links = TaskLinksPolicy.normalize(props.links);
     this.checklists = props.checklists;
     this.creatorId = props.creatorId;
     this.dateClosed = props.dateClosed;
@@ -118,6 +122,15 @@ export class TaskEntity {
     return this.customFields;
   }
 
+  getLinks(): TaskLinks {
+    return this.links;
+  }
+
+  setLinks(patch: Partial<TaskLinks>): void {
+    this.links = TaskLinksPolicy.merge(this.links, patch);
+    this.updatedAt = new Date();
+  }
+
   getChecklists(): Checklist[] {
     return this.checklists;
   }
@@ -170,7 +183,7 @@ export class TaskEntity {
   }
 
   replaceTags(tags: string[]): void {
-    this.tags = [...new Set(tags.map((t) => t.trim().toLowerCase()).filter(Boolean))];
+    this.tags = [...new Set(tags.map(t => t.trim().toLowerCase()).filter(Boolean))];
     this.updatedAt = new Date();
   }
 
@@ -229,6 +242,31 @@ export class TaskEntity {
   }
 
   toProps(): TaskEntityProps {
-    return { _id: this._id, workspaceId: this.workspaceId, spaceId: this.spaceId, listId: this.listId, parentId: this.parentId, title: this.title, descriptionMd: this.descriptionMd, status: this.status, priority: this.priority, tags: this.tags, assigneeIds: this.assigneeIds, watcherIds: this.watcherIds, points: this.points, startDate: this.startDate, dueDate: this.dueDate, customFields: this.customFields, checklists: this.checklists, creatorId: this.creatorId, dateClosed: this.dateClosed, archived: this.archived, clickupId: this.clickupId, createdAt: this.createdAt, updatedAt: this.updatedAt };
+    return {
+      _id: this._id,
+      workspaceId: this.workspaceId,
+      spaceId: this.spaceId,
+      listId: this.listId,
+      parentId: this.parentId,
+      title: this.title,
+      descriptionMd: this.descriptionMd,
+      status: this.status,
+      priority: this.priority,
+      tags: this.tags,
+      assigneeIds: this.assigneeIds,
+      watcherIds: this.watcherIds,
+      points: this.points,
+      startDate: this.startDate,
+      dueDate: this.dueDate,
+      customFields: this.customFields,
+      links: this.links,
+      checklists: this.checklists,
+      creatorId: this.creatorId,
+      dateClosed: this.dateClosed,
+      archived: this.archived,
+      clickupId: this.clickupId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

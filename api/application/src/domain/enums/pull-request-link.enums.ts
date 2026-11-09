@@ -3,3 +3,8 @@ export enum PullRequestState {
   MERGED = 'merged',
   CLOSED = 'closed',
 }
+
+export enum PullRequestLinkSource {
+  WEBHOOK = 'webhook',
+  MANUAL = 'manual',
+}

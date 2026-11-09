@@ -5,7 +5,9 @@ import { Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Popover } from '@/components/ui/popover';
 import { TagPicker } from './tag-picker';
+import { tagColor } from './task-helpers';
 import { TaskTagsFieldProps } from './task-field.types';
+import { TAG_ADD_EMPTY_CLASS, TAG_ADD_ICON_CLASS, TAG_CHIP_CLASS, TAG_REMOVE_CLASS } from './task-tags-field.constants';
 
 export function TaskTagsField({ tags, suggestions, readOnly, onAdd, onRemove }: TaskTagsFieldProps) {
   const t = useTranslations('drawer');
@@ -15,10 +17,10 @@ export function TaskTagsField({ tags, suggestions, readOnly, onAdd, onRemove }: 
   return (
     <div className="flex flex-wrap items-center gap-1" role="group" aria-label={t('tags')}>
       {tags.map((tag) => (
-        <span key={tag} className="flex items-center gap-1 rounded bg-panel2 px-2 py-0.5 text-xs text-muted">
+        <span key={tag} data-tag-color={tagColor(tag)} className={TAG_CHIP_CLASS} style={{ backgroundColor: `color-mix(in srgb, ${tagColor(tag)} 22%, transparent)`, color: `color-mix(in srgb, ${tagColor(tag)} var(--status-ink), var(--text))` }}>
           {tag}
           {readOnly ? null : (
-            <button type="button" aria-label={t('removeTag', { tag })} onClick={() => onRemove(tag)} className="hover:text-fg">
+            <button type="button" aria-label={t('removeTag', { tag })} onClick={() => onRemove(tag)} className={TAG_REMOVE_CLASS}>
               <X size={11} />
             </button>
           )}
@@ -26,9 +28,8 @@ export function TaskTagsField({ tags, suggestions, readOnly, onAdd, onRemove }: 
       ))}
       {readOnly ? null : (
         <>
-          <button ref={anchor} type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((current) => !current)} className="flex items-center gap-1 rounded border border-dashed border-line px-1.5 py-0.5 text-xs text-muted transition-colors hover:border-accent hover:text-fg">
-            <Plus size={11} />
-            {t('addTag')}
+          <button ref={anchor} type="button" aria-label={t('addTag')} title={t('addTag')} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((current) => !current)} className={tags.length > 0 ? TAG_ADD_ICON_CLASS : TAG_ADD_EMPTY_CLASS}>
+            {tags.length > 0 ? <Plus size={12} /> : t('empty')}
           </button>
           <Popover open={open} anchorRef={anchor} onClose={() => setOpen(false)} label={t('tags')} role="dialog">
             <TagPicker label={t('tags')} selected={tags} suggestions={suggestions} onToggle={(tag) => (tags.includes(tag) ? onRemove(tag) : onAdd(tag))} />

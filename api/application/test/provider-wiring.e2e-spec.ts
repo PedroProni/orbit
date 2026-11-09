@@ -22,6 +22,7 @@ import { ClickupTaskAssembler } from '../src/application/services/compat/clickup
 import { ClickupUserResolver } from '../src/application/services/compat/clickup-user-resolver.service';
 import { CustomFieldValidationService } from '../src/application/services/custom-field-validation.service';
 import { GuestAccessService } from '../src/application/services/guest-access.service';
+import { TaskAccessService } from '../src/application/services/task-access.service';
 import { NotificationService } from '../src/application/services/notification.service';
 import { RealtimeService } from '../src/application/services/realtime.service';
 import { RecurrenceScheduler } from '../src/application/services/recurrence-scheduler.service';
@@ -102,6 +103,7 @@ const PROVIDERS = [
   ClickupUserResolver,
   CustomFieldValidationService,
   GuestAccessService,
+  TaskAccessService,
   NotificationService,
   RealtimeService,
   RecurrenceScheduler,

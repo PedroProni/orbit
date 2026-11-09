@@ -8,6 +8,7 @@ export interface CustomFieldDefinitionEntityProps {
   name: string;
   type: CustomFieldType;
   options: CustomFieldOption[];
+  listIds: string[] | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -12,6 +12,7 @@ import { DownloadAttachmentUseCase } from '@application/use-cases/attachment/dow
 import { AttachmentContentUseCase } from '@application/use-cases/attachment/attachment-content.use-case';
 import { ListAttachmentsUseCase } from '@application/use-cases/attachment/list-attachments.use-case';
 import { DeleteAttachmentUseCase } from '@application/use-cases/attachment/delete-attachment.use-case';
+import { ListTaskPrintsUseCase } from '@application/use-cases/attachment/list-task-prints.use-case';
 import { RequestUploadDto } from '@shared/dtos/attachment/request-upload.dto';
 import { ATTACHMENT_CONTENT_CACHE_CONTROL } from '@domain/constants/attachment.constant';
 
@@ -25,12 +26,20 @@ export class AttachmentController {
     private readonly attachmentContent: AttachmentContentUseCase,
     private readonly listAttachments: ListAttachmentsUseCase,
     private readonly deleteAttachment: DeleteAttachmentUseCase,
+    private readonly listPrints: ListTaskPrintsUseCase,
   ) {}
 
   @Get('tasks/:taskId/attachments')
   @Authenticated(SCOPE_TASKS_READ)
   list(@CurrentPrincipal() principal: AuthPrincipal, @Param('taskId') taskId: string) {
     return this.listAttachments.execute(principal, taskId);
+  }
+
+  @Get('tasks/:taskId/prints')
+  @GuestReadable()
+  @Authenticated(SCOPE_TASKS_READ)
+  prints(@CurrentPrincipal() principal: AuthPrincipal, @Param('taskId') taskId: string) {
+    return this.listPrints.execute(principal, taskId);
   }
 
   @Post('tasks/:taskId/attachments')

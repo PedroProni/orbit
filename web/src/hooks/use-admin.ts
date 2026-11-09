@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/admin.service';
-import { CustomFieldInput, ListInput, SpacePatch, UserGroupInput } from '@/services/admin.types';
+import { CustomFieldInput, CustomFieldPatch, ListInput, SpacePatch, UserGroupInput } from '@/services/admin.types';
 import { useCapabilities } from './use-capabilities';
 import { useInvalidating } from './use-workspace';
 import { CUSTOM_FIELDS_KEY, HIERARCHY_KEY, USER_GROUPS_KEY } from './use-admin.constants';
@@ -25,6 +25,7 @@ export const useCreateList = () => useInvalidating(({ spaceId, input }: { spaceI
 export const useUpdateList = () => useInvalidating(({ id, input }: { id: string; input: Partial<ListInput> }) => adminService.updateList(id, input), [HIERARCHY_KEY]);
 export const useDeleteList = () => useInvalidating((id: string) => adminService.deleteList(id), [HIERARCHY_KEY]);
 export const useCreateCustomField = () => useInvalidating(({ spaceId, input }: { spaceId: string; input: CustomFieldInput }) => adminService.createCustomField(spaceId, input), [CUSTOM_FIELDS_KEY]);
+export const useUpdateCustomField = () => useInvalidating(({ id, patch }: { id: string; patch: CustomFieldPatch }) => adminService.updateCustomField(id, patch), [CUSTOM_FIELDS_KEY]);
 export const useDeleteCustomField = () => useInvalidating((id: string) => adminService.deleteCustomField(id), [CUSTOM_FIELDS_KEY]);
 export const useCreateGroup = () => useInvalidating((input: UserGroupInput) => adminService.createGroup(input), [USER_GROUPS_KEY]);
 export const useUpdateGroup = () => useInvalidating(({ id, input }: { id: string; input: UserGroupInput }) => adminService.updateGroup(id, input), [USER_GROUPS_KEY]);

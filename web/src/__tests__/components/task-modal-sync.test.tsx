@@ -63,7 +63,7 @@ describe('TaskDrawerContent fields and sync', () => {
 
   it('keeps the description being edited when the task refreshes', () => {
     const { rerender } = renderWithProviders(<TaskDrawerContent taskId="t1" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit description' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Description' }), { target: { value: 'Rascunho' } });
     setTask({ updatedAt: '2026-02-02T00:00:00Z', descriptionMd: 'Outro' });
     rerender(<TaskDrawerContent taskId="t1" />);
@@ -72,7 +72,7 @@ describe('TaskDrawerContent fields and sync', () => {
 
   it('resets everything when another task opens', () => {
     const { rerender } = renderWithProviders(<TaskDrawerContent taskId="t1" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit description' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Description' }), { target: { value: 'Rascunho' } });
     setTask({ id: 't2', title: 'Outra', descriptionMd: 'Outra descrição' });
     rerender(<TaskDrawerContent taskId="t2" />);

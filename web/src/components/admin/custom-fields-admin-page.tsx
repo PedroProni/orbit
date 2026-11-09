@@ -14,6 +14,7 @@ import { ADMIN_ICON_BUTTON_CLASS, CUSTOM_FIELD_ICONS, ADMIN_PANEL_CLASS, ADMIN_P
 import { AdminPageFrame } from './admin-page-frame';
 import { ConfirmDialog } from './confirm-dialog';
 import { CustomFieldDialog } from './custom-field-dialog';
+import { CustomFieldListsPicker } from './custom-field-lists-picker';
 import { SpacePicker } from './space-picker';
 
 export function CustomFieldsAdminPage() {
@@ -62,6 +63,7 @@ export function CustomFieldsAdminPage() {
                           })
                         : t(`customFields.types.${field.type}`)}
                     </span>
+                    <CustomFieldListsPicker field={field} space={space} />
                     <button
                       type="button"
                       aria-label={t('customFields.deleteFor', {

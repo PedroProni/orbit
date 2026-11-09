@@ -5,8 +5,9 @@ import { renderWithProviders } from '../helpers/render-with-providers';
 import { chooseOption } from '../helpers/choose-option';
 import { MEMBERS, makeTask } from '../helpers/fixtures';
 import { TaskChecklists } from '@/components/tasks/task-checklists';
-import { TaskCustomFields } from '@/components/tasks/task-custom-fields';
-import { customFieldDay, withCustomFieldValue } from '@/components/tasks/task-custom-fields.helpers';
+import { TaskCustomFieldRows } from '@/components/tasks/task-custom-fields';
+import { TaskFieldsSection } from '@/components/tasks/task-fields-section';
+import { customFieldDay, fieldsForTask, withCustomFieldValue } from '@/components/tasks/task-custom-fields.helpers';
 import { TaskPeopleField } from '@/components/tasks/task-people-field';
 import { TaskPointsField } from '@/components/tasks/task-points-field';
 import { TaskSubtasks } from '@/components/tasks/task-subtasks';
@@ -50,6 +51,19 @@ describe('TaskTagsField', () => {
     fireEvent.change(input, { target: { value: 'NOVA' } });
     fireEvent.keyDown(input, { key: 'Enter' });
     expect(onAdd).toHaveBeenCalledWith('nova');
+  });
+
+  it('keeps the row compact: an icon add after the chips, and a muted Empty with no tags', () => {
+    const { unmount } = renderWithProviders(<TaskTagsField tags={['devops', 'infra']} suggestions={[]} readOnly={false} onAdd={vi.fn()} onRemove={vi.fn()} />);
+    const add = screen.getByRole('button', { name: 'Add tag' });
+    expect(add.textContent).toBe('');
+    expect(add.querySelector('svg')).toBeTruthy();
+    const remove = screen.getByRole('button', { name: 'Remove tag devops' });
+    expect(remove.className.split(' ')).toEqual(expect.arrayContaining(['opacity-0', 'w-0', 'ml-0', 'overflow-hidden', 'group-hover:w-[11px]', 'focus-visible:w-[11px]']));
+    expect((remove.parentElement as HTMLElement).className.split(' ')).not.toContain('gap-1');
+    unmount();
+    renderWithProviders(<TaskTagsField tags={[]} suggestions={[]} readOnly={false} onAdd={vi.fn()} onRemove={vi.fn()} />);
+    expect(screen.getByRole('button', { name: 'Add tag' }).textContent).toBe('Empty');
   });
 
   it('is read only for a guest, and hidden with no tags', () => {
@@ -97,7 +111,7 @@ describe('TaskPointsField', () => {
   });
 });
 
-describe('TaskCustomFields', () => {
+describe('TaskCustomFieldRows', () => {
   const definitions: CustomFieldDefinition[] = [
     {
       id: 'f1',
@@ -108,9 +122,10 @@ describe('TaskCustomFields', () => {
         { id: 'o1', label: 'Back', color: '#111111' },
         { id: 'o2', label: 'Front', color: '#222222' },
       ],
+      listIds: null,
     },
-    { id: 'f2', spaceId: 's1', name: 'Link', type: 'url', options: [] },
-    { id: 'f3', spaceId: 's1', name: 'Entrega', type: 'date', options: [] },
+    { id: 'f2', spaceId: 's1', name: 'Link', type: 'url', options: [], listIds: null },
+    { id: 'f3', spaceId: 's1', name: 'Entrega', type: 'date', options: [], listIds: null },
   ];
   const stub = (role = 'member') => {
     vi.spyOn(orbitService, 'me').mockResolvedValue({ ...member, role } as Principal);
@@ -126,7 +141,11 @@ describe('TaskCustomFields', () => {
   it('saves the option id of a dropdown, keeping the other values', async () => {
     stub();
     const save = vi.fn();
-    renderWithProviders(<TaskCustomFields task={makeTask({ customFields: [{ fieldId: 'f2', value: 'https://a.io' }] })} save={save} />);
+    renderWithProviders(
+      <ul>
+        <TaskCustomFieldRows task={makeTask({ customFields: [{ fieldId: 'f2', value: 'https://a.io' }] })} save={save} />
+      </ul>,
+    );
     chooseOption(await screen.findByRole('combobox', { name: 'Area' }), 'Front');
     expect(save).toHaveBeenCalledWith({
       customFields: [
@@ -139,7 +158,11 @@ describe('TaskCustomFields', () => {
   it('clears a value by removing it from the array', async () => {
     stub();
     const save = vi.fn();
-    renderWithProviders(<TaskCustomFields task={makeTask({ customFields: [{ fieldId: 'f1', value: 'o1' }] })} save={save} />);
+    renderWithProviders(
+      <ul>
+        <TaskCustomFieldRows task={makeTask({ customFields: [{ fieldId: 'f1', value: 'o1' }] })} save={save} />
+      </ul>,
+    );
     chooseOption(await screen.findByRole('combobox', { name: 'Area' }), '-');
     expect(save).toHaveBeenCalledWith({ customFields: [] });
   });
@@ -147,7 +170,11 @@ describe('TaskCustomFields', () => {
   it('saves a url on blur only when it changed, and links only to a valid one', async () => {
     stub();
     const save = vi.fn();
-    renderWithProviders(<TaskCustomFields task={makeTask({ customFields: [{ fieldId: 'f2', value: 'https://a.io' }] })} save={save} />);
+    renderWithProviders(
+      <ul>
+        <TaskCustomFieldRows task={makeTask({ customFields: [{ fieldId: 'f2', value: 'https://a.io' }] })} save={save} />
+      </ul>,
+    );
     const input = (await screen.findByRole('textbox', { name: 'Link' })) as HTMLInputElement;
     expect(screen.getByRole('link', { name: 'Open Link' }).getAttribute('rel')).toContain('noopener');
     fireEvent.blur(input);
@@ -159,37 +186,63 @@ describe('TaskCustomFields', () => {
 
   it('never links to a value that is not http, like a script url', async () => {
     stub();
-    renderWithProviders(<TaskCustomFields task={makeTask({ customFields: [{ fieldId: 'f2', value: 'javascript:alert(1)' }] })} save={vi.fn()} />);
+    renderWithProviders(
+      <ul>
+        <TaskCustomFieldRows task={makeTask({ customFields: [{ fieldId: 'f2', value: 'javascript:alert(1)' }] })} save={vi.fn()} />
+      </ul>,
+    );
     await screen.findByRole('textbox', { name: 'Link' });
     expect(screen.queryByRole('link')).toBeNull();
   });
 
-  it('asks nothing and shows nothing for a guest', async () => {
+  it('asks nothing for a guest, who sees only the fixed slots, read only', async () => {
     const list = stub('guest');
-    renderWithProviders(<TaskCustomFields task={makeTask()} save={vi.fn()} />);
-    await waitFor(() => expect(orbitService.me).toHaveBeenCalled());
+    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([]);
+    vi.spyOn(orbitService, 'prints').mockResolvedValue([]);
+    renderWithProviders(<TaskFieldsSection task={makeTask()} readOnly save={vi.fn()} />);
+    await waitFor(() => expect(orbitService.pullRequests).toHaveBeenCalled());
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(list).not.toHaveBeenCalled();
-    expect(screen.queryByText('Fields')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Fields' })).toBeTruthy();
+    expect(screen.queryByRole('combobox', { name: 'Area' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Add Figma' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Link PR' })).toBeNull();
   });
 
-  it('folds the Fields section and shows an empty value as a dash', async () => {
+  it('folds the Fields section and keeps all empty fields behind a toggle', async () => {
     stub();
-    renderWithProviders(<TaskCustomFields task={makeTask({ customFields: [] })} save={vi.fn()} />);
-    const toggle = await screen.findByRole('button', { name: 'Fields' });
+    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([]);
+    vi.spyOn(orbitService, 'prints').mockResolvedValue([]);
+    renderWithProviders(<TaskFieldsSection task={makeTask({ customFields: [] })} readOnly={false} save={vi.fn()} />);
+    const toggle = screen.getByRole('button', { name: 'Fields' });
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(await screen.findByRole('button', { name: 'Show 3 empty fields' }));
     expect(screen.getByRole('combobox', { name: 'Area' }).textContent).toContain('-');
-    expect(screen.queryByRole('button', { name: /empty field/ })).toBeNull();
     fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(screen.queryByRole('combobox', { name: 'Area' })).toBeNull();
   });
 
+  it('keeps a field of another list out, unless the task already has a value for it', () => {
+    const scoped: CustomFieldDefinition[] = [
+      { id: 'a', spaceId: 's1', name: 'All', type: 'url', options: [], listIds: null },
+      { id: 'b', spaceId: 's1', name: 'Mine', type: 'url', options: [], listIds: ['l1'] },
+      { id: 'c', spaceId: 's1', name: 'Other', type: 'url', options: [], listIds: ['l9'] },
+      { id: 'd', spaceId: 's1', name: 'Kept', type: 'url', options: [], listIds: ['l9'] },
+    ];
+    const task = makeTask({ listId: 'l1', customFields: [{ fieldId: 'd', value: 'https://a.io' }] });
+    expect(fieldsForTask(scoped, task).map((field) => field.id)).toEqual(['a', 'b', 'd']);
+  });
+
   it('hides empty fields by default when there are more than six, and shows them on demand', async () => {
     vi.spyOn(orbitService, 'me').mockResolvedValue(member);
-    const many: CustomFieldDefinition[] = Array.from({ length: 7 }, (_, index) => ({ id: `m${index}`, spaceId: 's1', name: `Campo ${index}`, type: 'url', options: [] }));
+    const many: CustomFieldDefinition[] = Array.from({ length: 7 }, (_, index) => ({ id: `m${index}`, spaceId: 's1', name: `Campo ${index}`, type: 'url', options: [], listIds: null }));
     vi.spyOn(orbitService, 'customFields').mockResolvedValue(many);
-    renderWithProviders(<TaskCustomFields task={makeTask({ customFields: [{ fieldId: 'm3', value: 'https://a.io' }] })} save={vi.fn()} />);
+    renderWithProviders(
+      <ul>
+        <TaskCustomFieldRows task={makeTask({ customFields: [{ fieldId: 'm3', value: 'https://a.io' }] })} save={vi.fn()} />
+      </ul>,
+    );
     expect(await screen.findByRole('textbox', { name: 'Campo 3' })).toBeTruthy();
     expect(screen.getAllByRole('textbox')).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: 'Show 6 empty fields' }));

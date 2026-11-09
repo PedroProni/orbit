@@ -1,4 +1,6 @@
 import { PullRequestLinkEntity } from '@domain/entities/pull-request-link.entity';
 import { BaseRepository } from '@domain/repositories/base.repository';
 
-export interface PullRequestLinkRepository extends BaseRepository<PullRequestLinkEntity> {}
+export interface PullRequestLinkRepository extends BaseRepository<PullRequestLinkEntity> {
+  findForTask(taskId: string, repository: string, number: number): Promise<PullRequestLinkEntity | null>;
+}

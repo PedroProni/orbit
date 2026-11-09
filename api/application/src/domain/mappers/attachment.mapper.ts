@@ -13,6 +13,7 @@ export class DomainAttachmentMapper {
       size_bytes: entity.getSizeBytes(),
       uploader_id: entity.getUploaderId(),
       confirmed: entity.getConfirmed(),
+      gallery: entity.getGallery(),
       created_at: entity.getCreatedAt(),
       updated_at: entity.getUpdatedAt(),
     };
@@ -30,6 +31,7 @@ export class DomainAttachmentMapper {
       sizeBytes: raw.size_bytes,
       uploaderId: raw.uploader_id,
       confirmed: raw.confirmed,
+      gallery: raw.gallery ?? null,
       createdAt: raw.created_at,
       updatedAt: raw.updated_at,
     });

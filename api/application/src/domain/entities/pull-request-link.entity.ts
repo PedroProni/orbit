@@ -1,4 +1,4 @@
-import { PullRequestState } from '@domain/enums/pull-request-link.enums';
+import { PullRequestLinkSource, PullRequestState } from '@domain/enums/pull-request-link.enums';
 import { PullRequestLinkEntityProps } from '@domain/props/pull-request-link-entity.props';
 
 export class PullRequestLinkEntity {
@@ -9,7 +9,9 @@ export class PullRequestLinkEntity {
   private number: number;
   private url: string;
   private title: string;
-  private state: PullRequestState;
+  private state: PullRequestState | null;
+  private readonly source: PullRequestLinkSource;
+  private readonly createdBy: string | null;
   private readonly createdAt: Date;
   private updatedAt: Date;
 
@@ -22,6 +24,8 @@ export class PullRequestLinkEntity {
     this.url = props.url;
     this.title = props.title;
     this.state = props.state;
+    this.source = props.source;
+    this.createdBy = props.createdBy;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
@@ -54,8 +58,20 @@ export class PullRequestLinkEntity {
     return this.title;
   }
 
-  getState(): PullRequestState {
+  getState(): PullRequestState | null {
     return this.state;
+  }
+
+  getSource(): PullRequestLinkSource {
+    return this.source;
+  }
+
+  getCreatedBy(): string | null {
+    return this.createdBy;
+  }
+
+  isManual(): boolean {
+    return this.source === PullRequestLinkSource.MANUAL;
   }
 
   getCreatedAt(): Date {
@@ -67,7 +83,20 @@ export class PullRequestLinkEntity {
   }
 
   toProps(): PullRequestLinkEntityProps {
-    return { _id: this._id, workspaceId: this.workspaceId, taskId: this.taskId, repository: this.repository, number: this.number, url: this.url, title: this.title, state: this.state, createdAt: this.createdAt, updatedAt: this.updatedAt };
+    return {
+      _id: this._id,
+      workspaceId: this.workspaceId,
+      taskId: this.taskId,
+      repository: this.repository,
+      number: this.number,
+      url: this.url,
+      title: this.title,
+      state: this.state,
+      source: this.source,
+      createdBy: this.createdBy,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 
   sync(title: string, url: string, state: PullRequestState): void {

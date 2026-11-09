@@ -9,6 +9,7 @@ export class DomainCustomFieldDefinitionMapper {
       name: entity.getName(),
       type: entity.getType(),
       options: entity.getOptions(),
+      list_ids: entity.getListIds(),
       created_at: entity.getCreatedAt(),
       updated_at: entity.getUpdatedAt(),
     };
@@ -22,6 +23,7 @@ export class DomainCustomFieldDefinitionMapper {
       name: raw.name,
       type: raw.type,
       options: raw.options ?? [],
+      listIds: raw.list_ids ?? null,
       createdAt: raw.created_at,
       updatedAt: raw.updated_at,
     });

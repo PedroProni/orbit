@@ -51,7 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const caps = useCapabilities();
   const pathname = usePathname();
   useRealtime(caps.member);
-  useShortcuts();
+  useShortcuts(caps.member);
 
   useEffect(() => {
     if (hydrated && !authenticated) router.replace('/login');

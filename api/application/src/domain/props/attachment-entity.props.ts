@@ -1,4 +1,4 @@
-
+import { AttachmentGallery } from '@domain/enums/attachment.enums';
 
 export interface AttachmentEntityProps {
   _id: string;
@@ -11,6 +11,7 @@ export interface AttachmentEntityProps {
   sizeBytes: number;
   uploaderId: string;
   confirmed: boolean;
+  gallery: AttachmentGallery | null;
   createdAt: Date;
   updatedAt: Date;
 }

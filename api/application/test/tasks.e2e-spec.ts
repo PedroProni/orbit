@@ -351,4 +351,53 @@ describe('Tasks (e2e)', () => {
     await ctx.http().get(`/tasks/${t.body.id}/activity`).set(auth(outsider)).expect(404);
     await ctx.http().get(`/tasks/${t.body.id}/activity`).expect(401);
   });
+
+  it('keeps Figma, Notion and prints folder links on the task with partial updates, validation and isolation', async () => {
+    const t = await ctx.http().post(`/lists/${listId}/tasks`).set(auth(member)).send({ title: 'links' }).expect(201);
+    expect(t.body.links).toEqual({ figma: null, notion: null, printsFolder: null });
+    const id = t.body.id as string;
+    await ctx
+      .http()
+      .patch(`/tasks/${id}`)
+      .set(auth(member))
+      .send({ links: { figma: ' https://www.figma.com/design/abc ' } })
+      .expect(200);
+    await ctx
+      .http()
+      .patch(`/tasks/${id}`)
+      .set(auth(owner))
+      .send({ links: { printsFolder: 'https://drive.google.com/drive/folders/x' } })
+      .expect(200);
+    const got = await ctx.http().get(`/tasks/${id}`).set(auth(member)).expect(200);
+    expect(got.body.links).toEqual({ figma: 'https://www.figma.com/design/abc', notion: null, printsFolder: 'https://drive.google.com/drive/folders/x' });
+    for (const bad of [{ figma: 'javascript:alert(1)' }, { notion: 'notion.so/x' }, { figma: 42 }, { evil: 'https://x.test' }, { printsFolder: `https://x.test/${'a'.repeat(2050)}` }])
+      await ctx.http().patch(`/tasks/${id}`).set(auth(member)).send({ links: bad }).expect(400);
+    await ctx.http().patch(`/tasks/${id}`).set(auth(member)).send({ links: 'https://x.test' }).expect(400);
+    await ctx
+      .http()
+      .patch(`/tasks/${id}`)
+      .set(auth(outsider))
+      .send({ links: { figma: 'https://pwn.test' } })
+      .expect(404);
+    const guest = await ctx.login('links-guest@acme.test', 'Guest', 'guest');
+    const guestRes = await ctx
+      .http()
+      .patch(`/tasks/${id}`)
+      .set(auth(guest))
+      .send({ links: { figma: 'https://pwn.test' } });
+    expect([403, 404]).toContain(guestRes.status);
+    await ctx
+      .http()
+      .patch(`/tasks/${id}`)
+      .set(auth(member))
+      .send({ links: { figma: null } })
+      .expect(200);
+    const after = await ctx.http().get(`/tasks/${id}`).set(auth(member)).expect(200);
+    expect(after.body.links).toEqual({ figma: null, notion: null, printsFolder: 'https://drive.google.com/drive/folders/x' });
+    const activity = await ctx.http().get(`/tasks/${id}/activity`).set(auth(owner)).expect(200);
+    expect(activity.body[0].diff.links).toEqual({
+      before: { figma: 'https://www.figma.com/design/abc', notion: null, printsFolder: 'https://drive.google.com/drive/folders/x' },
+      after: { figma: null, notion: null, printsFolder: 'https://drive.google.com/drive/folders/x' },
+    });
+  });
 });
