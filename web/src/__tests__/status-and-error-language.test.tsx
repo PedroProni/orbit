@@ -13,7 +13,7 @@ import { DashboardWidget } from '@/components/workspace/dashboard-widget';
 import { describeApiError } from '@/lib/api-error';
 import { useStatusLabel } from '@/hooks/use-status-label';
 
-vi.mock('@/hooks/use-orbit', () => ({ useMembers: () => ({ data: MEMBERS }) }));
+vi.mock('@/hooks/use-orbit', () => ({ useMembers: () => ({ data: MEMBERS }), useUpdateTask: () => ({ mutate: vi.fn() }) }));
 
 const wrapper = (locale: 'en' | 'pt') =>
   function Wrapper({ children }: { children: ReactNode }) {
@@ -52,7 +52,7 @@ describe('status names', () => {
   it('renders the translated name in the chip and the table', () => {
     render(<StatusChip status={{ name: 'completed', color: '#22c55e', type: 'done', order: 6 } as never} />, { wrapper: wrapper('pt') });
     expect(screen.getByText('Concluída')).toBeTruthy();
-    renderWithProviders(<TaskTableView tasks={[makeTask({ id: 'a', title: 'Alpha', status: 'in review' })]} />, 'pt');
+    renderWithProviders(<TaskTableView tasks={[makeTask({ id: 'a', title: 'Alpha', status: 'in review' })]} statusesOf={() => []} readOnly />, 'pt');
     expect(screen.getByText('Em revisão')).toBeTruthy();
     expect(screen.queryByText('in review')).toBeNull();
   });

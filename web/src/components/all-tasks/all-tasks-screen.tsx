@@ -113,7 +113,11 @@ export function AllTasksScreen() {
         {tasks.isLoading || !hierarchy.data ? shown === 'board' ? <BoardSkeleton /> : <ListSkeleton /> : null}
         {tasks.data && hierarchy.data ? (
           <div key={shown} className={cn('anim-fade-in', shown === 'board' && 'h-full')}>
-            {shown === 'board' ? <KanbanBoard tasks={tasks.data.data} space={space} listId={ALL_TASKS_KEY} readOnly={isGuest} refuseDrop={refuseDrop} targetFor={targetFor} originOf={originOf} /> : <TaskTableView tasks={tasks.data.data} />}
+            {shown === 'board' ? (
+              <KanbanBoard tasks={tasks.data.data} space={space} listId={ALL_TASKS_KEY} readOnly={isGuest} refuseDrop={refuseDrop} targetFor={targetFor} originOf={originOf} />
+            ) : (
+              <TaskTableView tasks={tasks.data.data} statusesOf={(task) => spaceOfTask(spaces, task)?.statuses ?? []} readOnly={isGuest} />
+            )}
             {shown === 'table' && loaded === 0 ? <EmptyState title={tt('empty')} /> : null}
           </div>
         ) : null}

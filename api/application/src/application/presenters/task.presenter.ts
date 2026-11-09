@@ -1,4 +1,5 @@
 import { TaskEntity } from '@domain/entities/task.entity';
+import { TaskAttachmentSummary } from '@domain/types/task-attachment-summary.type';
 
 export class TaskPresenter {
   static toView(task: TaskEntity) {
@@ -26,5 +27,9 @@ export class TaskPresenter {
       createdAt: task.getCreatedAt(),
       updatedAt: task.getUpdatedAt(),
     };
+  }
+
+  static toListItem(task: TaskEntity, summary: TaskAttachmentSummary) {
+    return { ...TaskPresenter.toView(task), attachmentCount: summary.attachmentCount, coverAttachmentId: summary.coverAttachmentId };
   }
 }

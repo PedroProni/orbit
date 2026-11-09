@@ -115,7 +115,14 @@
     "datesError": "The start date must be on or before the due date",
     "addTaskOptions": "More ways to add a task",
     "addFromTemplate": "From a template",
-    "addWithForm": "With the full form"
+    "addWithForm": "With the full form",
+    "indicators": {
+      "description": "Has a description",
+      "subtasks": "{count, plural, one {# subtask} other {# subtasks}}",
+      "attachments": "{count, plural, one {# attachment} other {# attachments}}",
+      "checklist": "{done} of {total} checklist items done",
+      "moreTags": "+{count}"
+    }
   },
   "filters": {
     "status": "Status",
@@ -242,7 +249,9 @@
       "assignee": "Assignee",
       "dueDate": "Due",
       "points": "Points",
-      "updatedAt": "Updated"
+      "updatedAt": "Updated",
+      "rowNumber": "Row",
+      "tags": "Tags"
     }
   },
   "calendar": {
@@ -646,7 +655,8 @@
     "collapseColumn": "Collapse column {column}",
     "wipOver": "Over the limit of {limit} tasks",
     "pointsSum": "{points} pts",
-    "toggleLane": "Toggle lane {lane}"
+    "toggleLane": "Toggle lane {lane}",
+    "cover": "Cover image of {title}"
   },
   "display": {
     "button": "Display",

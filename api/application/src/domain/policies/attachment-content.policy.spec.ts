@@ -1,3 +1,4 @@
+import { AttachmentGallery } from '@domain/enums/attachment.enums';
 import { AttachmentContentPolicy } from './attachment-content.policy';
 
 describe('AttachmentContentPolicy', () => {
@@ -14,5 +15,11 @@ describe('AttachmentContentPolicy', () => {
     expect(AttachmentContentPolicy.isShownIn('![x](/attachments/a11/content)', 'a1')).toBe(false);
     expect(AttachmentContentPolicy.isShownIn('a1', 'a1')).toBe(false);
     expect(AttachmentContentPolicy.isShownIn('', 'a1')).toBe(false);
+  });
+
+  it('lets a guest see a print or a file shown in the description, by id and gallery', () => {
+    expect(AttachmentContentPolicy.guestCanSeeRef('', 'a1', AttachmentGallery.PRINTS)).toBe(true);
+    expect(AttachmentContentPolicy.guestCanSeeRef('![x](/attachments/a1/content)', 'a1', null)).toBe(true);
+    expect(AttachmentContentPolicy.guestCanSeeRef('![x](/attachments/a2/content)', 'a1', null)).toBe(false);
   });
 });

@@ -79,7 +79,7 @@ export function ListScreen({ listId }: ListScreenProps) {
           <div key={view} className={cn('anim-fade-in', view === 'board' && 'h-full')}>
             {space && tasks.data && view === 'list' ? <TaskListView tasks={tasks.data.data} space={space} listId={listId} readOnly={isGuest} /> : null}
             {space && tasks.data && view === 'board' ? <KanbanBoard tasks={tasks.data.data} space={space} listId={listId} readOnly={isGuest} /> : null}
-            {space && tasks.data && view === 'table' ? <TaskTableView tasks={tasks.data.data} /> : null}
+            {space && tasks.data && view === 'table' ? <TaskTableView tasks={tasks.data.data} statusesOf={() => space.statuses} readOnly={isGuest} /> : null}
             {tasks.data && view === 'calendar' ? <CalendarView tasks={tasks.data.data} /> : null}
             {tasks.data && view === 'timeline' ? <TimelineView tasks={tasks.data.data} /> : null}
             {tasks.data && view === 'workload' ? <WorkloadView tasks={tasks.data.data} /> : null}

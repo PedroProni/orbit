@@ -116,6 +116,8 @@ export interface Task {
   checklists: Checklist[];
   customFields: TaskCustomFieldValue[];
   links: TaskLinks;
+  attachmentCount?: number;
+  coverAttachmentId?: string | null;
   creatorId: string;
   dateClosed: string | null;
   archived: boolean;

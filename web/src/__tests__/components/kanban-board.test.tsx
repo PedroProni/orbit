@@ -68,7 +68,7 @@ describe('KanbanBoard', () => {
     expect(within(column).getByText('Ship release')).toBeTruthy();
     expect(within(column).getByText('infra')).toBeTruthy();
     expect(within(column).getByText('p1')).toBeTruthy();
-    expect(within(column).getByLabelText('Urgent')).toBeTruthy();
+    expect(within(column).getByTestId('card-priority').textContent).toBe('Urgent');
     expect(within(column).getByTitle('Subtasks').textContent).toBe('1');
     expect(within(column).getByTitle('Checklist').textContent).toBe('1/2');
     expect(within(column).getByText('AS')).toBeTruthy();
@@ -81,9 +81,55 @@ describe('KanbanBoard', () => {
     expect(screen.getByRole('region', { name: 'Completed' }).querySelector('div')?.textContent).toBe('Completed0');
   });
 
-  it('shows the no priority label when the task has none', () => {
-    renderWithProviders(<KanbanBoard tasks={[top]} space={space} listId="l1" />);
-    expect(screen.getByLabelText('No priority')).toBeTruthy();
+  it('shows nothing for priority when the task has none, and the flag with its name when it has one', () => {
+    renderWithProviders(<KanbanBoard tasks={[top, rich]} space={space} listId="l1" />);
+    const doing = screen.getByRole('region', { name: 'doing' });
+    expect(within(doing).queryByTestId('card-priority')).toBeNull();
+    expect(within(doing).queryByText('No priority')).toBeNull();
+    expect(within(doing).queryByText('-')).toBeNull();
+    const todo = screen.getByRole('region', { name: 'To do' });
+    expect(within(todo).getByTestId('card-priority').textContent).toBe('Urgent');
+  });
+
+  it('shows the column name as a pill in the status color and tints the column with it', () => {
+    renderWithProviders(<KanbanBoard tasks={[rich]} space={space} listId="l1" />);
+    const column = screen.getByRole('region', { name: 'To do' });
+    const pill = within(column).getByTestId('column-pill');
+    expect(pill.textContent).toBe('To do');
+    const color = pill.getAttribute('data-pill-color') ?? '';
+    expect(color).not.toBe('');
+    expect(pill.getAttribute('style')).toContain(color);
+    expect(column.getAttribute('style')).toContain(`color-mix(in srgb, ${color} 6%`);
+  });
+
+  it('colors each tag on its own, shows three at most and counts the rest', () => {
+    renderWithProviders(<KanbanBoard tasks={[makeTask({ id: 't', title: 'Tagged', tags: ['alpha', 'beta', 'gamma', 'delta', 'omega'] })]} space={space} listId="l1" />);
+    const column = screen.getByRole('region', { name: 'To do' });
+    expect(within(column).getByText('alpha').closest('[data-tag-color]')).toBeTruthy();
+    expect(within(column).getByText('gamma')).toBeTruthy();
+    expect(within(column).queryByText('delta')).toBeNull();
+    const more = within(column).getByText('+2');
+    expect(more.getAttribute('title')).toBe('delta, omega');
+  });
+
+  it('shows the description and attachment indicators only when the task has them', () => {
+    renderWithProviders(
+      <KanbanBoard tasks={[makeTask({ id: 'd', title: 'Documented', descriptionMd: 'Some text', attachmentCount: 3 }), makeTask({ id: 'e', title: 'Empty', status: 'doing', descriptionMd: '   ', attachmentCount: 0 })]} space={space} listId="l1" />,
+    );
+    const todo = screen.getByRole('region', { name: 'To do' });
+    expect(within(todo).getByRole('img', { name: 'Has a description' })).toBeTruthy();
+    expect(within(todo).getByRole('img', { name: '3 attachments' })).toBeTruthy();
+    const doing = screen.getByRole('region', { name: 'doing' });
+    expect(within(doing).queryByRole('img', { name: 'Has a description' })).toBeNull();
+    expect(within(doing).queryByRole('img', { name: /attachment/ })).toBeNull();
+  });
+
+  it('shows the cover image from the attachment the API picked, and no cover without one', () => {
+    renderWithProviders(<KanbanBoard tasks={[makeTask({ id: 'p', title: 'With cover', coverAttachmentId: 'att-1' }), makeTask({ id: 'q', title: 'No cover', status: 'doing', coverAttachmentId: null })]} space={space} listId="l1" />);
+    const cover = within(screen.getByRole('region', { name: 'To do' })).getByRole('img', { name: 'Cover image of With cover' });
+    expect(cover.getAttribute('src')).toMatch(/\/attachments\/att-1\/content$/);
+    expect(cover.getAttribute('loading')).toBe('lazy');
+    expect(within(screen.getByRole('region', { name: 'doing' })).queryByRole('img', { name: /Cover image/ })).toBeNull();
   });
 
   it('opens the task in the ui store when a card is clicked', () => {
@@ -170,7 +216,7 @@ describe('KanbanBoard', () => {
     useUiStore.setState({ display: { ...DEFAULT_DISPLAY, cardFields: ['tags'] } });
     renderWithProviders(<KanbanBoard tasks={[rich, child]} space={space} listId="l1" />);
     expect(screen.getByText('infra')).toBeTruthy();
-    expect(screen.queryByLabelText('Urgent')).toBeNull();
+    expect(screen.queryByTestId('card-priority')).toBeNull();
     expect(screen.queryByTitle('Subtasks')).toBeNull();
     expect(screen.queryByTitle('Checklist')).toBeNull();
     expect(screen.queryByText('AS')).toBeNull();

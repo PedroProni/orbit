@@ -314,6 +314,14 @@ const REQUIRED = [
   'apiErrors.pullRequestUrl',
   'apiErrors.printsImagesOnly',
   'toast.pullRequestUnlinkFailed',
+  'table.columns.rowNumber',
+  'table.columns.tags',
+  'tasks.indicators.description',
+  'tasks.indicators.subtasks',
+  'tasks.indicators.attachments',
+  'tasks.indicators.checklist',
+  'tasks.indicators.moreTags',
+  'board.cover',
 ];
 
 describe('i18n parity', () => {

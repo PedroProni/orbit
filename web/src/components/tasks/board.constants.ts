@@ -5,3 +5,6 @@ export const BOARD_NO_LANE = '__all__';
 export const BOARD_PRIORITY_KEYS: Array<TaskPriority | typeof BOARD_NONE_KEY> = ['urgent', 'high', 'normal', 'low', BOARD_NONE_KEY];
 export const PRIORITY_RANK: Record<TaskPriority, number> = { urgent: 0, high: 1, normal: 2, low: 3 };
 export const BOARD_DRAG_SEPARATOR = '::';
+export const BOARD_TAGS_SHOWN = 3;
+export const BOARD_COLUMN_TINT = '6%';
+export const BOARD_PILL_TINT = '18%';

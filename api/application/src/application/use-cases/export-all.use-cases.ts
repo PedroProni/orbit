@@ -90,6 +90,7 @@ import { LinkTaskPullRequestUseCase } from '@application/use-cases/task/link-tas
 import { UnlinkTaskPullRequestUseCase } from '@application/use-cases/task/unlink-task-pull-request.use-case';
 import { ListTaskPrintsUseCase } from '@application/use-cases/attachment/list-task-prints.use-case';
 import { TaskQueryFilterService } from '@application/services/task-query-filter.service';
+import { TaskAttachmentSummaryService } from '@application/services/task-attachment-summary.service';
 import { FormsUseCase } from '@application/use-cases/form/forms.use-case';
 import { AutomationsUseCase } from '@application/use-cases/automation/automations.use-case';
 import { AutomationRunner } from '@application/services/automation-runner.service';
@@ -174,6 +175,7 @@ export default [
   UnlinkTaskPullRequestUseCase,
   ListTaskPrintsUseCase,
   TaskQueryFilterService,
+  TaskAttachmentSummaryService,
   FormsUseCase,
   AutomationsUseCase,
   AutomationRunner,

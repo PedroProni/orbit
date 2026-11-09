@@ -70,7 +70,7 @@ describe('calendar days in a negative offset zone', () => {
   });
 
   it('shows the due day in the table', () => {
-    renderWithProviders(<TaskTableView tasks={[makeTask({ id: 'a', title: 'Alpha', dueDate: LATE_UTC })]} />, 'pt');
+    renderWithProviders(<TaskTableView tasks={[makeTask({ id: 'a', title: 'Alpha', dueDate: LATE_UTC })]} statusesOf={() => []} readOnly />, 'pt');
     expect(screen.getByRole('table').textContent).toContain('15/11');
   });
 

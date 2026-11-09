@@ -115,7 +115,14 @@
     "datesError": "A data de início precisa ser igual ou anterior ao prazo",
     "addTaskOptions": "Outras formas de adicionar tarefa",
     "addFromTemplate": "A partir de um modelo",
-    "addWithForm": "Com o formulário completo"
+    "addWithForm": "Com o formulário completo",
+    "indicators": {
+      "description": "Tem descrição",
+      "subtasks": "{count, plural, one {# subtarefa} other {# subtarefas}}",
+      "attachments": "{count, plural, one {# anexo} other {# anexos}}",
+      "checklist": "{done} de {total} itens da checklist concluídos",
+      "moreTags": "+{count}"
+    }
   },
   "filters": {
     "status": "Status",
@@ -242,7 +249,9 @@
       "assignee": "Responsável",
       "dueDate": "Entrega",
       "points": "Pontos",
-      "updatedAt": "Atualizada"
+      "updatedAt": "Atualizada",
+      "rowNumber": "Linha",
+      "tags": "Etiquetas"
     }
   },
   "calendar": {
@@ -646,7 +655,8 @@
     "collapseColumn": "Recolher coluna {column}",
     "wipOver": "Acima do limite de {limit} tarefas",
     "pointsSum": "{points} pts",
-    "toggleLane": "Alternar raia {lane}"
+    "toggleLane": "Alternar raia {lane}",
+    "cover": "Imagem de capa de {title}"
   },
   "display": {
     "button": "Exibição",

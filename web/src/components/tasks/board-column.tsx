@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/cn';
 import { useComposerStore } from '@/stores/composer.store';
-import { BOARD_DRAG_SEPARATOR } from './board.constants';
+import { BOARD_COLUMN_TINT, BOARD_DRAG_SEPARATOR, BOARD_PILL_TINT } from './board.constants';
 import { BoardDropData } from './board.types';
 import { BoardCard } from './board-card';
 import { BoardColumnProps } from './board-column.types';
@@ -61,10 +61,18 @@ export function BoardColumn({ column, lane, display, total, all, people, listId,
       aria-label={name}
       data-wip-over={overLimit || undefined}
       className={cn('flex w-[272px] shrink-0 flex-col rounded-lg border bg-panel p-2 transition-colors duration-150', fill && 'max-h-full', isOver ? 'border-accent bg-accentsoft/30' : overLimit ? 'border-danger' : 'border-line')}
-      style={{ borderTop: `3px solid ${color}` }}
+      style={{ borderTop: `3px solid ${color}`, backgroundColor: isOver ? undefined : `color-mix(in srgb, ${color} ${BOARD_COLUMN_TINT}, var(--panel))` }}
     >
-      <div className="mb-2 flex shrink-0 items-center gap-2 text-xs font-semibold uppercase" style={{ color }}>
-        <span className="min-w-0 truncate">{name}</span>
+      <div className="mb-2 flex shrink-0 items-center gap-2 text-xs font-semibold uppercase">
+        <span
+          data-testid="column-pill"
+          data-pill-color={color}
+          className="inline-flex min-w-0 items-center gap-1.5 rounded px-2 py-0.5"
+          style={{ backgroundColor: `color-mix(in srgb, ${color} ${BOARD_PILL_TINT}, transparent)`, color: `color-mix(in srgb, ${color} var(--status-ink), var(--text))` }}
+        >
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+          <span className="min-w-0 truncate">{name}</span>
+        </span>
         <span className={cn(overLimit ? 'text-danger' : 'text-muted')} title={overLimit ? tb('wipOver', { limit }) : undefined}>
           {limit !== undefined ? `${total}/${limit}` : column.tasks.length}
         </span>

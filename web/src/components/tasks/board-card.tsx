@@ -4,19 +4,23 @@ import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CalendarDays, GitBranch, Hash, ListChecks } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { attachmentContentUrl } from '@/components/attachments/attachments.helpers';
 import { AvatarStack } from '@/components/common/avatar';
 import { PriorityFlag } from '@/components/ui/priority-flag';
 import { formatShortDay, isOverdueDay, todayDay } from '@/lib/calendar-day';
 import { cn } from '@/lib/cn';
 import { useSelectionStore } from '@/stores/selection.store';
 import { useUiStore } from '@/stores/ui.store';
-import { BOARD_DRAG_SEPARATOR } from './board.constants';
+import { BOARD_DRAG_SEPARATOR, BOARD_TAGS_SHOWN } from './board.constants';
 import { BoardDragData } from './board.types';
 import { BoardCardProps, CardBodyProps } from './board-card.types';
 import { isTempTask } from './task-composer.helpers';
+import { TagChips } from './tag-chips';
+import { TaskIndicators } from './task-indicators';
 
 export function CardBody({ task, tasks, people, fields, origin }: CardBodyProps) {
   const t = useTranslations('tasks');
+  const tb = useTranslations('board');
   const locale = useLocale();
   const subtasks = tasks.filter((x) => x.parentId === task.id).length;
   const items = task.checklists.flatMap((c) => c.items);
@@ -26,13 +30,20 @@ export function CardBody({ task, tasks, people, fields, origin }: CardBodyProps)
   const shows = (field: CardBodyProps['fields'][number]) => fields.includes(field);
   return (
     <>
+      {task.coverAttachmentId ? (
+        <div className="-mx-2 -mt-2 mb-1 h-28 overflow-hidden rounded-t-lg bg-panel">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={attachmentContentUrl(task.coverAttachmentId)} alt={tb('cover', { title: task.title })} loading="lazy" draggable={false} className="h-full w-full object-cover" />
+        </div>
+      ) : null}
       {origin ? <p className="truncate pr-5 text-[11px] text-muted">{origin}</p> : null}
       <p className={cn('line-clamp-3 break-words font-medium leading-snug', !origin && 'pr-5')}>{task.title}</p>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
         {shows('assignees') && assignees.length > 0 ? <AvatarStack people={assignees} /> : null}
-        {shows('priority') ? (
-          <span role="img" aria-label={task.priority ? t(`priority.${task.priority}`) : t('priority.none')} className="flex">
+        {shows('priority') && task.priority ? (
+          <span data-testid="card-priority" className="flex items-center gap-1">
             <PriorityFlag priority={task.priority} size={13} />
+            {t(`priority.${task.priority}`)}
           </span>
         ) : null}
         {shows('dueDate') && task.dueDate ? (
@@ -53,6 +64,7 @@ export function CardBody({ task, tasks, people, fields, origin }: CardBodyProps)
             {subtasks}
           </span>
         ) : null}
+        <TaskIndicators task={task} subtasks={0} />
         {shows('checklist') && items.length > 0 ? (
           <span className="flex items-center gap-1" title={t('checklist')}>
             <ListChecks size={12} />
@@ -60,15 +72,7 @@ export function CardBody({ task, tasks, people, fields, origin }: CardBodyProps)
           </span>
         ) : null}
       </div>
-      {shows('tags') && task.tags.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {task.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="rounded bg-accentsoft px-1.5 py-px text-[11px] text-fg">
-              {tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      {shows('tags') ? <TagChips tags={task.tags} max={BOARD_TAGS_SHOWN} /> : null}
     </>
   );
 }
