@@ -197,10 +197,10 @@ describe('TaskCustomFieldRows', () => {
 
   it('asks nothing for a guest, who sees only the fixed slots, read only', async () => {
     const list = stub('guest');
-    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([]);
+    vi.spyOn(orbitService, 'github').mockResolvedValue({ pullRequests: [], branches: [], commits: [], syncEnabled: false, syncedAt: null });
     vi.spyOn(orbitService, 'prints').mockResolvedValue([]);
     renderWithProviders(<TaskFieldsSection task={makeTask()} readOnly save={vi.fn()} />);
-    await waitFor(() => expect(orbitService.pullRequests).toHaveBeenCalled());
+    await waitFor(() => expect(orbitService.github).toHaveBeenCalled());
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(list).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Fields' })).toBeTruthy();
@@ -211,7 +211,7 @@ describe('TaskCustomFieldRows', () => {
 
   it('folds the Fields section and keeps all empty fields behind a toggle', async () => {
     stub();
-    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([]);
+    vi.spyOn(orbitService, 'github').mockResolvedValue({ pullRequests: [], branches: [], commits: [], syncEnabled: false, syncedAt: null });
     vi.spyOn(orbitService, 'prints').mockResolvedValue([]);
     renderWithProviders(<TaskFieldsSection task={makeTask({ customFields: [] })} readOnly={false} save={vi.fn()} />);
     const toggle = screen.getByRole('button', { name: 'Fields' });

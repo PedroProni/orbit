@@ -1,0 +1,15 @@
+export const GITHUB_API_BASE_URL = 'https://api.github.com';
+export const GITHUB_WEB_BASE_URL = 'https://github.com';
+export const GITHUB_API_VERSION = '2022-11-28';
+export const GITHUB_API_ACCEPT = 'application/vnd.github+json';
+export const GITHUB_API_USER_AGENT = 'orbit-api';
+export const GITHUB_API_TIMEOUT_MS = 5000;
+export const GITHUB_RATE_LIMIT_FLOOR = 100;
+export const GITHUB_ETAG_CACHE_SIZE = 500;
+export const GITHUB_PAGE_SIZE = 100;
+export const GITHUB_REPOSITORY_PATTERN = /^[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}$/;
+export const GITHUB_SEARCH_RATE_LIMIT_FLOOR = 2;
+export const GITHUB_SEARCH_RESOURCE = 'search';
+export const GITHUB_CORE_RESOURCE = 'core';
+export const GITHUB_HTTP_STATUS = { NOT_MODIFIED: 304, NOT_FOUND: 404, FORBIDDEN: 403, TOO_MANY_REQUESTS: 429 } as const;
+export const GITHUB_SHA_PATTERN = /^[0-9a-f]{7,40}$/i;

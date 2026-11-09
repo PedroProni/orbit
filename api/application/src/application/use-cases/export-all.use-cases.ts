@@ -80,6 +80,12 @@ import { TimeTrackingUseCase } from '@application/use-cases/planning/time-tracki
 import { TaskTemplatesUseCase } from '@application/use-cases/planning/task-templates.use-case';
 import { TaskRecurrenceUseCase } from '@application/use-cases/planning/task-recurrence.use-case';
 import { RecurrenceScheduler } from '@application/services/recurrence-scheduler.service';
+import { PullRequestLinkWriterService } from '@application/services/pull-request-link-writer.service';
+import { GithubRefWriterService } from '@application/services/github-ref-writer.service';
+import { GithubSyncService } from '@application/services/github-sync.service';
+import { GithubSyncScheduler } from '@application/services/github-sync-scheduler.service';
+import { GetTaskGithubUseCase } from '@application/use-cases/github/get-task-github.use-case';
+import { RefreshTaskGithubUseCase } from '@application/use-cases/github/refresh-task-github.use-case';
 import { DocsUseCase } from '@application/use-cases/doc/docs.use-case';
 import { GoalsUseCase } from '@application/use-cases/goal/goals.use-case';
 import { DashboardsUseCase } from '@application/use-cases/dashboard/dashboards.use-case';
@@ -165,6 +171,12 @@ export default [
   TaskTemplatesUseCase,
   TaskRecurrenceUseCase,
   RecurrenceScheduler,
+  PullRequestLinkWriterService,
+  GithubRefWriterService,
+  GithubSyncService,
+  GithubSyncScheduler,
+  GetTaskGithubUseCase,
+  RefreshTaskGithubUseCase,
   DocsUseCase,
   GoalsUseCase,
   DashboardsUseCase,

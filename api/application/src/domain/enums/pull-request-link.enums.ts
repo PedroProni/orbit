@@ -7,4 +7,5 @@ export enum PullRequestState {
 export enum PullRequestLinkSource {
   WEBHOOK = 'webhook',
   MANUAL = 'manual',
+  SYNC = 'sync',
 }

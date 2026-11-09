@@ -22,4 +22,8 @@ export interface IEnvConfig {
   getS3AccessKey(): string;
   getS3SecretKey(): string;
   getPresignTtlSeconds(): number;
+  getGithubToken(): string;
+  getGithubRepositories(): string[];
+  getGithubSyncIntervalMs(): number;
+  getGithubApiUrl(): string;
 }

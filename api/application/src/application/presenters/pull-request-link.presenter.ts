@@ -11,6 +11,13 @@ export class PullRequestLinkPresenter {
       title: link.getTitle(),
       state: link.getState(),
       source: link.getSource(),
+      draft: link.isDraft(),
+      authorLogin: link.getAuthorLogin(),
+      authorAvatarUrl: link.getAuthorAvatarUrl(),
+      headRef: link.getHeadRef(),
+      checksState: link.getChecksState(),
+      githubUpdatedAt: link.getGithubUpdatedAt(),
+      syncedAt: link.getSyncedAt(),
       createdAt: link.getCreatedAt(),
       updatedAt: link.getUpdatedAt(),
     };

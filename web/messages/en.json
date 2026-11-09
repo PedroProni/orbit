@@ -239,7 +239,20 @@
       "open": "open",
       "merged": "merged",
       "closed": "closed"
-    }
+    },
+    "githubChecks": {
+      "success": "Checks passed",
+      "failure": "Checks failed",
+      "pending": "Checks running"
+    },
+    "githubDraft": "draft",
+    "githubUpdated": "updated {time}",
+    "githubBranches": "{count, plural, one {Branch (#)} other {Branches (#)}}",
+    "githubCommits": "{count, plural, one {Commit (#)} other {Commits (#)}}",
+    "githubSynced": "Synced {time}",
+    "githubNeverSynced": "Not synced yet",
+    "githubRefresh": "Refresh",
+    "githubRefreshing": "Refreshing"
   },
   "table": {
     "columns": {
@@ -549,7 +562,10 @@
     "defaultStatusLocked": "The seven default statuses cannot be removed, renamed or moved.",
     "statusDuplicate": "Each status needs a different name.",
     "pullRequestUrl": "That is not a GitHub pull request link",
-    "printsImagesOnly": "Prints must be images"
+    "printsImagesOnly": "Prints must be images",
+    "githubCooldown": "GitHub was just refreshed. Wait 30 seconds and try again.",
+    "githubNotConfigured": "GitHub sync is not set up on the server.",
+    "githubUnavailable": "GitHub is not answering right now. Try again in a few minutes."
   },
   "authErrors": {
     "invalidCredentials": "Email or password is incorrect.",

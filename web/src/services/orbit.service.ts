@@ -1,5 +1,5 @@
 import { api, toQuery } from '@/lib/api-client';
-import { AppNotification, AssigneeCounts, Attachment, AttachmentDownload, AttachmentUploadRequest, CustomFieldDefinition, SavedView, Member, NotificationPage, Principal, PullRequestLink, SearchResult, Task, TaskActivityEntry, TaskComment, TaskFilters, TaskPage } from '@/types/api.types';
+import { AppNotification, AssigneeCounts, Attachment, AttachmentDownload, AttachmentUploadRequest, CustomFieldDefinition, SavedView, Member, NotificationPage, Principal, PullRequestLink, SearchResult, Task, TaskActivityEntry, TaskGithub, TaskComment, TaskFilters, TaskPage } from '@/types/api.types';
 import { CreateTaskInput, LoginResponse, TaskPatch, UploadFileMeta } from '@/services/orbit.types';
 import { HierarchyResponse } from '@/services/hierarchy.types';
 import { normalizeSpace } from '@/services/hierarchy.helpers';
@@ -36,6 +36,8 @@ export const orbitService = {
   prints: (taskId: string) => api<Attachment[]>(`/tasks/${taskId}/prints`),
   pullRequests: (taskId: string) => api<PullRequestLink[]>(`/tasks/${taskId}/pull-requests`),
   linkPullRequest: (taskId: string, url: string) => api<PullRequestLink>(`/tasks/${taskId}/pull-requests`, { method: 'POST', body: JSON.stringify({ url }) }),
+  github: (taskId: string) => api<TaskGithub>(`/tasks/${taskId}/github`),
+  refreshGithub: (taskId: string) => api<TaskGithub>(`/tasks/${taskId}/github/refresh`, { method: 'POST' }),
   unlinkPullRequest: (taskId: string, linkId: string) => api<void>(`/tasks/${taskId}/pull-requests/${linkId}`, { method: 'DELETE' }),
   confirmUpload: (id: string) => api<Attachment>(`/attachments/${id}/confirm`, { method: 'POST' }),
   attachmentDownload: (id: string) => api<AttachmentDownload>(`/attachments/${id}/download`),

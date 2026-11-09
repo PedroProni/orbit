@@ -83,7 +83,22 @@ export type TaskLinkKey = keyof TaskLinks;
 
 export type PullRequestState = 'open' | 'closed' | 'merged';
 
-export type PullRequestSource = 'webhook' | 'manual';
+export type PullRequestSource = 'webhook' | 'manual' | 'sync';
+
+export type GithubChecksState = 'success' | 'failure' | 'pending' | 'none';
+
+export type GithubRefKind = 'branch' | 'commit';
+
+export interface GithubRef {
+  id: string;
+  repository: string;
+  kind: GithubRefKind;
+  key: string;
+  title: string;
+  url: string;
+  authorLogin: string | null;
+  occurredAt: string | null;
+}
 
 export interface PullRequestLink {
   id: string;
@@ -94,8 +109,23 @@ export interface PullRequestLink {
   title: string;
   state: PullRequestState | null;
   source: PullRequestSource;
+  draft: boolean;
+  authorLogin: string | null;
+  authorAvatarUrl: string | null;
+  headRef: string | null;
+  checksState: GithubChecksState | null;
+  githubUpdatedAt: string | null;
+  syncedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TaskGithub {
+  pullRequests: PullRequestLink[];
+  branches: GithubRef[];
+  commits: GithubRef[];
+  syncEnabled: boolean;
+  syncedAt: string | null;
 }
 
 export interface Task {

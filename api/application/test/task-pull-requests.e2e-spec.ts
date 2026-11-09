@@ -78,7 +78,25 @@ describe('Task GitHub pull requests and prints (e2e)', () => {
     const rows = await prs(member);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ repository: 'org/acme-bet', number: 101, url: 'https://github.com/org/acme-bet/pull/101', state: 'open', source: 'webhook', taskId });
-    expect(Object.keys(rows[0]).sort()).toEqual(['createdAt', 'id', 'number', 'repository', 'source', 'state', 'taskId', 'title', 'updatedAt', 'url']);
+    expect(Object.keys(rows[0]).sort()).toEqual([
+      'authorAvatarUrl',
+      'authorLogin',
+      'checksState',
+      'createdAt',
+      'draft',
+      'githubUpdatedAt',
+      'headRef',
+      'id',
+      'number',
+      'repository',
+      'source',
+      'state',
+      'syncedAt',
+      'taskId',
+      'title',
+      'updatedAt',
+      'url',
+    ]);
     await ctx
       .http()
       .delete(`/tasks/${taskId}/pull-requests/${rows[0].id as string}`)

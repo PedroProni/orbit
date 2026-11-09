@@ -10,6 +10,20 @@ const BASE = load('en');
 const flatten = (obj: Record<string, unknown>, prefix = ''): string[] => Object.entries(obj).flatMap(([key, value]) => (value && typeof value === 'object' ? flatten(value as Record<string, unknown>, `${prefix}${key}.`) : [`${prefix}${key}`]));
 
 const REQUIRED = [
+  'drawer.githubChecks.success',
+  'drawer.githubChecks.failure',
+  'drawer.githubChecks.pending',
+  'drawer.githubDraft',
+  'drawer.githubUpdated',
+  'drawer.githubBranches',
+  'drawer.githubCommits',
+  'drawer.githubSynced',
+  'drawer.githubNeverSynced',
+  'drawer.githubRefresh',
+  'drawer.githubRefreshing',
+  'apiErrors.githubCooldown',
+  'apiErrors.githubNotConfigured',
+  'apiErrors.githubUnavailable',
   'composer.restore',
   'composer.assignees',
   'board.select',

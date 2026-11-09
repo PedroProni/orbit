@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IEnvConfig } from '@shared/interfaces/env-config.interface';
+import { GithubRepositoryPolicy } from '@domain/policies/github-repository.policy';
+import { GITHUB_DEFAULT_SYNC_INTERVAL_MS } from '@domain/constants/github-sync.constant';
+import { GITHUB_API_BASE_URL } from '@domain/constants/github-api.constant';
 
 @Injectable()
 export class EnvConfigService implements IEnvConfig {
@@ -107,5 +110,28 @@ export class EnvConfigService implements IEnvConfig {
 
   getSchedulerIntervalMs(): number {
     return Number(this.configService.get<string>('SCHEDULER_INTERVAL_MS') ?? 60000);
+  }
+
+  getGithubToken(): string {
+    return (this.configService.get<string>('GITHUB_TOKEN') || '').trim();
+  }
+
+  getGithubRepositories(): string[] {
+    return GithubRepositoryPolicy.parseList(this.configService.get<string>('GITHUB_REPOSITORIES'));
+  }
+
+  getGithubSyncIntervalMs(): number {
+    return Number(this.configService.get<string>('GITHUB_SYNC_INTERVAL_MS') ?? GITHUB_DEFAULT_SYNC_INTERVAL_MS);
+  }
+
+  getGithubApiUrl(): string {
+    const raw = (this.configService.get<string>('GITHUB_API_URL') || '').trim();
+    if (!raw) return GITHUB_API_BASE_URL;
+    try {
+      const url = new URL(raw);
+      return url.protocol === 'https:' || url.protocol === 'http:' ? url.origin : GITHUB_API_BASE_URL;
+    } catch {
+      return GITHUB_API_BASE_URL;
+    }
   }
 }

@@ -15,6 +15,14 @@ export class PullRequestLinkPersistence extends BaseMongoPersistence<PullRequest
   }
 
   findForTask(taskId: string, repository: string, number: number): Promise<PullRequestLinkEntity | null> {
-    return this.findOne({ task_id: taskId, number, repository: { $regex: `^${escapeRegex(repository)}$`, $options: 'i' } });
+    return this.findOne({ task_id: taskId, number, repository: this.repositoryMatch(repository) });
+  }
+
+  findInRepository(repository: string, filter: Record<string, unknown>, limit: number): Promise<PullRequestLinkEntity[]> {
+    return this.findMany({ ...filter, repository: this.repositoryMatch(repository) }, { updated_at: -1 }, limit);
+  }
+
+  private repositoryMatch(repository: string) {
+    return { $regex: `^${escapeRegex(repository)}$`, $options: 'i' };
   }
 }

@@ -21,6 +21,8 @@ import { AuthSession, AuthSessionSchema } from '@infrastructure/database/schemas
 import { LoginAttempt, LoginAttemptSchema } from '@infrastructure/database/schemas/login-attempt.schema';
 import { AuditLog, AuditLogSchema } from '@infrastructure/database/schemas/audit-log.schema';
 import { PullRequestLink, PullRequestLinkSchema } from '@infrastructure/database/schemas/pull-request-link.schema';
+import { GithubRef, GithubRefSchema } from '@infrastructure/database/schemas/github-ref.schema';
+import { GithubSyncState, GithubSyncStateSchema } from '@infrastructure/database/schemas/github-sync-state.schema';
 import { WebhookDelivery, WebhookDeliverySchema } from '@infrastructure/database/schemas/webhook-delivery.schema';
 import { SavedView, SavedViewSchema } from '@infrastructure/database/schemas/saved-view.schema';
 import { TaskDependency, TaskDependencySchema } from '@infrastructure/database/schemas/task-dependency.schema';
@@ -54,6 +56,8 @@ import { AuthSessionPersistence } from '@infrastructure/database/persistence/aut
 import { LoginAttemptPersistence } from '@infrastructure/database/persistence/login-attempt.persistence';
 import { AuditLogPersistence } from '@infrastructure/database/persistence/audit-log.persistence';
 import { PullRequestLinkPersistence } from '@infrastructure/database/persistence/pull-request-link.persistence';
+import { GithubRefPersistence } from '@infrastructure/database/persistence/github-ref.persistence';
+import { GithubSyncStatePersistence } from '@infrastructure/database/persistence/github-sync-state.persistence';
 import { WebhookDeliveryPersistence } from '@infrastructure/database/persistence/webhook-delivery.persistence';
 import { SavedViewPersistence } from '@infrastructure/database/persistence/saved-view.persistence';
 import { TaskDependencyPersistence } from '@infrastructure/database/persistence/task-dependency.persistence';
@@ -94,6 +98,8 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
       { name: LoginAttempt.name, schema: LoginAttemptSchema },
       { name: AuditLog.name, schema: AuditLogSchema },
       { name: PullRequestLink.name, schema: PullRequestLinkSchema },
+      { name: GithubRef.name, schema: GithubRefSchema },
+      { name: GithubSyncState.name, schema: GithubSyncStateSchema },
       { name: WebhookDelivery.name, schema: WebhookDeliverySchema },
       { name: SavedView.name, schema: SavedViewSchema },
       { name: TaskDependency.name, schema: TaskDependencySchema },
@@ -131,6 +137,8 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
     ApiTokenPersistence,
     AuditLogPersistence,
     PullRequestLinkPersistence,
+    GithubRefPersistence,
+    GithubSyncStatePersistence,
     WebhookDeliveryPersistence,
     SavedViewPersistence,
     TaskDependencyPersistence,
@@ -168,6 +176,8 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
     ApiTokenPersistence,
     AuditLogPersistence,
     PullRequestLinkPersistence,
+    GithubRefPersistence,
+    GithubSyncStatePersistence,
     WebhookDeliveryPersistence,
     SavedViewPersistence,
     TaskDependencyPersistence,

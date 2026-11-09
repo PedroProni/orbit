@@ -1,0 +1,12 @@
+export const GITHUB_DEFAULT_REPOSITORIES = ['PedroProni/orbit-api', 'PedroProni/orbit-frontend', 'PedroProni/orbit'];
+export const GITHUB_DEFAULT_SYNC_INTERVAL_MS = 300000;
+export const GITHUB_SYNC_MAX_PAGES = 5;
+export const GITHUB_FIRST_SYNC_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000;
+export const GITHUB_COMMIT_CURSOR_OVERLAP_MS = 5 * 60 * 1000;
+export const GITHUB_REFRESH_COOLDOWN_MS = 30000;
+export const GITHUB_REPOSITORY_LOCK_MS = 4 * 60 * 1000;
+export const GITHUB_OPEN_CHECKS_LIMIT = 50;
+export const GITHUB_COMMIT_TITLE_MAX = 200;
+export const GITHUB_TASK_REFS_LIMIT = 100;
+export const GITHUB_REPOSITORY_SYNC_KEY_PREFIX = 'repo:';
+export const GITHUB_TASK_REFRESH_KEY_PREFIX = 'task:';

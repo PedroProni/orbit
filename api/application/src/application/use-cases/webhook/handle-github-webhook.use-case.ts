@@ -1,83 +1,143 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PULL_REQUEST_LINK_INJECT_TOKEN, SPACE_INJECT_TOKEN, TASK_INJECT_TOKEN, WEBHOOK_DELIVERY_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
-import { PullRequestLinkRepository } from '@domain/repositories/pull-request-link.repository';
+import { SPACE_INJECT_TOKEN, TASK_INJECT_TOKEN, WEBHOOK_DELIVERY_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
 import { TaskRepository } from '@domain/repositories/task.repository';
 import { WebhookDeliveryRepository } from '@domain/repositories/webhook-delivery.repository';
-import { PullRequestLinkEntity } from '@domain/entities/pull-request-link.entity';
+import { SpaceRepository } from '@domain/repositories/space.repository';
 import { WebhookDeliveryEntity } from '@domain/entities/webhook-delivery.entity';
+import { TaskEntity } from '@domain/entities/task.entity';
 import { PullRequestLinkSource, PullRequestState } from '@domain/enums/pull-request-link.enums';
 import { AuditActorType } from '@domain/enums/audit-log.enums';
 import { UserRole } from '@domain/enums/user.enums';
 import { REVIEW_STATUS_NAME, GITHUB_ACTOR_ID } from '@domain/constants/github-webhook.constant';
+import { GITHUB_BRANCH_REF_PREFIX, GITHUB_DATA_ACTIONS, GITHUB_EVENT, GITHUB_TRANSITION_ACTIONS } from '@domain/constants/github-webhook-event.constant';
+import { GITHUB_SHA_PATTERN } from '@domain/constants/github-api.constant';
 import { DUPLICATE_KEY_CODE } from '@domain/constants/mongo-error.constant';
 import { DailyLogPolicy } from '@domain/policies/daily-log.policy';
 import { TaskReferencePolicy } from '@domain/policies/task-reference.policy';
+import { GithubRefPolicy } from '@domain/policies/github-ref.policy';
+import { GithubPayloadMapper } from '@domain/mappers/github-payload.mapper';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
-import { newId } from '@common/helpers/functions/id.helper';
 import { GithubPullRequestPayload } from '@domain/types/github-pull-request-payload.type';
 import { GithubWebhookOutcome } from '@domain/types/github-webhook-outcome.type';
-import { SpaceRepository } from '@domain/repositories/space.repository';
+import { newId } from '@common/helpers/functions/id.helper';
 import { CommentWriterService } from '@application/services/comment-writer.service';
+import { PullRequestLinkWriterService } from '@application/services/pull-request-link-writer.service';
+import { GithubRefWriterService } from '@application/services/github-ref-writer.service';
+import { GithubSyncService } from '@application/services/github-sync.service';
 import { UpdateTaskUseCase } from '@application/use-cases/task/update-task.use-case';
 
 @Injectable()
 export class HandleGithubWebhookUseCase {
   constructor(
     @Inject(WEBHOOK_DELIVERY_INJECT_TOKEN) private readonly deliveries: WebhookDeliveryRepository,
-    @Inject(PULL_REQUEST_LINK_INJECT_TOKEN) private readonly links: PullRequestLinkRepository,
     @Inject(TASK_INJECT_TOKEN) private readonly tasks: TaskRepository,
     @Inject(SPACE_INJECT_TOKEN) private readonly spaces: SpaceRepository,
     private readonly comments: CommentWriterService,
     private readonly updateTask: UpdateTaskUseCase,
+    private readonly linkWriter: PullRequestLinkWriterService,
+    private readonly refWriter: GithubRefWriterService,
+    private readonly sync: GithubSyncService,
   ) {}
 
   async execute(deliveryId: string, event: string, payload: GithubPullRequestPayload): Promise<GithubWebhookOutcome> {
     if (!(await this.claim(deliveryId, event))) return { status: 'duplicate', linked: [] };
-    const pr = payload.pull_request;
-    if (event !== 'pull_request' || !pr || !payload.repository?.full_name) return { status: 'ignored', linked: [] };
-    const state = this.stateOf(payload.action, pr.merged === true);
-    if (!state) return { status: 'ignored', linked: [] };
-    const taskIds = TaskReferencePolicy.extract(pr.title, pr.head?.ref);
+    const repository = payload.repository?.full_name;
+    if (!repository) return { status: 'ignored', linked: [] };
+    if (event === GITHUB_EVENT.PULL_REQUEST) return this.pullRequest(repository, payload);
+    if (event === GITHUB_EVENT.PUSH) return this.push(repository, payload);
+    if (event === GITHUB_EVENT.CREATE || event === GITHUB_EVENT.DELETE) return this.branchEvent(repository, payload, event === GITHUB_EVENT.DELETE);
+    if (event === GITHUB_EVENT.CHECK_SUITE || event === GITHUB_EVENT.CHECK_RUN || event === GITHUB_EVENT.STATUS) {
+      const sha = payload.check_suite?.head_sha ?? payload.check_run?.head_sha ?? payload.sha ?? '';
+      const updated = await this.sync.refreshChecks(repository, sha);
+      return { status: updated > 0 ? 'processed' : 'ignored', linked: [] };
+    }
+    return { status: 'ignored', linked: [] };
+  }
+
+  private async pullRequest(repository: string, payload: GithubPullRequestPayload): Promise<GithubWebhookOutcome> {
+    const raw = payload.pull_request;
+    const action = payload.action ?? '';
+    const transition = (GITHUB_TRANSITION_ACTIONS as readonly string[]).includes(action);
+    if (!raw || (!transition && !(GITHUB_DATA_ACTIONS as readonly string[]).includes(action))) return { status: 'ignored', linked: [] };
+    const mapped = GithubPayloadMapper.pullRequest(repository, raw);
+    const pr = transition ? { ...mapped, state: this.stateOf(action, raw.merged === true || Boolean(raw.merged_at)) } : mapped;
     const linked: string[] = [];
-    for (const taskId of taskIds) {
+    const now = new Date();
+    for (const taskId of TaskReferencePolicy.extract(pr.title, pr.body, pr.headRef)) {
       const task = await this.tasks.findOne({ _id: taskId });
       if (!task) continue;
-      const principal: AuthPrincipal = { workspaceId: task.getWorkspaceId(), actorType: AuditActorType.WEBHOOK, actorId: GITHUB_ACTOR_ID, userId: GITHUB_ACTOR_ID, role: UserRole.MEMBER, scopes: [] };
-      const repository = payload.repository.full_name;
-      const url = pr.html_url ?? '';
-      const title = pr.title ?? '';
-      const previous = await this.upsertLink(task.getWorkspaceId(), taskId, repository, pr.number, url, title, state);
+      const write = await this.linkWriter.upsert(
+        { _id: newId(), workspaceId: task.getWorkspaceId(), taskId, repository, number: pr.number, url: pr.url, source: PullRequestLinkSource.WEBHOOK, createdBy: null, now },
+        link => link.applyGithub(pr, null, now),
+      );
       linked.push(taskId);
-      if (state === PullRequestState.OPEN && previous !== PullRequestState.OPEN) await this.moveToReview(principal, task.getId(), task.getSpaceId(), task.getStatus());
-      if (state === PullRequestState.MERGED && previous !== PullRequestState.MERGED) {
-        await this.comments.create(principal, taskId, `Merged into homolog on ${DailyLogPolicy.dateKey(new Date())} (${url})`, []);
+      if (!transition) continue;
+      const principal = this.principal(task);
+      const state = write.link.getState();
+      if (state === PullRequestState.OPEN && write.previous !== PullRequestState.OPEN) await this.moveToReview(principal, task.getId(), task.getSpaceId(), task.getStatus());
+      if (state === PullRequestState.MERGED && write.previous !== PullRequestState.MERGED) {
+        await this.comments.create(principal, taskId, `Merged into homolog on ${DailyLogPolicy.dateKey(now)} (${pr.url})`, []);
       }
     }
     return { status: 'processed', linked };
   }
 
-  private async upsertLink(workspaceId: string, taskId: string, repository: string, number: number, url: string, title: string, state: PullRequestState): Promise<PullRequestState | null | undefined> {
-    const existing = await this.links.findForTask(taskId, repository, number);
-    if (existing) return this.syncLink(existing, title, url, state);
-    const now = new Date();
-    try {
-      await this.links.create(
-        new PullRequestLinkEntity({ _id: newId(), workspaceId, taskId, repository, number, url, title, state, source: PullRequestLinkSource.WEBHOOK, createdBy: null, createdAt: now, updatedAt: now }),
-      );
-      return undefined;
-    } catch (error) {
-      if ((error as { code?: number }).code !== DUPLICATE_KEY_CODE) throw error;
-      const raced = await this.links.findForTask(taskId, repository, number);
-      if (!raced) throw error;
-      return this.syncLink(raced, title, url, state);
+  private async push(repository: string, payload: GithubPullRequestPayload): Promise<GithubWebhookOutcome> {
+    const ref = payload.ref ?? '';
+    if (!ref.startsWith(GITHUB_BRANCH_REF_PREFIX)) return { status: 'ignored', linked: [] };
+    const branch = ref.slice(GITHUB_BRANCH_REF_PREFIX.length);
+    if (payload.deleted === true) {
+      await this.refWriter.removeBranch(repository, branch);
+      return { status: 'processed', linked: [] };
     }
+    const now = new Date();
+    const linked = new Set<string>();
+    const branchIds = TaskReferencePolicy.extract(branch);
+    for (const id of branchIds) {
+      const task = await this.tasks.findOne({ _id: id });
+      if (!task) continue;
+      await this.refWriter.record(task, GithubRefPolicy.branch(repository, { name: branch }), now);
+      linked.add(id);
+    }
+    for (const commit of payload.commits ?? []) {
+      const sha = commit.id ?? '';
+      if (!GITHUB_SHA_PATTERN.test(sha)) continue;
+      const input = GithubRefPolicy.commit(repository, {
+        sha,
+        message: commit.message ?? '',
+        url: '',
+        authorLogin: commit.author?.username ?? null,
+        committedAt: commit.timestamp ? new Date(commit.timestamp) : null,
+      });
+      for (const id of new Set([...TaskReferencePolicy.extract(commit.message), ...branchIds])) {
+        const task = await this.tasks.findOne({ _id: id });
+        if (!task) continue;
+        await this.refWriter.record(task, input, now);
+        linked.add(id);
+      }
+    }
+    return { status: 'processed', linked: [...linked] };
   }
 
-  private async syncLink(link: PullRequestLinkEntity, title: string, url: string, state: PullRequestState): Promise<PullRequestState | null> {
-    const previous = link.getState();
-    link.sync(title, url, state);
-    await this.links.patch(link, ['title', 'url', 'state']);
-    return previous;
+  private async branchEvent(repository: string, payload: GithubPullRequestPayload, deleted: boolean): Promise<GithubWebhookOutcome> {
+    const branch = payload.ref ?? '';
+    if (payload.ref_type !== 'branch' || !branch) return { status: 'ignored', linked: [] };
+    if (deleted) {
+      await this.refWriter.removeBranch(repository, branch);
+      return { status: 'processed', linked: [] };
+    }
+    const linked: string[] = [];
+    for (const id of TaskReferencePolicy.extract(branch)) {
+      const task = await this.tasks.findOne({ _id: id });
+      if (!task) continue;
+      await this.refWriter.record(task, GithubRefPolicy.branch(repository, { name: branch }), new Date());
+      linked.push(id);
+    }
+    return { status: 'processed', linked };
+  }
+
+  private principal(task: TaskEntity): AuthPrincipal {
+    return { workspaceId: task.getWorkspaceId(), actorType: AuditActorType.WEBHOOK, actorId: GITHUB_ACTOR_ID, userId: GITHUB_ACTOR_ID, role: UserRole.MEMBER, scopes: [] };
   }
 
   private async claim(deliveryId: string, event: string): Promise<boolean> {
@@ -91,10 +151,9 @@ export class HandleGithubWebhookUseCase {
     }
   }
 
-  private stateOf(action: string | undefined, merged: boolean): PullRequestState | null {
-    if (action === 'opened' || action === 'reopened' || action === 'ready_for_review') return PullRequestState.OPEN;
+  private stateOf(action: string, merged: boolean): PullRequestState {
     if (action === 'closed') return merged ? PullRequestState.MERGED : PullRequestState.CLOSED;
-    return null;
+    return PullRequestState.OPEN;
   }
 
   private async moveToReview(principal: AuthPrincipal, taskId: string, spaceId: string, currentStatus: string): Promise<void> {

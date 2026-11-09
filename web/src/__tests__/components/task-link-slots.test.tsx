@@ -7,7 +7,7 @@ import { TaskPullRequestSlot } from '@/components/tasks/task-pull-request-slot';
 import { TaskUrlSlot } from '@/components/tasks/task-url-slot';
 import { ApiError } from '@/lib/api-client';
 import { orbitService } from '@/services/orbit.service';
-import { Attachment, PullRequestLink } from '@/types/api.types';
+import { Attachment, GithubRef, PullRequestLink, TaskGithub } from '@/types/api.types';
 
 const pr = (over: Partial<PullRequestLink>): PullRequestLink => ({
   id: 'p1',
@@ -18,10 +18,19 @@ const pr = (over: Partial<PullRequestLink>): PullRequestLink => ({
   title: 'Ajusta login',
   state: 'open',
   source: 'webhook',
+  draft: false,
+  authorLogin: null,
+  authorAvatarUrl: null,
+  headRef: null,
+  checksState: null,
+  githubUpdatedAt: null,
+  syncedAt: null,
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
   ...over,
 });
+const ref = (over: Partial<GithubRef>): GithubRef => ({ id: 'r1', repository: 'PedroProni/orbit-api', kind: 'branch', key: 'feat/86abc1234-login', title: '', url: 'https://github.com/PedroProni/orbit-api/tree/feat/86abc1234-login', authorLogin: null, occurredAt: null, ...over });
+const view = (over: Partial<TaskGithub>): TaskGithub => ({ pullRequests: [], branches: [], commits: [], syncEnabled: false, syncedAt: null, ...over });
 const print = (over: Partial<Attachment>): Attachment => ({ id: 'a1', taskId: 't1', commentId: null, filename: 'tela.png', mimeType: 'image/png', sizeBytes: 10, uploaderId: 'u1', confirmed: true, gallery: 'prints', createdAt: '2026-01-01T00:00:00Z', ...over });
 
 describe('TaskUrlSlot', () => {
@@ -65,7 +74,7 @@ describe('TaskPullRequestSlot', () => {
   beforeEach(() => vi.restoreAllMocks());
 
   it('lists linked pull requests with their state, and only a manual one can be unlinked', async () => {
-    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([pr({}), pr({ id: 'p2', number: 13, state: 'merged', source: 'manual' })]);
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({ pullRequests: [pr({}), pr({ id: 'p2', number: 13, state: 'merged', source: 'manual' })] }));
     const unlink = vi.spyOn(orbitService, 'unlinkPullRequest').mockResolvedValue(undefined);
     renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly={false} />);
     expect(await screen.findByRole('link', { name: 'acme-org/orbit#12' })).toBeTruthy();
@@ -76,7 +85,7 @@ describe('TaskPullRequestSlot', () => {
   });
 
   it('links a pull request by url and shows the refusal in place', async () => {
-    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([]);
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({}));
     const link = vi
       .spyOn(orbitService, 'linkPullRequest')
       .mockRejectedValueOnce(new ApiError(400, 'Not a GitHub pull request link'))
@@ -94,14 +103,14 @@ describe('TaskPullRequestSlot', () => {
   });
 
   it('shows the list to a guest with no way to link or unlink', async () => {
-    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([pr({ source: 'manual' })]);
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({ pullRequests: [pr({ source: 'manual' })] }));
     renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly />);
     expect(await screen.findByRole('link', { name: 'acme-org/orbit#12' })).toBeTruthy();
     expect(screen.queryByRole('button')).toBeNull();
   });
 
   it('wraps a long pull request name instead of cutting it, the title gives way first and the state stays in view', async () => {
-    vi.spyOn(orbitService, 'pullRequests').mockResolvedValue([pr({ state: 'merged' })]);
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({ pullRequests: [pr({ state: 'merged' })] }));
     renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly={false} />);
     const classes = (await screen.findByRole('link', { name: 'acme-org/orbit#12' })).className.split(' ');
     expect(classes).toEqual(expect.arrayContaining(['min-w-0', '[overflow-wrap:anywhere]']));
@@ -109,6 +118,99 @@ describe('TaskPullRequestSlot', () => {
     expect(classes).not.toContain('truncate');
     expect(screen.getByText('merged').className.split(' ')).toContain('shrink-0');
     expect(screen.getByText('Ajusta login').className.split(' ')).toEqual(expect.arrayContaining(['min-w-0', 'shrink-[100]', 'truncate']));
+  });
+
+  it('shows the checks, the author with the GitHub avatar, the draft badge and when GitHub last changed the pull request', async () => {
+    const hourAgo = new Date(Date.now() - 3600 * 1000).toISOString();
+    vi.spyOn(orbitService, 'github').mockResolvedValue(
+      view({
+        pullRequests: [
+          pr({ checksState: 'failure', draft: true, authorLogin: 'octo', authorAvatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4', githubUpdatedAt: hourAgo }),
+          pr({ id: 'p2', number: 13, checksState: 'success', authorLogin: 'evil', authorAvatarUrl: 'https://evil.example/x.png' }),
+          pr({ id: 'p3', number: 14, checksState: 'none' }),
+        ],
+      }),
+    );
+    const { container } = renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly={false} />);
+    expect(await screen.findByRole('img', { name: 'Checks failed' })).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'Checks passed' })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: 'Checks running' })).toBeNull();
+    expect(screen.getByText('octo')).toBeTruthy();
+    expect(screen.getByText('draft')).toBeTruthy();
+    expect(screen.getByText('updated 1 hour ago')).toBeTruthy();
+    expect([...container.querySelectorAll('img')].map((img) => img.getAttribute('src'))).toEqual(['https://avatars.githubusercontent.com/u/1?v=4']);
+    expect(screen.getByLabelText('evil')).toBeTruthy();
+  });
+
+  it('folds branches and commits behind their counts and opens them as GitHub links', async () => {
+    vi.spyOn(orbitService, 'github').mockResolvedValue(
+      view({
+        branches: [ref({})],
+        commits: [
+          ref({ id: 'c1', kind: 'commit', key: 'abcdef1234567890abcdef1234567890abcdef12', title: 'fix 86abc1234 login', url: 'https://github.com/PedroProni/orbit-api/commit/abcdef1234567890abcdef1234567890abcdef12' }),
+          ref({ id: 'c2', kind: 'commit', key: '1111111222222233333334444444555555566666', url: 'javascript:alert(1)' }),
+        ],
+      }),
+    );
+    renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly />);
+    const branches = await screen.findByRole('button', { name: 'Branch (1)' });
+    expect(branches.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('link', { name: 'feat/86abc1234-login' })).toBeNull();
+    fireEvent.click(branches);
+    expect(screen.getByRole('link', { name: 'feat/86abc1234-login' }).getAttribute('href')).toBe('https://github.com/PedroProni/orbit-api/tree/feat/86abc1234-login');
+    fireEvent.click(screen.getByRole('button', { name: 'Commits (2)' }));
+    expect(screen.getByRole('link', { name: 'abcdef1' }).getAttribute('rel')).toContain('noopener');
+    expect(screen.getByText('fix 86abc1234 login')).toBeTruthy();
+    expect(screen.getByText('1111111').getAttribute('href')).toBeNull();
+  });
+
+  it('refreshes from GitHub for a member, shows when it last synced, and explains the cooldown in place', async () => {
+    const minutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({ syncEnabled: true, syncedAt: minutesAgo }));
+    const refresh = vi
+      .spyOn(orbitService, 'refreshGithub')
+      .mockResolvedValueOnce(view({ syncEnabled: true, syncedAt: new Date().toISOString(), pullRequests: [pr({ source: 'sync' })] }))
+      .mockRejectedValueOnce(new ApiError(429, 'GitHub refresh: GITHUB_REFRESH_COOLDOWN'));
+    renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly={false} />);
+    expect(await screen.findByText('Synced 5 minutes ago')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    await waitFor(() => expect(refresh).toHaveBeenCalledWith('t1'));
+    expect(await screen.findByRole('link', { name: 'acme-org/orbit#12' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Unlink acme-org/orbit#12' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('GitHub was just refreshed. Wait 30 seconds and try again.');
+  });
+
+  it('never shows a sync or update time in the future when the server clock runs ahead of the page', async () => {
+    const ahead = new Date(Date.now() + 2 * 60 * 1000).toISOString();
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({ syncEnabled: true, syncedAt: ahead, pullRequests: [pr({ source: 'sync', githubUpdatedAt: ahead })] }));
+    const { container } = renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly={false} />);
+    expect(await screen.findByRole('link', { name: 'acme-org/orbit#12' })).toBeTruthy();
+    const times = [...container.querySelectorAll('time')].map((node) => node.textContent ?? '');
+    expect(times).toHaveLength(2);
+    expect(times.some((text) => /\bin \d/.test(text))).toBe(false);
+    expect(times[0].startsWith('updated ')).toBe(true);
+    expect(times[1].startsWith('Synced ')).toBe(true);
+  });
+
+  it('tells a member when GitHub is down, and gives a guest the sync time with no refresh', async () => {
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({ syncEnabled: true, syncedAt: null }));
+    vi.spyOn(orbitService, 'refreshGithub').mockRejectedValueOnce(new ApiError(503, 'GitHub search: GITHUB_RATE_LIMITED'));
+    const { unmount } = renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly={false} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Refresh' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('GitHub is not answering right now. Try again in a few minutes.');
+    unmount();
+    renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly />);
+    expect(await screen.findByText('Not synced yet')).toBeTruthy();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('hides the sync line when the server has no GitHub token', async () => {
+    vi.spyOn(orbitService, 'github').mockResolvedValue(view({ syncEnabled: false, pullRequests: [pr({})] }));
+    renderWithProviders(<TaskPullRequestSlot taskId="t1" readOnly={false} />);
+    expect(await screen.findByRole('link', { name: 'acme-org/orbit#12' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Refresh' })).toBeNull();
+    expect(screen.queryByText('Not synced yet')).toBeNull();
   });
 });
 

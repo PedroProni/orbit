@@ -21,6 +21,7 @@ import { ClickupCompatController } from '@presentation/controllers/compat/clicku
 
 import { GithubWebhookController } from '@presentation/controllers/github-webhook.controllers';
 import { TaskPullRequestController } from '@presentation/controllers/task-pull-request.controllers';
+import { TaskGithubController } from '@presentation/controllers/task-github.controllers';
 
 import { SavedViewController } from '@presentation/controllers/saved-view.controllers';
 
@@ -35,6 +36,7 @@ const controllers: any = [
   CustomFieldController,
   TaskController,
   TaskPullRequestController,
+  TaskGithubController,
   CommentController,
   NotificationController,
   AttachmentController,

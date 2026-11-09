@@ -239,7 +239,20 @@
       "open": "aberto",
       "merged": "mesclado",
       "closed": "fechado"
-    }
+    },
+    "githubChecks": {
+      "success": "Verificações aprovadas",
+      "failure": "Verificações falharam",
+      "pending": "Verificações em andamento"
+    },
+    "githubDraft": "rascunho",
+    "githubUpdated": "atualizado {time}",
+    "githubBranches": "{count, plural, one {Branch (#)} other {Branches (#)}}",
+    "githubCommits": "{count, plural, one {Commit (#)} other {Commits (#)}}",
+    "githubSynced": "Sincronizado {time}",
+    "githubNeverSynced": "Ainda não sincronizado",
+    "githubRefresh": "Atualizar",
+    "githubRefreshing": "Atualizando"
   },
   "table": {
     "columns": {
@@ -549,7 +562,10 @@
     "defaultStatusLocked": "Os sete status padrão não podem ser removidos, renomeados nem movidos.",
     "statusDuplicate": "Cada status precisa de um nome diferente.",
     "pullRequestUrl": "Esse link não é de um pull request do GitHub",
-    "printsImagesOnly": "Prints precisam ser imagens"
+    "printsImagesOnly": "Prints precisam ser imagens",
+    "githubCooldown": "O GitHub acabou de ser atualizado. Aguarde 30 segundos e tente de novo.",
+    "githubNotConfigured": "A sincronização com o GitHub não está configurada no servidor.",
+    "githubUnavailable": "O GitHub não está respondendo agora. Tente de novo em alguns minutos."
   },
   "authErrors": {
     "invalidCredentials": "E-mail ou senha incorretos.",
