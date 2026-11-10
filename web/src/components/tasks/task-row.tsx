@@ -14,7 +14,7 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu';
 import { Select } from '@/components/ui/select';
 import { PriorityFlag } from '@/components/ui/priority-flag';
 import { Tooltip } from '@/components/ui/tooltip';
-import { LIST_COLUMNS_CLASS, PRIORITIES } from './tasks.constants';
+import { LIST_COLUMNS_CLASS, LIST_WIDE_CELL_CLASS, LIST_WIDE_TAGS_CLASS, PRIORITIES } from './tasks.constants';
 import { isTempTask } from './task-composer.helpers';
 import { statusColor } from './task-helpers';
 import { TaskRowProps } from './task-row.types';
@@ -83,14 +83,14 @@ export function TaskRow({ task, people, statuses, readOnly = false }: TaskRowPro
         </span>
         <DateField variant="ghost" disabled={readOnly} ariaLabel={t('columns.due')} value={dayFromIso(task.dueDate)} onChange={(day) => patch({ dueDate: isoFromDay(day) })} className="hidden md:flex" />
         <Select variant="ghost" disabled={readOnly} ariaLabel={t('columns.priority')} value={task.priority ?? ''} options={[{ value: '', label: t('priority.noneShort'), icon: <PriorityFlag priority={null} /> }, ...PRIORITIES.map((p) => ({ value: p, label: t(`priority.${p}`), icon: <PriorityFlag priority={p} /> }))]} onChange={(priority) => patch({ priority: (priority || null) as TaskPriority | null })} className="hidden md:flex" />
-        <span className="hidden gap-1 lg:flex">
+        <span className={LIST_WIDE_TAGS_CLASS}>
           {task.tags.slice(0, 2).map((tag) => (
             <span key={tag} className="rounded bg-accentsoft px-1.5 py-0.5 text-[11px]">
               {tag}
             </span>
           ))}
         </span>
-        <span className="hidden text-xs text-muted lg:block">{task.points ?? ''}</span>
+        <span className={`${LIST_WIDE_CELL_CLASS} text-xs text-muted`}>{task.points ?? ''}</span>
       </div>
     </ContextMenu>
   );

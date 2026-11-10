@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useBoardLabels } from '@/hooks/use-board-labels';
+import { touchLiftFeedback, useBoardSensors } from '@/hooks/use-board-sensors';
 import { useDragScroll } from '@/hooks/use-drag-scroll';
 import { useMembers, useUpdateTask } from '@/hooks/use-orbit';
 import { cn } from '@/lib/cn';
@@ -34,7 +35,7 @@ export function KanbanBoard({ tasks, space, listId, readOnly = false, refuseDrop
   const groupBy = readOnly && display.groupBy === 'assignee' ? 'status' : display.groupBy;
   const swimlane = readOnly && display.swimlane === 'assignee' ? 'none' : display.swimlane;
   const shown = { ...display, groupBy, swimlane };
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }));
+  const sensors = useBoardSensors();
   const lanes = buildBoardLayout({ tasks: tasks.filter((x) => !x.parentId), statuses: space.statuses, groupBy, swimlane, people });
   const activeTask = tasks.find((x) => x.id === active?.taskId);
   const scroller = useRef<HTMLDivElement>(null);
@@ -51,7 +52,10 @@ export function KanbanBoard({ tasks, space, listId, readOnly = false, refuseDrop
     return () => window.removeEventListener('resize', measure);
   }, [measure, columnCount]);
 
-  const onDragStart = (event: DragStartEvent) => setActive(event.active.data.current as BoardDragData);
+  const onDragStart = (event: DragStartEvent) => {
+    touchLiftFeedback(event);
+    setActive(event.active.data.current as BoardDragData);
+  };
   const onDragEnd = (event: DragEndEvent) => {
     setActive(null);
     const from = event.active.data.current as BoardDragData | undefined;
@@ -116,7 +120,7 @@ export function KanbanBoard({ tasks, space, listId, readOnly = false, refuseDrop
       </div>
       <DragOverlay dropAnimation={prefersReducedMotion() ? null : { duration: 180, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
         {activeTask ? (
-          <div className="w-[256px] rotate-2 cursor-grabbing space-y-1.5 rounded-lg border border-accent bg-panel2 p-2 text-[13px] shadow-2xl">
+          <div className="w-[256px] rotate-2 scale-[1.03] cursor-grabbing select-none space-y-1.5 rounded-lg border border-accent bg-panel2 p-2 text-[13px] shadow-2xl">
             <CardBody task={activeTask} tasks={tasks} people={people} fields={display.cardFields} origin={originOf?.(activeTask)} />
           </div>
         ) : null}

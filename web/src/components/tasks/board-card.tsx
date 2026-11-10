@@ -95,7 +95,7 @@ export function BoardCard({ task, tasks, people, fields, origin, column, lane, r
       data-task-card={task.id}
       onClick={temp ? undefined : () => openTask(task.id)}
       className={cn(
-        'group relative space-y-1.5 rounded-lg border bg-panel2 p-2 text-[13px] shadow-sm transition-[transform,box-shadow,border-color,opacity] duration-150',
+        'group relative touch-manipulation select-none space-y-1.5 rounded-lg border bg-panel2 p-2 text-[13px] shadow-sm transition-[transform,box-shadow,border-color,opacity] duration-150 [-webkit-touch-callout:none]',
         temp ? 'anim-pop-in cursor-progress opacity-70' : 'hover:-translate-y-0.5 hover:border-accent hover:shadow-md',
         !temp && (readOnly ? 'cursor-pointer' : 'cursor-grab'),
         isDragging ? 'border-dashed border-accent opacity-40' : selected ? 'border-accent' : 'border-line',

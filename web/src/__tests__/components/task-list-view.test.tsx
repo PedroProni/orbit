@@ -72,6 +72,26 @@ describe('TaskListView', () => {
     expect(classes).not.toContain('truncate');
   });
 
+  it('follows the list width instead of the window, so the title keeps room at 1024 px with the sidebar open', () => {
+    renderWithProviders(<TaskListView tasks={tasks} space={space} listId="l1" />);
+    const section = screen.getByRole('region', { name: 'To do' });
+    const tagsHeader = within(section).getByText('Tags');
+    const header = tagsHeader.parentElement as HTMLElement;
+    const frame = header.parentElement?.parentElement as HTMLElement;
+    expect(frame.className.split(' ')).toEqual(expect.arrayContaining(['@container', 'overflow-x-auto']));
+    expect((header.parentElement as HTMLElement).className.split(' ')).toContain('md:min-w-[610px]');
+    expect(header.className).toContain('md:grid-cols-[minmax(220px,1fr)_90px_130px_110px]');
+    expect(header.className).toContain('md:@4xl:grid-cols-[minmax(220px,1fr)_90px_130px_110px_140px_50px]');
+    expect(header.className).not.toMatch(/(^| )lg:/);
+    const wide = [tagsHeader, within(section).getByText('Points'), within(section).getAllByText('x').map((chip) => chip.parentElement as HTMLElement).find((cell) => cell.className.includes('gap-1')) as HTMLElement, within(section).getAllByText('3').find((cell) => cell.className.includes('text-muted')) as HTMLElement];
+    wide.forEach((cell) => {
+      const classes = cell.className.split(' ');
+      expect(classes).toContain('hidden');
+      expect(classes.some((c) => c.startsWith('md:@4xl:'))).toBe(true);
+      expect(classes.some((c) => c.startsWith('lg:'))).toBe(false);
+    });
+  });
+
   it('labels a task with no priority with the short word in both languages, so the desktop priority column never cuts it', () => {
     const task = makeTask({ id: 'd', title: 'Delta', status: 'to-do', priority: null });
     const { unmount } = renderWithProviders(<TaskListView tasks={[task]} space={space} listId="l1" />, 'pt');

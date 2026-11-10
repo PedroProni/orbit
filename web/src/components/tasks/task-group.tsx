@@ -11,7 +11,7 @@ import { ComposerPicker } from './composer-field.types';
 import { StatusChip } from './status-chip';
 import { TaskComposer } from './task-composer';
 import { TaskRow } from './task-row';
-import { LIST_COLUMNS_CLASS } from './tasks.constants';
+import { LIST_COLUMNS_CLASS, LIST_FRAME_CLASS, LIST_MIN_WIDTH_CLASS, LIST_WIDE_CELL_CLASS } from './tasks.constants';
 import { TaskGroupProps } from './task-group.types';
 import { useListMotion } from '@/hooks/use-list-motion';
 import { cellPresets } from './board-groups';
@@ -54,20 +54,22 @@ export function TaskGroup({ status, tasks, people, space, listId, readOnly = fal
         )}
       </div>
       {open ? (
-        <div className="anim-fade-in overflow-hidden rounded-lg border border-line">
-          <div className={`${LIST_COLUMNS_CLASS} gap-3 border-b border-line bg-panel px-3 py-1 text-[11px] font-semibold uppercase text-muted`}>
-            <span>{t('columns.name')}</span>
-            <span className="hidden md:block">{t('columns.assignee')}</span>
-            <span className="hidden md:block">{t('columns.due')}</span>
-            <span className="hidden md:block">{t('columns.priority')}</span>
-            <span className="hidden lg:block">{t('columns.tags')}</span>
-            <span className="hidden lg:block">{t('columns.points')}</span>
+        <div className={`anim-fade-in ${LIST_FRAME_CLASS} rounded-lg border border-line`}>
+          <div className={LIST_MIN_WIDTH_CLASS}>
+            <div className={`${LIST_COLUMNS_CLASS} gap-3 border-b border-line bg-panel px-3 py-1 text-[11px] font-semibold uppercase text-muted`}>
+              <span>{t('columns.name')}</span>
+              <span className="hidden md:block">{t('columns.assignee')}</span>
+              <span className="hidden md:block">{t('columns.due')}</span>
+              <span className="hidden md:block">{t('columns.priority')}</span>
+              <span className={LIST_WIDE_CELL_CLASS}>{t('columns.tags')}</span>
+              <span className={LIST_WIDE_CELL_CLASS}>{t('columns.points')}</span>
+            </div>
+            <ul ref={listRef} className="divide-y divide-line">
+              {tasks.map((task) => (
+                <TaskRow key={task.id} task={task} people={people} statuses={space.statuses} readOnly={readOnly} />
+              ))}
+            </ul>
           </div>
-          <ul ref={listRef} className="divide-y divide-line">
-            {tasks.map((task) => (
-              <TaskRow key={task.id} task={task} people={people} statuses={space.statuses} readOnly={readOnly} />
-            ))}
-          </ul>
           {readOnly ? null : composing ? (
             <div className="border-t border-line">
               <TaskComposer listId={listId} space={space} label={label} variant="row" initialPicker={firstPicker} />

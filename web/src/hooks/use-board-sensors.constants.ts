@@ -1,0 +1,4 @@
+export const BOARD_POINTER_DISTANCE_PX = 6;
+export const BOARD_TOUCH_DELAY_MS = 250;
+export const BOARD_TOUCH_TOLERANCE_PX = 6;
+export const BOARD_TOUCH_VIBRATE_MS = 12;
