@@ -32,6 +32,7 @@ export const VIEWER_WRITE_ROUTES: WriteRouteCase[] = [
   { method: 'POST', path: '/forms', body: { name: 'Form do leitor', fields: [{ label: 'Assunto', required: true, target: 'title' }] } },
   { method: 'DELETE', path: '/forms/:id' },
   { method: 'PATCH', path: '/forms/:id', body: { name: 'alterado pelo leitor' } },
+  { method: 'POST', path: '/forms/:id/rotate-key' },
   { method: 'POST', path: '/goals', body: { name: 'Meta do leitor', description: 'x', targets: [] } },
   { method: 'DELETE', path: '/goals/:id' },
   { method: 'PATCH', path: '/goals/:id', body: { name: 'alterada pelo leitor' } },

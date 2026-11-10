@@ -1,8 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { SPACE_INJECT_TOKEN, TASK_PLAN_INJECT_TOKEN, TASK_TEMPLATE_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { SPACE_INJECT_TOKEN, TASK_LIST_INJECT_TOKEN, TASK_PLAN_INJECT_TOKEN, TASK_TEMPLATE_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
 import { TaskTemplateRepository } from '@domain/repositories/task-template.repository';
 import { TaskPlanRepository } from '@domain/repositories/task-plan.repository';
 import { SpaceRepository } from '@domain/repositories/space.repository';
+import { TaskListRepository } from '@domain/repositories/task-list.repository';
 import { TaskTemplateEntity } from '@domain/entities/task-template.entity';
 import { TaskPlanEntity } from '@domain/entities/task-plan.entity';
 import { TaskKind } from '@domain/enums/task-kind.enums';
@@ -20,6 +21,7 @@ export class TaskTemplatesUseCase {
     @Inject(TASK_TEMPLATE_INJECT_TOKEN) private readonly templates: TaskTemplateRepository,
     @Inject(TASK_PLAN_INJECT_TOKEN) private readonly plans: TaskPlanRepository,
     @Inject(SPACE_INJECT_TOKEN) private readonly spaces: SpaceRepository,
+    @Inject(TASK_LIST_INJECT_TOKEN) private readonly lists: TaskListRepository,
     private readonly createTask: CreateTaskUseCase,
     private readonly audit: AuditService,
   ) {}
@@ -33,7 +35,20 @@ export class TaskTemplatesUseCase {
   async create(principal: AuthPrincipal, dto: SaveTemplateDto) {
     if (!(await this.spaces.findByIdInWorkspace(dto.spaceId, principal.workspaceId))) throw new NotFoundException('Space not found');
     const now = new Date();
-    const template = new TaskTemplateEntity({ _id: newId(), workspaceId: principal.workspaceId, spaceId: dto.spaceId, name: 'x', titleTemplate: 'x', descriptionMd: '', tags: [], priority: null, taskKind: TaskKind.TASK, estimateMinutes: null, createdAt: now, updatedAt: now });
+    const template = new TaskTemplateEntity({
+      _id: newId(),
+      workspaceId: principal.workspaceId,
+      spaceId: dto.spaceId,
+      name: 'x',
+      titleTemplate: 'x',
+      descriptionMd: '',
+      tags: [],
+      priority: null,
+      taskKind: TaskKind.TASK,
+      estimateMinutes: null,
+      createdAt: now,
+      updatedAt: now,
+    });
     guardDomain(() => template.apply(dto.name, dto.titleTemplate, dto.descriptionMd, dto.tags, dto.priority ?? null, dto.taskKind, dto.estimateMinutes ?? null));
     const saved = await this.templates.create(template);
     await this.audit.record(principal, 'template.created', 'template', saved.getId(), { name: saved.getName() });
@@ -43,7 +58,9 @@ export class TaskTemplatesUseCase {
   async update(principal: AuthPrincipal, id: string, dto: SaveTemplateDto) {
     const template = await this.find(principal, id);
     guardDomain(() => template.apply(dto.name, dto.titleTemplate, dto.descriptionMd, dto.tags, dto.priority ?? null, dto.taskKind, dto.estimateMinutes ?? null));
-    return TaskTemplatesUseCase.view(await this.templates.update(template));
+    const saved = await this.templates.update(template);
+    await this.audit.record(principal, 'template.updated', 'template', saved.getId(), { name: saved.getName() });
+    return TaskTemplatesUseCase.view(saved);
   }
 
   async remove(principal: AuthPrincipal, id: string) {
@@ -54,9 +71,37 @@ export class TaskTemplatesUseCase {
 
   async instantiate(principal: AuthPrincipal, id: string, dto: InstantiateTemplateDto) {
     const template = await this.find(principal, id);
-    const created = await this.createTask.execute(principal, { listId: dto.listId, parentId: null, title: dto.title?.trim() || template.getTitleTemplate(), descriptionMd: template.getDescriptionMd(), status: null, priority: template.getPriority(), tags: template.getTags(), assigneeIds: [], watcherIds: [], points: null, startDate: null, dueDate: null, customFields: [], taskKind: null });
+    const list = await this.lists.findByIdInWorkspace(dto.listId, principal.workspaceId);
+    if (!list) throw new NotFoundException('List not found');
+    if (list.getSpaceId() !== template.getSpaceId()) throw new BadRequestException('The list must belong to the template space');
+    const created = await this.createTask.execute(principal, {
+      listId: dto.listId,
+      parentId: null,
+      title: dto.title?.trim() || template.getTitleTemplate(),
+      descriptionMd: template.getDescriptionMd(),
+      status: null,
+      priority: template.getPriority(),
+      tags: template.getTags(),
+      assigneeIds: [],
+      watcherIds: [],
+      points: null,
+      startDate: null,
+      dueDate: null,
+      customFields: [],
+      taskKind: null,
+    });
     const now = new Date();
-    await this.plans.create(new TaskPlanEntity({ _id: newId(), workspaceId: principal.workspaceId, taskId: created.id, estimateMinutes: template.getEstimateMinutes(), taskKind: template.getTaskKind(), createdAt: now, updatedAt: now }));
+    await this.plans.create(
+      new TaskPlanEntity({
+        _id: newId(),
+        workspaceId: principal.workspaceId,
+        taskId: created.id,
+        estimateMinutes: template.getEstimateMinutes(),
+        taskKind: template.getTaskKind(),
+        createdAt: now,
+        updatedAt: now,
+      }),
+    );
     return created;
   }
 
@@ -67,6 +112,16 @@ export class TaskTemplatesUseCase {
   }
 
   private static view(t: TaskTemplateEntity) {
-    return { id: t.getId(), spaceId: t.getSpaceId(), name: t.getName(), titleTemplate: t.getTitleTemplate(), descriptionMd: t.getDescriptionMd(), tags: t.getTags(), priority: t.getPriority(), taskKind: t.getTaskKind(), estimateMinutes: t.getEstimateMinutes() };
+    return {
+      id: t.getId(),
+      spaceId: t.getSpaceId(),
+      name: t.getName(),
+      titleTemplate: t.getTitleTemplate(),
+      descriptionMd: t.getDescriptionMd(),
+      tags: t.getTags(),
+      priority: t.getPriority(),
+      taskKind: t.getTaskKind(),
+      estimateMinutes: t.getEstimateMinutes(),
+    };
   }
 }

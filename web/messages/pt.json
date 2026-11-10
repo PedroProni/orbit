@@ -808,7 +808,8 @@
     "groups": {
       "people": "Pessoas",
       "structure": "Estrutura",
-      "automation": "Automação"
+      "automation": "Automação",
+      "integrations": "Integrações"
     },
     "sections": {
       "people": "Membros e papéis",
@@ -817,7 +818,10 @@
       "statuses": "Status e regras",
       "customFields": "Campos personalizados",
       "taskTypes": "Tipos de tarefa",
-      "automations": "Automações"
+      "automations": "Automações",
+      "templates": "Modelos",
+      "forms": "Formulários",
+      "apiTokens": "Tokens de API"
     },
     "loadError": "Não foi possível carregar esta página. Tente de novo.",
     "spacePicker": "Espaço",
@@ -1076,6 +1080,133 @@
       "copy": "Copiar",
       "copied": "Copiado",
       "secretDone": "Já guardei"
+    },
+    "forms": {
+      "subtitle": "Formulários públicos transformam respostas de pessoas de fora do espaço de trabalho em tarefas de uma lista. Qualquer pessoa com o link pode responder.",
+      "add": "Novo formulário",
+      "empty": "Nenhum formulário ainda",
+      "emptyHint": "Crie um formulário para receber pedidos de fora como tarefas.",
+      "createTitle": "Novo formulário",
+      "editTitle": "Editar formulário",
+      "listLabel": "Lista que recebe as tarefas",
+      "listPlaceholder": "Escolha uma lista",
+      "listOption": "{space} / {list}",
+      "listMissing": "Lista não encontrada",
+      "acceptingLabel": "Recebendo respostas",
+      "fieldsLabel": "Campos",
+      "fieldsHint": "As respostas dos campos de título viram o título da tarefa; as outras vão para a descrição.",
+      "fieldLabelFor": "Rótulo do campo {position}",
+      "fieldLabelPlaceholder": "Pergunta exibida no formulário",
+      "fieldTargetFor": "Destino do campo {position}",
+      "removeFieldFor": "Remover o campo {position}",
+      "required": "Obrigatório",
+      "addField": "Adicionar campo",
+      "targets": {
+        "title": "Título da tarefa",
+        "description": "Descrição da tarefa"
+      },
+      "problems": {
+        "name": "Dê um nome ao formulário.",
+        "list": "Escolha a lista que recebe as tarefas.",
+        "fields": "Adicione pelo menos um campo.",
+        "label": "Todo campo precisa de um rótulo.",
+        "title": "Adicione um campo obrigatório que vá para o título da tarefa."
+      },
+      "status": {
+        "open": "Recebendo respostas",
+        "off": "Desligado",
+        "paused": "Pausado"
+      },
+      "pausedHint": "Pausado: quem criou este formulário não pode mais criar tarefas. Salve o formulário para assumi-lo e reabrir o link.",
+      "pausedSaveNote": "Este formulário está pausado porque quem o criou não pode mais criar tarefas. Ao salvar, você vira o dono e o link público volta a funcionar.",
+      "fieldCount": "{count, plural, one {# campo} other {# campos}}",
+      "copyLink": "Copiar link",
+      "copied": "Copiado",
+      "copyLinkFor": "Copiar o link público de {name}",
+      "editFor": "Editar {name}",
+      "rotateFor": "Trocar o link de {name}",
+      "deleteFor": "Apagar {name}",
+      "rotateTitle": "Trocar o link público",
+      "confirmRotate": "Criar um link novo para \"{name}\"? O link atual para de funcionar na hora.",
+      "rotate": "Trocar link",
+      "deleteTitle": "Apagar formulário",
+      "confirmDelete": "Apagar \"{name}\"? O link para de funcionar. As tarefas já criadas continuam."
+    },
+    "templates": {
+      "subtitle": "Modelos preenchem tarefas novas de um espaço. Os membros escolhem o modelo ao criar a tarefa.",
+      "add": "Novo modelo",
+      "empty": "Nenhum modelo ainda",
+      "emptyHint": "Crie um modelo para começar tarefas comuns com o mesmo título, descrição e configurações.",
+      "createTitle": "Novo modelo",
+      "editTitle": "Editar modelo",
+      "spaceLabel": "Espaço",
+      "titleLabel": "Título da tarefa",
+      "descriptionLabel": "Descrição",
+      "tagsLabel": "Tags",
+      "tagsPlaceholder": "Separe as tags com vírgulas",
+      "priorityLabel": "Prioridade",
+      "kindLabel": "Tipo",
+      "estimateLabel": "Estimativa (minutos)",
+      "problems": {
+        "space": "Escolha um espaço.",
+        "name": "Dê um nome ao modelo.",
+        "title": "Escreva o título da tarefa.",
+        "estimate": "A estimativa precisa ser um número inteiro de minutos, até 600000."
+      },
+      "spaceMissing": "Espaço não encontrado",
+      "estimate": "{minutes, plural, one {# minuto} other {# minutos}}",
+      "editFor": "Editar {name}",
+      "deleteFor": "Apagar {name}",
+      "deleteTitle": "Apagar modelo",
+      "confirmDelete": "Apagar \"{name}\"? As tarefas já criadas a partir dele continuam."
+    },
+    "apiTokens": {
+      "subtitle": "Tokens permitem que scripts chamem a API em seu nome. Um token nunca faz mais do que o seu papel atual permite.",
+      "subtitleOwner": "Tokens permitem que scripts chamem a API em nome de quem os criou. Como dono, você vê e pode revogar todos os tokens.",
+      "add": "Novo token",
+      "empty": "Nenhum token ainda",
+      "emptyHint": "Crie um token para usar a API a partir de um script ou de outra ferramenta.",
+      "createTitle": "Novo token de API",
+      "scopesLabel": "O que o token pode fazer",
+      "scopesHint": "Você só pode conceder o que o seu papel permite.",
+      "scopes": {
+        "workspaceRead": "Ler o espaço de trabalho",
+        "tasksRead": "Ler tarefas",
+        "tasksWrite": "Criar e editar tarefas",
+        "commentsWrite": "Escrever comentários",
+        "attachmentsWrite": "Enviar anexos",
+        "usersRead": "Ler pessoas",
+        "structureWrite": "Alterar espaços, listas e configurações",
+        "tokensManage": "Gerenciar tokens de API",
+        "auditRead": "Ler o registro de auditoria",
+        "usersInvite": "Convidar pessoas",
+        "usersManage": "Gerenciar pessoas"
+      },
+      "problems": {
+        "name": "Dê um nome ao token.",
+        "scopes": "Escolha pelo menos uma permissão."
+      },
+      "createdTitle": "Copie o seu token agora",
+      "createdBody": "Use-o no cabeçalho Authorization das suas requisições.",
+      "createdLabel": "Token",
+      "createdWarning": "Esta é a única vez que o token aparece. Guarde-o em um lugar seguro; se perder, revogue e crie outro.",
+      "createdDone": "Já guardei",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "status": {
+        "active": "Ativo",
+        "revoked": "Revogado"
+      },
+      "owner": "Dono: {name}",
+      "unknownOwner": "Pessoa desconhecida",
+      "created": "Criado em {date}",
+      "lastUsed": "Último uso {when}",
+      "neverUsed": "Nunca usado",
+      "scopesFor": "Permissões de {name}",
+      "revoke": "Revogar",
+      "revokeFor": "Revogar {name}",
+      "revokeTitle": "Revogar token",
+      "confirmRevoke": "Revogar \"{name}\"? O que estiver usando o token para de funcionar na hora."
     }
   },
   "createTask": {
@@ -1146,5 +1277,17 @@
     "showing": "Mostrando {loaded} de {total}",
     "loadMore": "Carregar mais",
     "loadingMore": "Carregando..."
+  },
+  "publicForm": {
+    "notFound": "Este formulário não está disponível",
+    "notFoundHint": "O link pode ter mudado ou o formulário pode estar fechado. Peça um link novo a quem o enviou.",
+    "send": "Enviar",
+    "sending": "Enviando",
+    "sent": "Obrigado, recebemos a sua resposta.",
+    "sendAnother": "Enviar outra resposta",
+    "required": "Preencha \"{label}\".",
+    "requiredLabel": "{label} (obrigatório)",
+    "tooMany": "Muitas respostas foram enviadas daqui. Tente de novo em alguns minutos.",
+    "honeypotLabel": "Deixe este campo vazio"
   }
 }

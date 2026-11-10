@@ -140,3 +140,10 @@ export interface StatusesEditorProps {
 export interface RulesEditorProps {
   space: SpaceNode;
 }
+
+export interface CopyButtonProps {
+  value: string;
+  label: string;
+  copiedLabel: string;
+  ariaLabel?: string;
+}

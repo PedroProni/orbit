@@ -2,7 +2,9 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query
 import { ApiTags } from '@nestjs/swagger';
 import { Authenticated } from '@infrastructure/auth/authenticated.decorator';
 import { CurrentPrincipal } from '@infrastructure/auth/current-principal.decorator';
+import { ClientContext } from '@infrastructure/auth/client-context.decorator';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
+import { SessionContext } from '@domain/types/session-context.type';
 import { SCOPE_STRUCTURE_WRITE, SCOPE_TASKS_READ, SCOPE_TASKS_WRITE, SCOPE_USERS_MANAGE } from '@domain/constants/scopes.constant';
 import { FormsUseCase } from '@application/use-cases/form/forms.use-case';
 import { ChatUseCase } from '@application/use-cases/chat/chat.use-case';
@@ -38,6 +40,13 @@ export class FormController {
     return this.forms.update(principal, id, dto);
   }
 
+  @Post(':id/rotate-key')
+  @HttpCode(200)
+  @Authenticated(SCOPE_STRUCTURE_WRITE)
+  rotateKey(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string) {
+    return this.forms.rotateKey(principal, id);
+  }
+
   @Delete(':id')
   @HttpCode(204)
   @Authenticated(SCOPE_STRUCTURE_WRITE)
@@ -57,8 +66,8 @@ export class PublicFormController {
   }
 
   @Post(':key')
-  submit(@Param('key') key: string, @Body() dto: SubmitFormDto) {
-    return this.forms.submit(key, dto.answers);
+  submit(@Param('key') key: string, @Body() dto: SubmitFormDto, @ClientContext() context: SessionContext) {
+    return this.forms.submit(key, dto, context.ip);
   }
 }
 

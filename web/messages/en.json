@@ -808,7 +808,8 @@
     "groups": {
       "people": "People",
       "structure": "Structure",
-      "automation": "Automation"
+      "automation": "Automation",
+      "integrations": "Integrations"
     },
     "sections": {
       "people": "Members and roles",
@@ -817,7 +818,10 @@
       "statuses": "Statuses and rules",
       "customFields": "Custom fields",
       "taskTypes": "Task types",
-      "automations": "Automations"
+      "automations": "Automations",
+      "templates": "Templates",
+      "forms": "Forms",
+      "apiTokens": "API tokens"
     },
     "loadError": "It was not possible to load this page. Try again.",
     "spacePicker": "Space",
@@ -1076,6 +1080,133 @@
       "copy": "Copy",
       "copied": "Copied",
       "secretDone": "I saved it"
+    },
+    "forms": {
+      "subtitle": "Public forms turn answers from people outside the workspace into tasks in a list. Anyone with the link can answer.",
+      "add": "New form",
+      "empty": "No forms yet",
+      "emptyHint": "Create a form to receive requests from outside as tasks.",
+      "createTitle": "New form",
+      "editTitle": "Edit form",
+      "listLabel": "List that receives the tasks",
+      "listPlaceholder": "Choose a list",
+      "listOption": "{space} / {list}",
+      "listMissing": "List not found",
+      "acceptingLabel": "Accepting answers",
+      "fieldsLabel": "Fields",
+      "fieldsHint": "Answers to title fields become the task title; the others go to the description.",
+      "fieldLabelFor": "Label of field {position}",
+      "fieldLabelPlaceholder": "Question shown on the form",
+      "fieldTargetFor": "Where field {position} goes",
+      "removeFieldFor": "Remove field {position}",
+      "required": "Required",
+      "addField": "Add field",
+      "targets": {
+        "title": "Task title",
+        "description": "Task description"
+      },
+      "problems": {
+        "name": "Give the form a name.",
+        "list": "Choose the list that receives the tasks.",
+        "fields": "Add at least one field.",
+        "label": "Every field needs a label.",
+        "title": "Add a required field that goes to the task title."
+      },
+      "status": {
+        "open": "Accepting answers",
+        "off": "Off",
+        "paused": "Paused"
+      },
+      "pausedHint": "Paused: the person who created this form can no longer create tasks. Save it to take it over and reopen the link.",
+      "pausedSaveNote": "This form is paused because its creator can no longer create tasks. Saving makes you its owner and reopens the public link.",
+      "fieldCount": "{count, plural, one {# field} other {# fields}}",
+      "copyLink": "Copy link",
+      "copied": "Copied",
+      "copyLinkFor": "Copy the public link of {name}",
+      "editFor": "Edit {name}",
+      "rotateFor": "Change the link of {name}",
+      "deleteFor": "Delete {name}",
+      "rotateTitle": "Change the public link",
+      "confirmRotate": "Create a new link for \"{name}\"? The current link stops working right away.",
+      "rotate": "Change link",
+      "deleteTitle": "Delete form",
+      "confirmDelete": "Delete \"{name}\"? Its link stops working. Tasks already created stay."
+    },
+    "templates": {
+      "subtitle": "Templates prefill new tasks in a space. Members pick them when creating a task.",
+      "add": "New template",
+      "empty": "No templates yet",
+      "emptyHint": "Create a template to start common tasks with the same title, description and settings.",
+      "createTitle": "New template",
+      "editTitle": "Edit template",
+      "spaceLabel": "Space",
+      "titleLabel": "Task title",
+      "descriptionLabel": "Description",
+      "tagsLabel": "Tags",
+      "tagsPlaceholder": "Separate tags with commas",
+      "priorityLabel": "Priority",
+      "kindLabel": "Type",
+      "estimateLabel": "Estimate (minutes)",
+      "problems": {
+        "space": "Choose a space.",
+        "name": "Give the template a name.",
+        "title": "Write the task title.",
+        "estimate": "The estimate must be a whole number of minutes, up to 600000."
+      },
+      "spaceMissing": "Space not found",
+      "estimate": "{minutes, plural, one {# minute} other {# minutes}}",
+      "editFor": "Edit {name}",
+      "deleteFor": "Delete {name}",
+      "deleteTitle": "Delete template",
+      "confirmDelete": "Delete \"{name}\"? Tasks already created from it stay."
+    },
+    "apiTokens": {
+      "subtitle": "Tokens let scripts call the API as you. A token never does more than your current role allows.",
+      "subtitleOwner": "Tokens let scripts call the API as the person who created them. As the owner you see and can revoke every token.",
+      "add": "New token",
+      "empty": "No tokens yet",
+      "emptyHint": "Create a token to use the API from a script or another tool.",
+      "createTitle": "New API token",
+      "scopesLabel": "What the token can do",
+      "scopesHint": "You can only grant what your role allows.",
+      "scopes": {
+        "workspaceRead": "Read the workspace",
+        "tasksRead": "Read tasks",
+        "tasksWrite": "Create and edit tasks",
+        "commentsWrite": "Write comments",
+        "attachmentsWrite": "Upload attachments",
+        "usersRead": "Read people",
+        "structureWrite": "Change spaces, lists and settings",
+        "tokensManage": "Manage API tokens",
+        "auditRead": "Read the audit log",
+        "usersInvite": "Invite people",
+        "usersManage": "Manage people"
+      },
+      "problems": {
+        "name": "Give the token a name.",
+        "scopes": "Choose at least one permission."
+      },
+      "createdTitle": "Copy your token now",
+      "createdBody": "Use it in the Authorization header of your requests.",
+      "createdLabel": "Token",
+      "createdWarning": "This is the only time the token is shown. Store it somewhere safe; if you lose it, revoke it and create a new one.",
+      "createdDone": "I stored it",
+      "copy": "Copy",
+      "copied": "Copied",
+      "status": {
+        "active": "Active",
+        "revoked": "Revoked"
+      },
+      "owner": "Owner: {name}",
+      "unknownOwner": "Unknown person",
+      "created": "Created {date}",
+      "lastUsed": "Last used {when}",
+      "neverUsed": "Never used",
+      "scopesFor": "Permissions of {name}",
+      "revoke": "Revoke",
+      "revokeFor": "Revoke {name}",
+      "revokeTitle": "Revoke token",
+      "confirmRevoke": "Revoke \"{name}\"? Anything using it stops working right away."
     }
   },
   "createTask": {
@@ -1146,5 +1277,17 @@
     "showing": "Showing {loaded} of {total}",
     "loadMore": "Load more",
     "loadingMore": "Loading..."
+  },
+  "publicForm": {
+    "notFound": "This form is not available",
+    "notFoundHint": "The link may have changed or the form may be closed. Ask whoever sent it for a new link.",
+    "send": "Send",
+    "sending": "Sending",
+    "sent": "Thanks, we received your answer.",
+    "sendAnother": "Send another answer",
+    "required": "Fill in \"{label}\".",
+    "requiredLabel": "{label} (required)",
+    "tooMany": "Too many answers were sent from here. Try again in a few minutes.",
+    "honeypotLabel": "Leave this field empty"
   }
 }

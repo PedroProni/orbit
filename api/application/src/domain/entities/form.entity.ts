@@ -70,15 +70,44 @@ export class FormEntity {
   rewrite(name: string, fields: FormField[], active: boolean): void {
     if (!name.trim()) throw new Error('Form name is required');
     if (fields.length === 0 || fields.length > 20) throw new Error('A form needs between 1 and 20 fields');
-    if (fields.some((f) => !f.label.trim())) throw new Error('Every field needs a label');
-    if (!fields.some((f) => f.target === FormFieldTarget.TITLE && f.required)) throw new Error('A required title field is needed');
+    if (fields.some(f => !f.label.trim())) throw new Error('Every field needs a label');
+    if (!fields.some(f => f.target === FormFieldTarget.TITLE && f.required)) throw new Error('A required title field is needed');
     this.name = name.trim();
     this.fields = fields;
     this.active = active;
     this.updatedAt = new Date();
   }
 
+  moveTo(listId: string): void {
+    if (!listId.trim()) throw new Error('Form list is required');
+    this.listId = listId;
+    this.updatedAt = new Date();
+  }
+
+  rotateKey(publicKey: string): void {
+    if (!publicKey || publicKey === this.publicKey) throw new Error('A new public key is required');
+    this.publicKey = publicKey;
+    this.updatedAt = new Date();
+  }
+
+  transferTo(userId: string): void {
+    if (!userId.trim()) throw new Error('Form owner is required');
+    this.createdBy = userId;
+    this.updatedAt = new Date();
+  }
+
   toProps(): FormEntityProps {
-    return { _id: this._id, workspaceId: this.workspaceId, listId: this.listId, name: this.name, publicKey: this.publicKey, fields: this.fields, active: this.active, createdBy: this.createdBy, createdAt: this.createdAt, updatedAt: this.updatedAt };
+    return {
+      _id: this._id,
+      workspaceId: this.workspaceId,
+      listId: this.listId,
+      name: this.name,
+      publicKey: this.publicKey,
+      fields: this.fields,
+      active: this.active,
+      createdBy: this.createdBy,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

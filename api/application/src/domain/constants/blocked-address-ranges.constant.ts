@@ -15,6 +15,6 @@ export const BLOCKED_IPV4_RANGES = [
   '240.0.0.0/4',
 ];
 export const IPV4_MAPPED_IPV6_RANGE = '::ffff:0:0/96';
-export const BLOCKED_IPV6_RANGES = ['::/128', '::1/128', '::/96', '64:ff9b::/96', '100::/64', '2001:db8::/32', 'fc00::/7', 'fe80::/10', 'ff00::/8'];
+export const BLOCKED_IPV6_RANGES = ['::/128', '::1/128', '::/96', '64:ff9b::/96', '100::/64', '2001::/32', '2001:db8::/32', '2002::/16', 'fc00::/7', 'fe80::/10', 'ff00::/8'];
 export const IPV4_ADDRESS_BITS = 32;
 export const IPV6_ADDRESS_BITS = 128;

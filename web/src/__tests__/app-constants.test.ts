@@ -26,7 +26,7 @@ describe('login flags', () => {
 
   it('keeps the screens that work without a session public', async () => {
     const { PUBLIC_PATHS } = await loadWith(undefined);
-    expect([...PUBLIC_PATHS].sort()).toEqual(['/forgot-password', '/login', '/set-password']);
+    expect([...PUBLIC_PATHS].sort()).toEqual(['/f/', '/forgot-password', '/login', '/set-password']);
   });
 });
 

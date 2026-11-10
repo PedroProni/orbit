@@ -65,21 +65,22 @@ export class ApiTokenEntity {
     return this.updatedAt;
   }
 
-  revoke(): void {
-    if (this.revokedAt) throw new Error('Token already revoked');
-    this.revokedAt = new Date();
-    this.updatedAt = new Date();
-  }
-
   isActive(): boolean {
     return this.revokedAt === null;
   }
 
-  touch(): void {
-    this.lastUsedAt = new Date();
-  }
-
   toProps(): ApiTokenEntityProps {
-    return { _id: this._id, workspaceId: this.workspaceId, userId: this.userId, name: this.name, tokenHash: this.tokenHash, scopes: this.scopes, lastUsedAt: this.lastUsedAt, revokedAt: this.revokedAt, createdAt: this.createdAt, updatedAt: this.updatedAt };
+    return {
+      _id: this._id,
+      workspaceId: this.workspaceId,
+      userId: this.userId,
+      name: this.name,
+      tokenHash: this.tokenHash,
+      scopes: this.scopes,
+      lastUsedAt: this.lastUsedAt,
+      revokedAt: this.revokedAt,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

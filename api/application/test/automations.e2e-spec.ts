@@ -366,6 +366,30 @@ describe('Automations (e2e)', () => {
     for (const a of [hook, failing]) await ctx.http().delete(`/automations/${a.id}`).set(auth(owner)).expect(204);
   });
 
+  it('refuses 6to4 and Teredo webhook addresses that carry a private IPv4 inside', async () => {
+    const listId = await newList('Webhook 6to4');
+    const base = { name: 'Webhook', listId, triggerType: 'task_created', triggerValue: null, actionType: 'webhook', actionUserIds: [] };
+    const env = ctx.app.get(EnvConfigService);
+    const spy = jest.spyOn(env, 'isAutomationWebhookPrivateAllowed').mockReturnValue(false);
+    for (const actionValue of [
+      'https://[2002:a9fe:a9fe::1]/x',
+      'https://[2002:7f00:1::]/x',
+      'https://[2002:c0a8:101::1]/x',
+      'https://[2001:0:a9fe:a9fe::]/x',
+      'https://[2001:0:7f00:1::]/x',
+      'https://[2001:0:4136:e378:8000:63bf:3f57:fefe]/x',
+    ]) {
+      const res = await ctx
+        .http()
+        .post('/automations')
+        .set(auth(owner))
+        .send({ ...base, actionValue })
+        .expect(400);
+      expect(res.body.code).toBe('AUTOMATION_WEBHOOK_URL_PRIVATE');
+    }
+    spy.mockRestore();
+  });
+
   it('refuses webhooks without the secret key and private addresses when they are not allowed', async () => {
     const listId = await newList('Webhook recusado');
     const base = { name: 'Webhook', listId, triggerType: 'task_created', triggerValue: null, actionType: 'webhook', actionUserIds: [] };

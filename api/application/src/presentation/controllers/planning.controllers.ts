@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Authenticated } from '@infrastructure/auth/authenticated.decorator';
 import { CurrentPrincipal } from '@infrastructure/auth/current-principal.decorator';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
-import { SCOPE_TASKS_READ, SCOPE_TASKS_WRITE } from '@domain/constants/scopes.constant';
+import { SCOPE_STRUCTURE_WRITE, SCOPE_TASKS_READ, SCOPE_TASKS_WRITE } from '@domain/constants/scopes.constant';
 import { TaskDependenciesUseCase } from '@application/use-cases/planning/task-dependencies.use-case';
 import { TaskPlansUseCase } from '@application/use-cases/planning/task-plans.use-case';
 import { TimeTrackingUseCase } from '@application/use-cases/planning/time-tracking.use-case';
@@ -115,20 +115,20 @@ export class PlanningController {
   }
 
   @Post('task-templates')
-  @Authenticated(SCOPE_TASKS_WRITE)
+  @Authenticated(SCOPE_STRUCTURE_WRITE)
   createTemplate(@CurrentPrincipal() principal: AuthPrincipal, @Body() dto: SaveTemplateDto) {
     return this.templates.create(principal, dto);
   }
 
   @Patch('task-templates/:id')
-  @Authenticated(SCOPE_TASKS_WRITE)
+  @Authenticated(SCOPE_STRUCTURE_WRITE)
   updateTemplate(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string, @Body() dto: SaveTemplateDto) {
     return this.templates.update(principal, id, dto);
   }
 
   @Delete('task-templates/:id')
   @HttpCode(204)
-  @Authenticated(SCOPE_TASKS_WRITE)
+  @Authenticated(SCOPE_STRUCTURE_WRITE)
   async removeTemplate(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string) {
     await this.templates.remove(principal, id);
   }

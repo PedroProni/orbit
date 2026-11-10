@@ -61,7 +61,7 @@ describe('api client transport', () => {
     expect(assign).toHaveBeenCalledWith('/login');
   });
 
-  it.each(['/login', '/forgot-password', '/set-password'])('stays on the public screen %s after a 401', async (pathname) => {
+  it.each(['/login', '/forgot-password', '/set-password', '/f/chave-publica'])('stays on the public screen %s after a 401', async (pathname) => {
     const assign = stubBrowser(pathname);
     stubFetch(401, { message: 'Unauthorized' });
     await expect(api('/auth/login', { method: 'POST', body: '{}' })).rejects.toMatchObject({ status: 401 });

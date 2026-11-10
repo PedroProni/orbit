@@ -82,13 +82,14 @@ describe('Planning (e2e)', () => {
 
   it('creates tasks from templates with plan data and rejects foreign spaces', async () => {
     const dto = { spaceId, name: 'Bug padrão', titleTemplate: 'Corrigir bug', descriptionMd: 'Passos', tags: ['Bug', 'bug', ' '], priority: 'high', taskKind: 'bug', estimateMinutes: 90 };
-    const tpl = await ctx.http().post('/task-templates').set(auth(member)).send(dto).expect(201);
+    await ctx.http().post('/task-templates').set(auth(member)).send(dto).expect(403);
+    const tpl = await ctx.http().post('/task-templates').set(auth(owner)).send(dto).expect(201);
     expect(tpl.body.tags).toEqual(['bug']);
     await ctx.http().post('/task-templates').set(auth(outsider)).send(dto).expect(404);
     await ctx
       .http()
       .post('/task-templates')
-      .set(auth(member))
+      .set(auth(owner))
       .send({ ...dto, titleTemplate: '' })
       .expect(400);
     const created = await ctx.http().post(`/task-templates/${tpl.body.id}/instantiate`).set(auth(member)).send({ listId }).expect(201);

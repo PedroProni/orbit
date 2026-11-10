@@ -1,8 +1,15 @@
 import { Type } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { FormFieldTarget } from '@domain/enums/form.enums';
+import { FORM_FIELD_ID_MAX_LENGTH } from '@domain/constants/public-form.constant';
 
 export class FormFieldDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(FORM_FIELD_ID_MAX_LENGTH)
+  id?: string;
+
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)

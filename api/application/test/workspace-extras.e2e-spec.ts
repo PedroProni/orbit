@@ -1,3 +1,5 @@
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 import { closeTestApp, createTestApp, TestContext } from './helpers/create-test-app';
 
 describe('Forms, automations, chat, groups, guests and inbox (e2e)', () => {
@@ -65,7 +67,13 @@ describe('Forms, automations, chat, groups, guests and inbox (e2e)', () => {
       .post(`/public/forms/${key}`)
       .send({ answers: { [title]: 'Preciso de acesso', [details]: 'Urgente' } })
       .expect(201);
-    const task = await ctx.http().get(`/tasks/${sent.body.taskId}`).set(auth(member)).expect(200);
+    expect(sent.body).toEqual({ received: true });
+    const stored = await ctx.app.get<Connection>(getConnectionToken()).collection('tasks').findOne({ list_id: listId, title: 'Preciso de acesso' });
+    const task = await ctx
+      .http()
+      .get(`/tasks/${String(stored?._id)}`)
+      .set(auth(member))
+      .expect(200);
     expect(task.body.title).toBe('Preciso de acesso');
     expect(task.body.descriptionMd).toContain('Urgente');
     await ctx
@@ -115,7 +123,9 @@ describe('Forms, automations, chat, groups, guests and inbox (e2e)', () => {
       .post(`/public/forms/${key}`)
       .send({ answers: { [fieldId]: 'Pedido sem prefixo' } })
       .expect(201);
-    const task = await ctx.http().get(`/tasks/${sent.body.taskId}`).set(auth(owner)).expect(200);
+    expect(sent.body).toEqual({ received: true });
+    const stored = await ctx.app.get<Connection>(getConnectionToken()).collection('tasks').findOne({ list_id: listId, title: '[FORM] Pedido sem prefixo' });
+    const task = await ctx.http().get(`/tasks/${stored?._id}`).set(auth(owner)).expect(200);
     expect(task.body.title).toBe('[FORM] Pedido sem prefixo');
     expect(task.body.tags).toEqual(['externo']);
     await ctx.http().patch(`/spaces/${spaceId}`).set(auth(owner)).send({ titlePrefixes: [], requiredTags: [] }).expect(200);

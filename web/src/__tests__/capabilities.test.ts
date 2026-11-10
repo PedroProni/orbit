@@ -17,6 +17,12 @@ describe('capabilitiesOf', () => {
     expect(capabilitiesOf(me('owner')).canModerateComments).toBe(true);
   });
 
+  it('marks only the owner as owner', () => {
+    expect(capabilitiesOf(undefined).isOwner).toBe(false);
+    expect(capabilitiesOf(me('admin')).isOwner).toBe(false);
+    expect(capabilitiesOf(me('owner')).isOwner).toBe(true);
+  });
+
   it('lets only owners and admins manage access', () => {
     expect(capabilitiesOf(undefined).canManageAccess).toBe(false);
     expect(capabilitiesOf(me('guest')).canManageAccess).toBe(false);

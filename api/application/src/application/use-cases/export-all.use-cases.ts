@@ -11,6 +11,7 @@ import { GenerateAccessLinkUseCase } from '@application/use-cases/user/generate-
 import { RevokeUserSessionsUseCase } from '@application/use-cases/user/revoke-user-sessions.use-case';
 import { ListUserAccessUseCase } from '@application/use-cases/user/list-user-access.use-case';
 import { LoginThrottleService } from '@application/services/login-throttle.service';
+import { PublicFormThrottleService } from '@application/services/public-form-throttle.service';
 import { AccessLinkService } from '@application/services/access-link.service';
 import { LoginAccessUseCase } from '@application/use-cases/auth/login-access.use-case';
 import { DevLoginUseCase } from '@application/use-cases/auth/dev-login.use-case';
@@ -213,5 +214,6 @@ export default [
   RevokeUserSessionsUseCase,
   ListUserAccessUseCase,
   LoginThrottleService,
+  PublicFormThrottleService,
   AccessLinkService,
 ];

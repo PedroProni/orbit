@@ -14,5 +14,6 @@ export function capabilitiesOf(me: Principal | undefined): Capabilities {
     canModerateComments: me?.role === 'owner' || me?.role === 'admin',
     canManageAccess: me?.role === 'owner' || me?.role === 'admin',
     canManageStructure: me?.role === 'owner' || me?.role === 'admin',
+    isOwner: me?.role === 'owner',
   };
 }

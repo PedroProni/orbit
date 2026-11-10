@@ -74,8 +74,7 @@ export class PrincipalGuard implements CanActivate {
     if (!token || !token.isActive()) throw new UnauthorizedException('Invalid token');
     const user = await this.users.findByIdInWorkspace(token.getUserId(), token.getWorkspaceId());
     if (!user || !user.isActive()) throw new UnauthorizedException('Token owner not available');
-    token.touch();
-    await this.tokens.update(token);
+    if (!(await this.tokens.touchIfActive(token.getId(), new Date()))) throw new UnauthorizedException('Invalid token');
     const roleScopes = ROLE_SCOPES[user.getRole()];
     return {
       workspaceId: token.getWorkspaceId(),

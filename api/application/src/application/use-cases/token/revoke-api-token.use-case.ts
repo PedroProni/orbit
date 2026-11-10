@@ -15,9 +15,7 @@ export class RevokeApiTokenUseCase {
   async execute(principal: AuthPrincipal, tokenId: string): Promise<void> {
     const token = await this.tokens.findByIdInWorkspace(tokenId, principal.workspaceId);
     if (!token || !ApiTokenAccessPolicy.canManage(principal, token.getUserId())) throw new NotFoundException('Token not found');
-    if (!token.isActive()) throw new BadRequestException('Token already revoked');
-    token.revoke();
-    await this.tokens.update(token);
+    if (!token.isActive() || !(await this.tokens.revokeIfActive(token.getId(), principal.workspaceId, new Date()))) throw new BadRequestException('Token already revoked');
     await this.audit.record(principal, 'token.revoked', 'api_token', tokenId);
   }
 }

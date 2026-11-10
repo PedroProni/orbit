@@ -1,4 +1,4 @@
-import { Bot, CalendarDays, FolderTree, Link2, ListChecks, ListFilter, Shapes, SlidersHorizontal, Users, UsersRound } from 'lucide-react';
+import { Bot, CalendarDays, FileText, FolderTree, KeyRound, LayoutTemplate, Link2, ListChecks, ListFilter, Shapes, SlidersHorizontal, Users, UsersRound } from 'lucide-react';
 import { CustomFieldType, StatusType } from '@/types/api.types';
 
 export const ADMIN_SECTIONS = [
@@ -16,9 +16,17 @@ export const ADMIN_SECTIONS = [
       { href: '/admin/statuses', key: 'statuses', icon: ListChecks },
       { href: '/admin/custom-fields', key: 'customFields', icon: SlidersHorizontal },
       { href: '/admin/task-types', key: 'taskTypes', icon: Shapes },
+      { href: '/admin/templates', key: 'templates', icon: LayoutTemplate },
     ],
   },
-  { group: 'automation', items: [{ href: '/admin/automations', key: 'automations', icon: Bot }] },
+  {
+    group: 'automation',
+    items: [
+      { href: '/admin/automations', key: 'automations', icon: Bot },
+      { href: '/admin/forms', key: 'forms', icon: FileText },
+    ],
+  },
+  { group: 'integrations', items: [{ href: '/admin/api-tokens', key: 'apiTokens', icon: KeyRound }] },
 ] as const;
 
 export const ADMIN_HOME = '/admin/people';
@@ -43,3 +51,5 @@ export const NO_FOLDER = '';
 export const STATUS_NAME_MAX_LENGTH = 60;
 export const DEFAULT_STATUS_COUNT = 7;
 export const CUSTOM_FIELD_ICONS = { dropdown: ListFilter, url: Link2, date: CalendarDays } as const;
+export const ADMIN_WIDE_DIALOG_PANEL_CLASS = 'flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-linestrong bg-raised shadow-floating';
+export const ADMIN_BADGE_CLASS = 'shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium';
