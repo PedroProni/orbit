@@ -35,7 +35,8 @@ export function AllTasksScreen() {
   const filters = useUiStore((s) => s.filters);
   const display = useUiStore((s) => s.display);
   const hierarchy = useHierarchy();
-  const { isGuest } = useCapabilities();
+  const { canWrite } = useCapabilities();
+  const readOnly = !canWrite;
   const statusLabel = useStatusLabel();
   const recent = useRecentListsStore((s) => s.listIds);
   const hydrateRecent = useRecentListsStore((s) => s.hydrate);
@@ -98,7 +99,7 @@ export function AllTasksScreen() {
           );
         })}
       </div>
-      <TaskToolbar listId={null} space={hierarchy.data ? space : undefined} readOnly={isGuest} />
+      <TaskToolbar listId={null} space={hierarchy.data ? space : undefined} readOnly={readOnly} />
       {tasks.data ? (
         <div className="flex shrink-0 items-center gap-2 px-4 pt-2 text-xs text-muted">
           <span>{t('showing', { loaded, total })}</span>
@@ -114,15 +115,15 @@ export function AllTasksScreen() {
         {tasks.data && hierarchy.data ? (
           <div key={shown} className={cn('anim-fade-in', shown === 'board' && 'h-full')}>
             {shown === 'board' ? (
-              <KanbanBoard tasks={tasks.data.data} space={space} listId={ALL_TASKS_KEY} readOnly={isGuest} refuseDrop={refuseDrop} targetFor={targetFor} originOf={originOf} />
+              <KanbanBoard tasks={tasks.data.data} space={space} listId={ALL_TASKS_KEY} readOnly={readOnly} refuseDrop={refuseDrop} targetFor={targetFor} originOf={originOf} />
             ) : (
-              <TaskTableView tasks={tasks.data.data} statusesOf={(task) => spaceOfTask(spaces, task)?.statuses ?? []} readOnly={isGuest} />
+              <TaskTableView tasks={tasks.data.data} statusesOf={(task) => spaceOfTask(spaces, task)?.statuses ?? []} readOnly={readOnly} />
             )}
             {shown === 'table' && loaded === 0 ? <EmptyState title={tt('empty')} /> : null}
           </div>
         ) : null}
       </div>
-      {hierarchy.data && !isGuest ? <BulkBar space={space} /> : null}
+      {hierarchy.data && !readOnly ? <BulkBar space={space} /> : null}
     </div>
   );
 }

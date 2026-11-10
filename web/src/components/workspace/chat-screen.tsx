@@ -2,38 +2,43 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useCapabilities } from '@/hooks/use-capabilities';
 import { useChannels, useInvalidating, useMessages } from '@/hooks/use-workspace';
 import { useMembers } from '@/hooks/use-orbit';
 import { workspaceService } from '@/services/workspace.service';
+import { ChatPostInput } from '@/types/workspace.types';
 
 export function ChatScreen() {
   const t = useTranslations('chat');
   const channels = useChannels();
+  const { canWrite } = useCapabilities();
   const members = useMembers();
   const [selected, setSelected] = useState<string | null>(null);
   const messages = useMessages(selected);
   const [name, setName] = useState('');
   const [text, setText] = useState('');
   const createChannel = useInvalidating(workspaceService.createChannel, ['channels']);
-  const post = useInvalidating((args: { id: string; body: string }) => workspaceService.postMessage(args.id, args.body), ['messages']);
+  const post = useInvalidating((args: ChatPostInput) => workspaceService.postMessage(args.id, args.body), ['messages']);
   const author = (id: string) => members.data?.find((m) => m.id === id)?.name ?? '';
   return (
     <div className="grid h-full grid-cols-1 md:grid-cols-[240px_1fr]">
       <aside className="border-b border-line p-3 md:border-b-0 md:border-r">
-        <form
-          className="mb-3 flex gap-1"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!name.trim()) return;
-            createChannel.mutate(name.trim(), { onSuccess: (created) => setSelected(created.id) });
-            setName('');
-          }}
-        >
-          <input aria-label={t('channelName')} placeholder={t('channelName')} value={name} onChange={(e) => setName(e.target.value)} className="min-w-0 flex-1 rounded border border-line bg-panel2 px-2 py-1 text-sm" />
-          <button type="submit" className="rounded border border-line px-2 text-sm">
-            {t('create')}
-          </button>
-        </form>
+        {canWrite ? (
+          <form
+            className="mb-3 flex gap-1"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!name.trim()) return;
+              createChannel.mutate(name.trim(), { onSuccess: (created) => setSelected(created.id) });
+              setName('');
+            }}
+          >
+            <input aria-label={t('channelName')} placeholder={t('channelName')} value={name} onChange={(e) => setName(e.target.value)} className="min-w-0 flex-1 rounded border border-line bg-panel2 px-2 py-1 text-sm" />
+            <button type="submit" className="rounded border border-line px-2 text-sm">
+              {t('create')}
+            </button>
+          </form>
+        ) : null}
         <ul className="space-y-1">
           {channels.data?.map((c) => (
             <li key={c.id}>
@@ -45,7 +50,7 @@ export function ChatScreen() {
         </ul>
       </aside>
       <section className="flex min-h-96 flex-col p-4">
-        {!selected ? <p className="text-sm text-muted">{t('pick')}</p> : null}
+        {!selected ? <p className="text-sm text-muted">{t(canWrite ? 'pick' : 'pickOnly')}</p> : null}
         {selected ? (
           <>
             <ul className="mb-3 flex-1 space-y-2 overflow-y-auto">
@@ -57,20 +62,26 @@ export function ChatScreen() {
               ))}
               {messages.data?.length === 0 ? <li className="text-sm text-muted">{t('noMessages')}</li> : null}
             </ul>
-            <form
-              className="flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!text.trim()) return;
-                post.mutate({ id: selected, body: text.trim() });
-                setText('');
-              }}
-            >
-              <input aria-label={t('message')} placeholder={t('message')} value={text} onChange={(e) => setText(e.target.value)} className="flex-1 rounded border border-line bg-panel2 px-3 py-2 text-sm" />
-              <button type="submit" disabled={!text.trim()} className="rounded bg-accent px-3 py-2 text-sm text-white disabled:opacity-50">
-                {t('send')}
-              </button>
-            </form>
+            {canWrite ? (
+              <form
+                className="flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!text.trim()) return;
+                  post.mutate({ id: selected, body: text.trim() });
+                  setText('');
+                }}
+              >
+                <input aria-label={t('message')} placeholder={t('message')} value={text} onChange={(e) => setText(e.target.value)} className="flex-1 rounded border border-line bg-panel2 px-3 py-2 text-sm" />
+                <button type="submit" disabled={!text.trim()} className="rounded bg-accent px-3 py-2 text-sm text-white disabled:opacity-50">
+                  {t('send')}
+                </button>
+              </form>
+            ) : (
+              <p role="note" className="rounded border border-line bg-panel2 px-3 py-2 text-sm text-muted">
+                {t('readOnlyNotice')}
+              </p>
+            )}
           </>
         ) : null}
       </section>

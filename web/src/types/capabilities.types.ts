@@ -2,6 +2,8 @@ export interface Capabilities {
   loaded: boolean;
   isGuest: boolean;
   member: boolean;
+  isViewer: boolean;
+  canWrite: boolean;
   userId: string | null;
   canModerateComments: boolean;
   canManageAccess: boolean;

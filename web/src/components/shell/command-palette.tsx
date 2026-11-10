@@ -27,7 +27,7 @@ export function CommandPalette({ open = true }: CommandPaletteProps) {
   const setView = useUiStore((s) => s.setView);
   const openTask = useUiStore((s) => s.openTask);
   const hierarchy = useHierarchy();
-  const { isGuest } = useCapabilities();
+  const { isGuest, canWrite } = useCapabilities();
   const docs = useDocs();
   const [query, setQuery] = useState('');
   const [debounced, setDebounced] = useState('');
@@ -50,11 +50,11 @@ export function CommandPalette({ open = true }: CommandPaletteProps) {
       ...(isGuest ? [] : NAV_ITEMS).map((item) => ({ key: `page-${item.href}`, group: 'pages' as const, label: tn(item.key), run: go(item.href) })),
       ...(docs.data ?? []).map((doc) => ({ key: `doc-${doc.id}`, group: 'docs' as const, label: doc.title, run: go('/docs') })),
       ...VIEW_MODES.map((mode) => ({ key: `view-${mode}`, group: 'actions' as const, label: t('switchView', { view: tt(`views.${mode}`) }), run: () => setView(mode) })),
-      ...(isGuest ? [] : [{ key: 'action-new-task', group: 'actions' as const, label: t('createTask'), run: () => setTimeout(triggerNewTask, 0) }]),
+      ...(canWrite ? [{ key: 'action-new-task', group: 'actions' as const, label: t('createTask'), run: () => setTimeout(triggerNewTask, 0) }] : []),
     ];
     const found = (search.data?.tasks ?? []).map((task) => ({ key: `task-${task.id}`, group: 'tasks' as const, label: task.title, run: () => openTask(task.id) }));
     return [...filterPaletteItems(base, query), ...found];
-  }, [hierarchy.data, docs.data, search.data, query, router, setView, openTask, t, tn, tt, isGuest]);
+  }, [hierarchy.data, docs.data, search.data, query, router, setView, openTask, t, tn, tt, isGuest, canWrite]);
 
   const choose = (item?: PaletteItem) => {
     if (!item) return;

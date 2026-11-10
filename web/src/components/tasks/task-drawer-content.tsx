@@ -45,7 +45,9 @@ export function TaskDrawerContent({ taskId }: TaskDrawerContentProps) {
   const tp = useTranslations('tasks');
   const openTask = useUiStore((s) => s.openTask);
   const task = useTask(taskId);
-  const { isGuest: readOnly } = useCapabilities();
+  const { canWrite, isGuest } = useCapabilities();
+  const readOnly = !canWrite;
+  const limited = isGuest;
   const hierarchy = useHierarchy();
   const members = useMembers();
   const siblingTasks = useTasks(task.data?.listId ?? '', EMPTY_FILTERS);
@@ -78,7 +80,7 @@ export function TaskDrawerContent({ taskId }: TaskDrawerContentProps) {
   }
 
   const data = task.data;
-  const people = (members.data ?? []).map((m) => ({ id: m.id, name: m.name }));
+  const people = (members.data ?? []).map((m) => ({ id: m.id, name: m.name, role: m.role }));
   const siblings = (siblingTasks.data?.data ?? []).filter((item) => !item.parentId);
   const tagSuggestions = [...new Set([...(space?.requiredTags ?? []).map((tag) => tag.toLowerCase()), ...siblings.flatMap((item) => item.tags)])];
   const fail = (err: unknown) => {
@@ -180,21 +182,21 @@ export function TaskDrawerContent({ taskId }: TaskDrawerContentProps) {
                         {canRepeat ? <TaskRepeatIndicator taskId={data.id} /> : null}
                       </div>
                     </TaskPropertyRow>
-                    {readOnly ? null : (
+                    {limited ? null : (
                       <>
                         <TaskPropertyRow icon={Hourglass} label={t('timeEstimate')}>
-                          <TaskEstimateField taskId={data.id} onError={fail} />
+                          <TaskEstimateField taskId={data.id} readOnly={readOnly} onError={fail} />
                         </TaskPropertyRow>
                         <TaskPropertyRow icon={Clock} label={t('trackTime')}>
-                          <TaskTrackTimeField taskId={data.id} onError={fail} />
+                          <TaskTrackTimeField taskId={data.id} readOnly={readOnly} onError={fail} />
                         </TaskPropertyRow>
                       </>
                     )}
                   </div>
                   <div>
-                    {readOnly ? null : (
+                    {limited ? null : (
                       <TaskPropertyRow icon={Users} label={t('assignees')}>
-                        <TaskPeopleField label={t('assignees')} emptyLabel={t('empty')} people={people} selected={data.assigneeIds} onToggle={(id) => save(data.assigneeIds.includes(id) ? { removeAssigneeIds: [id] } : { addAssigneeIds: [id] })} />
+                        <TaskPeopleField label={t('assignees')} emptyLabel={t('empty')} readOnly={readOnly} people={people} selected={data.assigneeIds} onToggle={(id) => save(data.assigneeIds.includes(id) ? { removeAssigneeIds: [id] } : { addAssigneeIds: [id] })} />
                       </TaskPropertyRow>
                     )}
                     <TaskPropertyRow icon={Flag} label={t('priority')}>
@@ -218,11 +220,11 @@ export function TaskDrawerContent({ taskId }: TaskDrawerContentProps) {
                 </div>
                 <hr className="border-line" />
                 <TaskDescription key={data.id} value={data.descriptionMd} readOnly={readOnly} onSave={(descriptionMd) => save({ descriptionMd })} />
-                <TaskFieldsSection task={data} readOnly={readOnly} save={save} />
+                <TaskFieldsSection task={data} readOnly={readOnly} limited={limited} save={save} />
                 <TaskChecklists task={data} readOnly={readOnly} save={save} adding={addingChecklist} onAddingChange={setAddingChecklist} />
-                {readOnly ? null : <TaskDependencies taskId={data.id} siblings={siblings} open={relating} onClose={() => setRelating(false)} onError={fail} />}
+                {limited ? null : <TaskDependencies taskId={data.id} siblings={siblings} open={relating} readOnly={readOnly} onClose={() => setRelating(false)} onError={fail} />}
                 <TaskSubtasks parentId={data.id} listId={data.listId} canAdd={!readOnly && !data.parentId} composing={composingSubtask} onComposingChange={setComposingSubtask} />
-                {readOnly ? null : <TaskAttachments taskId={data.id} controller={uploads} />}
+                {limited ? null : <TaskAttachments taskId={data.id} controller={uploads} readOnly={readOnly} />}
                 {readOnly ? null : <TaskActionLinks canAddSubtask={!data.parentId} onAddSubtask={() => setComposingSubtask(true)} onAddDependency={() => setRelating(true)} onAddChecklist={() => setAddingChecklist(true)} onAttach={(files) => void uploads.start(files)} />}
               </>
             ) : null}
@@ -230,7 +232,7 @@ export function TaskDrawerContent({ taskId }: TaskDrawerContentProps) {
         </div>
         {data && space ? (
           <aside className="min-w-0 border-t border-line bg-panel lg:min-h-0 lg:border-l lg:border-t-0">
-            <TaskTimeline task={data} statuses={space.statuses} readOnly={readOnly} />
+            <TaskTimeline task={data} statuses={space.statuses} readOnly={readOnly} limited={limited} />
           </aside>
         ) : null}
       </div>

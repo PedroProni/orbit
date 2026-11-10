@@ -10,6 +10,7 @@ export interface TaskPeopleFieldProps {
   people: PickerPerson[];
   selected: string[];
   onToggle: (id: string) => void;
+  readOnly?: boolean;
 }
 
 export interface TaskTagsFieldProps {
@@ -29,12 +30,14 @@ export interface TaskPointsFieldProps {
 export interface TaskCustomFieldsProps {
   task: Task;
   save: SaveTaskPatch;
+  readOnly?: boolean;
 }
 
 export interface CustomFieldInputProps {
   definition: CustomFieldDefinition;
   value: TaskCustomFieldValue['value'];
   onSave: (value: string | null) => void;
+  readOnly?: boolean;
 }
 
 export interface TaskChecklistsProps {

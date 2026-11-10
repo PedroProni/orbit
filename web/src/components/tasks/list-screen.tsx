@@ -38,7 +38,8 @@ export function ListScreen({ listId }: ListScreenProps) {
   const space = findSpaceByList(hierarchy.data, listId);
   const list = space?.lists.find((l) => l.id === listId);
   const tasks = useTasks(listId, filters);
-  const { isGuest } = useCapabilities();
+  const { canWrite } = useCapabilities();
+  const readOnly = !canWrite;
   const openTask = useUiStore((s) => s.openTask);
   const loadedList = useRef<string | null>(null);
 
@@ -72,22 +73,22 @@ export function ListScreen({ listId }: ListScreenProps) {
     <div className="flex h-full flex-col">
       <ListHeader space={space} list={list} />
       <ViewTabs listId={listId} />
-      <TaskToolbar listId={listId} space={space} readOnly={isGuest} />
+      <TaskToolbar listId={listId} space={space} readOnly={readOnly} />
       <div className={cn('min-h-0 flex-1 p-4', view === 'board' && tasks.data ? 'overflow-hidden pb-2' : 'overflow-auto')}>
         {tasks.isLoading ? view === 'board' ? <BoardSkeleton /> : <ListSkeleton /> : null}
         {tasks.data ? (
           <div key={view} className={cn('anim-fade-in', view === 'board' && 'h-full')}>
-            {space && tasks.data && view === 'list' ? <TaskListView tasks={tasks.data.data} space={space} listId={listId} readOnly={isGuest} /> : null}
-            {space && tasks.data && view === 'board' ? <KanbanBoard tasks={tasks.data.data} space={space} listId={listId} readOnly={isGuest} /> : null}
-            {space && tasks.data && view === 'table' ? <TaskTableView tasks={tasks.data.data} statusesOf={() => space.statuses} readOnly={isGuest} /> : null}
+            {space && tasks.data && view === 'list' ? <TaskListView tasks={tasks.data.data} space={space} listId={listId} readOnly={readOnly} /> : null}
+            {space && tasks.data && view === 'board' ? <KanbanBoard tasks={tasks.data.data} space={space} listId={listId} readOnly={readOnly} /> : null}
+            {space && tasks.data && view === 'table' ? <TaskTableView tasks={tasks.data.data} statusesOf={() => space.statuses} readOnly={readOnly} /> : null}
             {tasks.data && view === 'calendar' ? <CalendarView tasks={tasks.data.data} /> : null}
             {tasks.data && view === 'timeline' ? <TimelineView tasks={tasks.data.data} /> : null}
             {tasks.data && view === 'workload' ? <WorkloadView tasks={tasks.data.data} /> : null}
-            {tasks.data && tasks.data.data.length === 0 && view !== 'board' ? <EmptyState title={t('empty')} hint={isGuest ? undefined : t('emptyHint')} /> : null}
+            {tasks.data && tasks.data.data.length === 0 && view !== 'board' ? <EmptyState title={t('empty')} hint={readOnly ? undefined : t('emptyHint')} /> : null}
           </div>
         ) : null}
       </div>
-      {space && !isGuest ? <BulkBar space={space} /> : null}
+      {space && !readOnly ? <BulkBar space={space} /> : null}
     </div>
   );
 }

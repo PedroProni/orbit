@@ -30,7 +30,9 @@
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu",
     "signOut": "Sair",
-    "account": "Minha conta"
+    "account": "Minha conta",
+    "readOnlyChip": "Somente leitura",
+    "readOnlyChipHint": "Seu papel vê tudo, mas não altera nada."
   },
   "sidebar": {
     "label": "Espaços e listas",
@@ -347,7 +349,8 @@
       "bullet": "Lista com marcadores",
       "code": "Código",
       "link": "Link"
-    }
+    },
+    "pickOnly": "Escolha um documento"
   },
   "goals": {
     "title": "Metas",
@@ -385,7 +388,9 @@
     "pick": "Escolha ou crie um canal",
     "noMessages": "Nenhuma mensagem ainda",
     "message": "Escreva uma mensagem",
-    "send": "Enviar"
+    "send": "Enviar",
+    "readOnlyNotice": "Você pode ler este canal. Seu papel não envia mensagens.",
+    "pickOnly": "Escolha um canal"
   },
   "planning": {
     "title": "Planejamento",
@@ -515,7 +520,9 @@
     },
     "docCreated": "Doc criado: {name}",
     "statusMissing": "O espaço \"{space}\" não tem o status \"{status}\", então a tarefa continua onde estava",
-    "pullRequestUnlinkFailed": "Não foi possível desvincular o pull request"
+    "pullRequestUnlinkFailed": "Não foi possível desvincular o pull request",
+    "roleChanged": "Papel alterado.",
+    "roleChangeFailed": "Não foi possível alterar o papel."
   },
   "attachments": {
     "title": "Anexos",
@@ -639,11 +646,13 @@
       "owner": "Dono",
       "admin": "Administrador",
       "member": "Membro",
+      "viewer": "Leitor",
       "guest": "Convidado"
     },
     "roleHints": {
       "admin": "Tudo que um membro faz, mais gerenciar espaços, pessoas e integrações.",
       "member": "Cria e edita tarefas, comentários e arquivos.",
+      "viewer": "Vê tudo o que um membro vê, inclusive nomes, mas não altera nada.",
       "guest": "Só lê as listas compartilhadas com ele."
     },
     "states": {
@@ -666,7 +675,8 @@
     "copied": "Copiado",
     "deniedHint": "Só donos e administradores gerenciam pessoas.",
     "loadError": "Não foi possível carregar as pessoas.",
-    "empty": "Nenhuma pessoa ainda."
+    "empty": "Nenhuma pessoa ainda.",
+    "roleLabel": "Papel de {name}"
   },
   "board": {
     "noTag": "Sem tag",

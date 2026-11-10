@@ -1,3 +1,5 @@
+import { Attachment } from '@/types/api.types';
+
 export type UploadStatus = 'uploading' | 'done' | 'error';
 
 export interface UploadItem {
@@ -18,6 +20,12 @@ export interface UploadController {
 export interface TaskAttachmentsProps {
   taskId: string;
   controller: UploadController;
+  readOnly?: boolean;
+}
+
+export interface AttachmentItemProps {
+  attachment: Attachment;
+  onRemove?: (id: string) => void;
 }
 
 export interface FileValidation {

@@ -7,13 +7,14 @@ import { workspaceService } from '@/services/workspace.service';
 import { INLINE_INPUT_CLASS } from './task-plan-fields.constants';
 import { TaskPlanFieldProps, TaskPlanPatch } from './task-plan-fields.types';
 
-export function TaskEstimateField({ taskId, onError }: TaskPlanFieldProps) {
+export function TaskEstimateField({ taskId, onError, readOnly = false }: TaskPlanFieldProps) {
   const t = useTranslations('planning');
   const td = useTranslations('drawer');
   const plan = useTaskPlan(taskId);
   const [draft, setDraft] = useState('');
   const change = useInvalidating((body: TaskPlanPatch) => workspaceService.changePlan(taskId, body), ['plan']);
   const current = plan.data?.estimateMinutes ?? null;
+  if (readOnly) return <span className={current === null ? 'px-1.5 text-muted' : 'px-1.5'}>{current === null ? td('empty') : td('minutes', { minutes: current })}</span>;
   return (
     <input
       type="number"

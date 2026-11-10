@@ -1,7 +1,10 @@
+import { UserRole } from '@/types/api.types';
+
 export interface PickerPerson {
   id: string;
   name: string;
   email?: string;
+  role?: UserRole;
 }
 
 export interface PeoplePickerProps {

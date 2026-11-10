@@ -21,6 +21,7 @@ const CALLS: [string, () => unknown, string, string | undefined, unknown][] = [
   ['userAccess', () => authService.userAccess(), '/users/access', undefined, undefined],
   ['inviteUser', () => authService.inviteUser(INVITE), '/users/invite', 'POST', INVITE],
   ['generateAccessLink', () => authService.generateAccessLink('u1'), '/users/u1/access-link', 'POST', undefined],
+  ['changeUserRole', () => authService.changeUserRole('u1', 'viewer'), '/users/u1/role', 'PATCH', { role: 'viewer' }],
   ['revokeUserSessions', () => authService.revokeUserSessions('u1'), '/users/u1/sessions', 'DELETE', undefined],
 ];
 

@@ -1,14 +1,16 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Select } from '@/components/ui/select';
 import { STATE_CLASS } from './people.constants';
-import { accessStateOf, canAdministerPerson } from './people.helpers';
+import { accessStateOf, assignableRolesFor, canAdministerPerson } from './people.helpers';
 import { PersonRowProps } from './people.types';
 
-export function PersonRow({ person, actorId, actorRole, onLink, onEndSessions, busy }: PersonRowProps) {
+export function PersonRow({ person, actorId, actorRole, onLink, onEndSessions, onChangeRole, busy }: PersonRowProps) {
   const t = useTranslations('people');
   const state = accessStateOf(person);
   const allowed = canAdministerPerson(actorId, actorRole, person);
+  const roles = allowed ? assignableRolesFor(actorRole, person) : [];
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 py-3">
       <div className="min-w-0 flex-1 basis-56">
@@ -16,7 +18,11 @@ export function PersonRow({ person, actorId, actorRole, onLink, onEndSessions, b
         <p className="truncate text-xs text-muted">{person.email}</p>
       </div>
       <div className="flex w-44 items-center gap-2 text-xs">
-        <span className="rounded bg-panel2 px-1.5 py-0.5">{t(`roles.${person.role}`)}</span>
+        {roles.length ? (
+          <Select ariaLabel={t('roleLabel', { name: person.name })} disabled={busy} variant="ghost" value={person.role} options={roles.map((role) => ({ value: role, label: t(`roles.${role}`) }))} onChange={(role) => role !== person.role && onChangeRole(person, role)} className="w-auto shrink-0" />
+        ) : (
+          <span className="rounded bg-panel2 px-1.5 py-0.5">{t(`roles.${person.role}`)}</span>
+        )}
         <span className={STATE_CLASS[state]}>{t(`states.${state}`)}</span>
       </div>
       <div className="flex w-56 justify-end gap-2">

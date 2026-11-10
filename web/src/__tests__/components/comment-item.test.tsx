@@ -6,7 +6,7 @@ import { MEMBERS } from '../helpers/fixtures';
 import { CommentItem } from '@/components/tasks/comment-item';
 import { TaskComment } from '@/types/api.types';
 
-const mocks = vi.hoisted(() => ({ edit: vi.fn(), remove: vi.fn(), caps: { userId: 'u1', canModerateComments: false } }));
+const mocks = vi.hoisted(() => ({ edit: vi.fn(), remove: vi.fn(), caps: { userId: 'u1', canModerateComments: false, canWrite: true } }));
 
 vi.mock('@/hooks/use-capabilities', () => ({ useCapabilities: () => mocks.caps }));
 vi.mock('@/hooks/use-orbit', () => ({ useMembers: () => ({ data: MEMBERS }), useEditComment: () => ({ mutate: mocks.edit, isPending: false }), useDeleteComment: () => ({ mutate: mocks.remove, isPending: false }) }));
@@ -18,7 +18,7 @@ describe('CommentItem', () => {
   beforeEach(() => {
     mocks.edit.mockClear();
     mocks.remove.mockClear();
-    mocks.caps = { userId: 'u1', canModerateComments: false };
+    mocks.caps = { userId: 'u1', canModerateComments: false, canWrite: true };
   });
 
   it('lets the author edit and sends the people mentioned in the new text', () => {
@@ -50,14 +50,14 @@ describe('CommentItem', () => {
   });
 
   it('shows no actions on a comment from someone else', () => {
-    mocks.caps = { userId: 'u2', canModerateComments: false };
+    mocks.caps = { userId: 'u2', canModerateComments: false, canWrite: true };
     show();
     expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
   });
 
   it('lets an admin delete but not edit a comment from someone else', () => {
-    mocks.caps = { userId: 'u2', canModerateComments: true };
+    mocks.caps = { userId: 'u2', canModerateComments: true, canWrite: true };
     show();
     expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Delete' })).toBeTruthy();

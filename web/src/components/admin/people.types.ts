@@ -19,7 +19,13 @@ export interface PersonRowProps {
   actorRole: string;
   onLink: (person: UserAccess) => void;
   onEndSessions: (person: UserAccess) => void;
+  onChangeRole: (person: UserAccess, role: string) => void;
   busy: boolean;
 }
 
 export type PersonAccessState = 'disabled' | 'active' | 'pending';
+
+export interface IssuedLinkState {
+  name: string;
+  link: IssuedAccessLink;
+}

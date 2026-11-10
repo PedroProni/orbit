@@ -61,7 +61,7 @@ export class UserController {
   }
 
   @Patch(':id/role')
-  @Authenticated(SCOPE_USERS_MANAGE)
+  @Authenticated(SCOPE_USERS_INVITE)
   role(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string, @Body() dto: ChangeUserRoleDto) {
     return this.changeRole.execute(principal, id, dto.role);
   }

@@ -3,7 +3,7 @@ import { ViewDisplay } from '@/types/view-display.types';
 export type StatusType = 'open' | 'active' | 'review' | 'done' | 'closed';
 export type TaskPriority = 'urgent' | 'high' | 'normal' | 'low';
 export type TaskKind = 'task' | 'milestone' | 'bug' | 'feature' | 'chore';
-export type UserRole = 'owner' | 'admin' | 'member' | 'guest';
+export type UserRole = 'owner' | 'admin' | 'member' | 'viewer' | 'guest';
 
 export interface StatusDefinition {
   name: string;

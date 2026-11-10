@@ -4,18 +4,19 @@ import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/re
 import { renderWithProviders } from '../helpers/render-with-providers';
 import { chooseOption } from '../helpers/choose-option';
 import { PeoplePage } from '@/components/admin/people-page';
-import { accessLinkUrl, accessStateOf, canAdministerPerson, invitableRoles } from '@/components/admin/people.helpers';
+import { accessLinkUrl, accessStateOf, assignableRolesFor, canAdministerPerson, invitableRoles } from '@/components/admin/people.helpers';
 import { ApiError } from '@/lib/api-client';
 import { authService } from '@/services/auth.service';
 import { UserAccess } from '@/services/auth.types';
 import { orbitService } from '@/services/orbit.service';
 import { useSessionStore } from '@/stores/session.store';
+import { useToastStore } from '@/stores/toast.store';
 import { Principal } from '@/types/api.types';
 
 const person = (id: string, role: string, extra: Partial<UserAccess> = {}): UserAccess => ({ id, email: `${id}@example.com`, name: id, avatarUrl: null, role, status: 'active', hasPassword: true, ...extra }) as UserAccess;
 const me = (role: string): Principal => ({ id: 'me', email: 'me@example.com', name: 'me', avatarUrl: null, role, status: 'active', workspaceId: 'w1', scopes: [] }) as unknown as Principal;
 const LINK = { token: 'segredo-do-link', kind: 'reset', expiresAt: '2026-11-06T11:00:00.000Z' } as const;
-const PEOPLE = [person('me', 'owner'), person('adm', 'admin'), person('mem', 'member'), person('novo', 'member', { hasPassword: false }), person('off', 'guest', { status: 'disabled' })];
+const PEOPLE = [person('me', 'owner'), person('adm', 'admin'), person('mem', 'member'), person('novo', 'member', { hasPassword: false }), person('off', 'guest', { status: 'disabled' }), person('lei', 'viewer')];
 
 const openAs = async (role: string) => {
   vi.spyOn(orbitService, 'me').mockResolvedValue(me(role));
@@ -90,6 +91,42 @@ describe('people screen', () => {
     expect(screen.queryByLabelText('Link for this person')).toBeNull();
   });
 
+  it('lets an admin change a member to viewer from the row and shows the new role after the reload', async () => {
+    const list = vi.spyOn(authService, 'userAccess').mockResolvedValue(PEOPLE);
+    const change = vi.spyOn(authService, 'changeUserRole').mockResolvedValue({});
+    await openAs('admin');
+    const select = await screen.findByRole('combobox', { name: 'Role of mem' });
+    fireEvent.click(select);
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual(['Member', 'Viewer', 'Guest']);
+    list.mockResolvedValue(PEOPLE.map((item) => (item.id === 'mem' ? { ...item, role: 'viewer' } : item)) as UserAccess[]);
+    fireEvent.click(screen.getByRole('option', { name: 'Viewer' }));
+    await waitFor(() => expect(change).toHaveBeenCalledWith('mem', 'viewer'));
+    await waitFor(() => expect(useToastStore.getState().items.map((toast) => `${toast.kind}:${toast.messageKey}`)).toContain('success:roleChanged'));
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Role of mem' }).textContent).toContain('Viewer'));
+  });
+
+  it('gives an admin no role control over an admin, an owner or themselves', async () => {
+    vi.spyOn(authService, 'userAccess').mockResolvedValue([...PEOPLE, person('me2', 'admin')]);
+    vi.spyOn(orbitService, 'me').mockResolvedValue({ ...me('admin'), id: 'me2' });
+    renderWithProviders(<PeoplePage />);
+    expect(await screen.findByRole('combobox', { name: 'Role of lei' })).toBeTruthy();
+    expect(screen.queryByRole('combobox', { name: 'Role of adm' })).toBeNull();
+    expect(screen.queryByRole('combobox', { name: 'Role of me' })).toBeNull();
+    expect(screen.queryByRole('combobox', { name: 'Role of me2' })).toBeNull();
+    expect(screen.getAllByText('Owner').length).toBeGreaterThan(0);
+  });
+
+  it('lets an owner promote to admin, never to owner, and shows the refusal toast when the server says no', async () => {
+    vi.spyOn(authService, 'userAccess').mockResolvedValue(PEOPLE);
+    const change = vi.spyOn(authService, 'changeUserRole').mockRejectedValue(new ApiError(403, 'Forbidden'));
+    await openAs('owner');
+    fireEvent.click(await screen.findByRole('combobox', { name: 'Role of lei' }));
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual(['Administrator', 'Member', 'Viewer', 'Guest']);
+    fireEvent.click(screen.getByRole('option', { name: 'Administrator' }));
+    await waitFor(() => expect(change).toHaveBeenCalledWith('lei', 'admin'));
+    await waitFor(() => expect(useToastStore.getState().items.map((toast) => `${toast.kind}:${toast.messageKey}`)).toContain('error:roleChangeFailed'));
+  });
+
   it('ends the sessions of a person', async () => {
     vi.spyOn(authService, 'userAccess').mockResolvedValue(PEOPLE);
     const revoke = vi.spyOn(authService, 'revokeUserSessions').mockResolvedValue({ revoked: 2 });
@@ -126,6 +163,20 @@ describe('people screen', () => {
     expect((screen.getByLabelText('Link for this person') as HTMLTextAreaElement).tagName).toBe('TEXTAREA');
   });
 
+  it('invites a viewer with the hint that explains the role', async () => {
+    vi.spyOn(authService, 'userAccess').mockResolvedValue(PEOPLE);
+    const invite = vi.spyOn(authService, 'inviteUser').mockResolvedValue({ user: person('bia', 'viewer') as never, link: { ...LINK, kind: 'invite' } });
+    await openAs('admin');
+    fireEvent.click(await screen.findByRole('button', { name: 'Invite person' }));
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.change(within(dialog).getByLabelText('Name'), { target: { value: 'Bia' } });
+    fireEvent.change(within(dialog).getByLabelText('Email'), { target: { value: 'bia@example.com' } });
+    chooseOption(within(dialog).getByRole('combobox', { name: 'What this person can do' }), 'Viewer');
+    expect(within(dialog).getByText('Sees everything a member sees, names included, but cannot change anything.')).toBeTruthy();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Create invite' }));
+    await waitFor(() => expect(invite).toHaveBeenCalledWith({ email: 'bia@example.com', name: 'Bia', role: 'viewer', allowExternalEmail: false }));
+  });
+
   it('explains an email outside the company and keeps what was typed', async () => {
     vi.spyOn(authService, 'userAccess').mockResolvedValue(PEOPLE);
     vi.spyOn(authService, 'inviteUser').mockRejectedValue(new ApiError(403, 'EMAIL_DOMAIN_NOT_ALLOWED'));
@@ -159,12 +210,22 @@ describe('people rules', () => {
     expect(canAdministerPerson('me', 'owner', person('o', 'owner'))).toBe(true);
     expect(canAdministerPerson('me', 'owner', person('me', 'owner'))).toBe(false);
     expect(canAdministerPerson('me', 'member', person('g', 'guest'))).toBe(false);
+    expect(canAdministerPerson('me', 'admin', person('v', 'viewer'))).toBe(true);
+    expect(canAdministerPerson('me', 'viewer', person('g', 'guest'))).toBe(false);
   });
 
   it('offers only the roles this person may give', () => {
-    expect(invitableRoles('owner')).toEqual(['admin', 'member', 'guest']);
-    expect(invitableRoles('admin')).toEqual(['member', 'guest']);
+    expect(invitableRoles('owner')).toEqual(['admin', 'member', 'viewer', 'guest']);
+    expect(invitableRoles('admin')).toEqual(['member', 'viewer', 'guest']);
     expect(invitableRoles('member')).toEqual([]);
+    expect(invitableRoles('viewer')).toEqual([]);
+  });
+
+  it('lets an admin move a person only among member, viewer and guest, and never touches an owner', () => {
+    expect(assignableRolesFor('admin', person('m', 'member'))).toEqual(['member', 'viewer', 'guest']);
+    expect(assignableRolesFor('owner', person('a', 'admin'))).toEqual(['admin', 'member', 'viewer', 'guest']);
+    expect(assignableRolesFor('owner', person('o', 'owner'))).toEqual([]);
+    expect(assignableRolesFor('viewer', person('m', 'member'))).toEqual([]);
   });
 
   it('reads the state and builds a link that keeps the token out of the server logs', () => {

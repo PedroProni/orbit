@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/auth.service';
-import { InviteUserInput } from '@/services/auth.types';
+import { ChangePasswordInput, ChangeUserRoleInput, InviteUserInput } from '@/services/auth.types';
 import { useToastStore } from '@/stores/toast.store';
 import { SESSIONS_KEY, USER_ACCESS_KEY } from './use-account.constants';
 
@@ -32,7 +32,7 @@ export const useRevokeOtherSessions = () => {
 export const useChangePassword = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => authService.changePassword(currentPassword, newPassword),
+    mutationFn: ({ currentPassword, newPassword }: ChangePasswordInput) => authService.changePassword(currentPassword, newPassword),
     onSuccess: () => {
       useToastStore.getState().push('success', 'passwordChanged');
       return client.invalidateQueries({ queryKey: SESSIONS_KEY });
@@ -55,3 +55,15 @@ export const useRevokeUserSessions = () =>
     onSuccess: () => useToastStore.getState().push('success', 'sessionsEnded'),
     onError: () => useToastStore.getState().push('error', 'sessionRevokeFailed'),
   });
+
+export const useChangeUserRole = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ChangeUserRoleInput) => authService.changeUserRole(input.userId, input.role),
+    onSuccess: () => {
+      useToastStore.getState().push('success', 'roleChanged');
+      return client.invalidateQueries({ queryKey: USER_ACCESS_KEY });
+    },
+    onError: () => useToastStore.getState().push('error', 'roleChangeFailed'),
+  });
+};

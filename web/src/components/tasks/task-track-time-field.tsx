@@ -8,7 +8,7 @@ import { useInvalidating, useTaskPlan, useTaskTime } from '@/hooks/use-workspace
 import { workspaceService } from '@/services/workspace.service';
 import { TaskPlanFieldProps } from './task-plan-fields.types';
 
-export function TaskTrackTimeField({ taskId, onError }: TaskPlanFieldProps) {
+export function TaskTrackTimeField({ taskId, onError, readOnly = false }: TaskPlanFieldProps) {
   const t = useTranslations('planning');
   const td = useTranslations('drawer');
   const plan = useTaskPlan(taskId);
@@ -21,6 +21,7 @@ export function TaskTrackTimeField({ taskId, onError }: TaskPlanFieldProps) {
   const addTime = useInvalidating((value: number) => workspaceService.addTime(taskId, value), ['time', 'plan']);
   const running = time.data?.entries.some((entry) => entry.running) ?? false;
   const tracked = plan.data?.trackedMinutes ?? 0;
+  if (readOnly) return <span className={tracked > 0 ? 'px-1.5' : 'px-1.5 text-muted'}>{tracked > 0 ? td('minutes', { minutes: tracked }) : td('empty')}</span>;
   return (
     <div className="flex items-center gap-1">
       <button type="button" onClick={() => (running ? stop.mutate(undefined, { onError }) : start.mutate(undefined, { onError }))} className="flex items-center gap-1.5 rounded px-1.5 py-1 transition-colors hover:bg-panel2">

@@ -24,7 +24,7 @@ export function CommentItem({ taskId, comment, members, attachments, onRemoveAtt
   const remove = useDeleteComment(taskId);
   const [body, setBody] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const isAuthor = caps.userId === comment.authorId;
+  const isAuthor = caps.canWrite && caps.userId === comment.authorId;
   const save = () => {
     if (!body?.trim()) return;
     edit.mutate({ id: comment.id, bodyMd: body, mentionIds: collectMentionIds(body, members) }, { onSuccess: () => setBody(null) });
@@ -81,7 +81,7 @@ export function CommentItem({ taskId, comment, members, attachments, onRemoveAtt
         )}
         <ul className="mt-2 space-y-2 empty:hidden">
           {attachments.map((a) => (
-            <AttachmentItem key={a.id} attachment={a} onRemove={onRemoveAttachment} />
+            <AttachmentItem key={a.id} attachment={a} onRemove={caps.canWrite ? onRemoveAttachment : undefined} />
           ))}
         </ul>
       </div>

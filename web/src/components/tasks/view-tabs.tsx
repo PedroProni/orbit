@@ -24,7 +24,7 @@ export function ViewTabs({ listId }: ViewTabsProps) {
   const update = useUpdateView();
   const remove = useDeleteView();
   const push = useToastStore((s) => s.push);
-  const { isGuest, member, userId, canManageAccess } = useCapabilities();
+  const { canWrite, userId, canManageAccess } = useCapabilities();
   const { view, filters, display, activeViewId, setView, applyView } = useUiStore();
   const addRef = useRef<HTMLButtonElement>(null);
   const [form, setForm] = useState<ViewFormState | null>(null);
@@ -92,7 +92,7 @@ export function ViewTabs({ listId }: ViewTabsProps) {
               {item.name}
               {dirty ? <span role="img" aria-label={ts('unsaved')} className="h-1.5 w-1.5 rounded-full bg-accent" /> : null}
             </button>
-            {active ? (
+            {active && canWrite ? (
               <DropdownMenu items={menuFor(item)} label={ts('menu', { name: item.name })} className="rounded p-0.5 text-muted hover:text-fg">
                 <MoreHorizontal size={13} />
               </DropdownMenu>
@@ -101,7 +101,7 @@ export function ViewTabs({ listId }: ViewTabsProps) {
           </span>
         );
       })}
-      {isGuest || !member ? null : (
+      {!canWrite ? null : (
         <button ref={addRef} type="button" onClick={() => openForm(null)} className="ml-1 flex shrink-0 items-center gap-1 px-2 py-2 text-xs text-muted hover:text-fg">
           <Plus size={12} />
           {t('addView')}

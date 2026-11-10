@@ -84,7 +84,7 @@ export function CreateTaskForm({ open, defaults, onHide }: CreateTaskFormProps) 
   const fallbackSpace = listId ? findSpaceByList(spaces, listId) : undefined;
   const target = listId && fallbackSpace ? composerTarget(spaces, listId, fallbackSpace) : null;
   const sameSpace = !!target && !!defaults.listId && findSpaceByList(spaces, defaults.listId)?.id === target.space.id;
-  const people = (members.data ?? []).map((m) => ({ id: m.id, name: m.name, email: m.email }));
+  const people = (members.data ?? []).map((m) => ({ id: m.id, name: m.name, email: m.email, role: m.role }));
   const meId = me.data?.id ?? null;
   const prefix = target ? titlePrefixOf(draft.title, target.space.titlePrefixes) : '';
   const isBlank = draft.title.trim() === prefix.trim();

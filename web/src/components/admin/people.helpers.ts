@@ -9,4 +9,6 @@ export const canAdministerPerson = (actorId: string, actorRole: string, person: 
 
 export const invitableRoles = (actorRole: string): string[] => (actorRole === 'owner' ? ['admin', ...LOWER_ROLES] : actorRole === 'admin' ? LOWER_ROLES : []);
 
+export const assignableRolesFor = (actorRole: string, person: UserAccess): string[] => (person.role === 'owner' ? [] : invitableRoles(actorRole));
+
 export const accessLinkUrl = (origin: string, token: string): string => `${origin}${SET_PASSWORD_PATH}${ACCESS_LINK_HASH_PREFIX}${token}`;

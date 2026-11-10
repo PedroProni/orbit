@@ -6,13 +6,14 @@ import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCapabilities, useMe } from '@/hooks/use-capabilities';
-import { useGenerateAccessLink, useRevokeUserSessions, useUserAccess } from '@/hooks/use-account';
+import { useChangeUserRole, useGenerateAccessLink, useRevokeUserSessions, useUserAccess } from '@/hooks/use-account';
 import { describeAuthError } from '@/lib/auth-error';
-import { IssuedAccessLink, UserAccess } from '@/services/auth.types';
+import { UserAccess } from '@/services/auth.types';
 import { useToastStore } from '@/stores/toast.store';
 import { AccessLinkDialog } from './access-link-dialog';
 import { InviteDialog } from './invite-dialog';
 import { PersonRow } from './person-row';
+import { IssuedLinkState } from './people.types';
 
 export function PeoplePage() {
   const t = useTranslations('people');
@@ -23,8 +24,9 @@ export function PeoplePage() {
   const people = useUserAccess(caps.canManageAccess);
   const generate = useGenerateAccessLink();
   const revoke = useRevokeUserSessions();
+  const changeRole = useChangeUserRole();
   const [inviting, setInviting] = useState(false);
-  const [issued, setIssued] = useState<{ name: string; link: IssuedAccessLink } | null>(null);
+  const [issued, setIssued] = useState<IssuedLinkState | null>(null);
   const [refusal, setRefusal] = useState<string | null>(null);
 
   if (me.isLoading) return <Skeleton className="m-6 h-40" />;
@@ -77,7 +79,7 @@ export function PeoplePage() {
         ) : null}
         <ul className="divide-y divide-line">
           {people.data?.map((person) => (
-            <PersonRow key={person.id} person={person} actorId={me.data?.id ?? ''} actorRole={me.data?.role ?? ''} busy={generate.isPending || revoke.isPending} onLink={(target) => void link(target)} onEndSessions={(target) => revoke.mutate(target.id)} />
+            <PersonRow key={person.id} person={person} actorId={me.data?.id ?? ''} actorRole={me.data?.role ?? ''} busy={generate.isPending || revoke.isPending || changeRole.isPending} onLink={(target) => void link(target)} onEndSessions={(target) => revoke.mutate(target.id)} onChangeRole={(target, role) => changeRole.mutate({ userId: target.id, role })} />
           ))}
         </ul>
       </section>

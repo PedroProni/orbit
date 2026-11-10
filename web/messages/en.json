@@ -30,7 +30,9 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "signOut": "Sign out",
-    "account": "My account"
+    "account": "My account",
+    "readOnlyChip": "Read only",
+    "readOnlyChipHint": "Your role can view everything but cannot change anything."
   },
   "sidebar": {
     "label": "Spaces and lists",
@@ -347,7 +349,8 @@
       "bullet": "Bulleted list",
       "code": "Code",
       "link": "Link"
-    }
+    },
+    "pickOnly": "Pick a doc"
   },
   "goals": {
     "title": "Goals",
@@ -385,7 +388,9 @@
     "pick": "Pick or create a channel",
     "noMessages": "No messages yet",
     "message": "Write a message",
-    "send": "Send"
+    "send": "Send",
+    "readOnlyNotice": "You can read this channel. Your role cannot send messages.",
+    "pickOnly": "Pick a channel"
   },
   "planning": {
     "title": "Planning",
@@ -515,7 +520,9 @@
     },
     "docCreated": "Doc created: {name}",
     "statusMissing": "The space \"{space}\" has no status \"{status}\", so this task stays where it was",
-    "pullRequestUnlinkFailed": "Could not unlink the pull request"
+    "pullRequestUnlinkFailed": "Could not unlink the pull request",
+    "roleChanged": "Role changed.",
+    "roleChangeFailed": "Could not change the role."
   },
   "attachments": {
     "title": "Attachments",
@@ -639,11 +646,13 @@
       "owner": "Owner",
       "admin": "Administrator",
       "member": "Member",
+      "viewer": "Viewer",
       "guest": "Guest"
     },
     "roleHints": {
       "admin": "Everything a member does, plus managing spaces, people and integrations.",
       "member": "Creates and edits tasks, comments and files.",
+      "viewer": "Sees everything a member sees, names included, but cannot change anything.",
       "guest": "Only reads the lists shared with them."
     },
     "states": {
@@ -666,7 +675,8 @@
     "copied": "Copied",
     "deniedHint": "Only owners and administrators manage people.",
     "loadError": "Could not load the people.",
-    "empty": "No people yet."
+    "empty": "No people yet.",
+    "roleLabel": "Role of {name}"
   },
   "board": {
     "noTag": "No tag",

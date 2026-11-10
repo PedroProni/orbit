@@ -447,6 +447,16 @@ const REQUIRED = [
   'apiErrors.automationWebhookUrlInvalid',
   'apiErrors.automationWebhookUrlPrivate',
   'apiErrors.automationInvalid',
+  'people.roles.viewer',
+  'people.roleHints.viewer',
+  'people.roleLabel',
+  'shell.readOnlyChip',
+  'shell.readOnlyChipHint',
+  'chat.readOnlyNotice',
+  'chat.pickOnly',
+  'docs.pickOnly',
+  'toast.roleChanged',
+  'toast.roleChangeFailed',
 ];
 
 describe('i18n parity', () => {

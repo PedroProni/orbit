@@ -13,7 +13,7 @@ import { TaskFieldRow } from './task-field-row';
 import { CUSTOM_FIELD_FALLBACK_ICON, CUSTOM_FIELD_TYPE_ICONS, CUSTOM_FIELD_URL_PATTERN, CUSTOM_FIELDS_HIDE_EMPTY_ABOVE } from './task-custom-fields.constants';
 import { INLINE_INPUT_CLASS } from './task-plan-fields.constants';
 
-function UrlInput({ definition, value, onSave }: CustomFieldInputProps) {
+function UrlInput({ definition, value, onSave, readOnly = false }: CustomFieldInputProps) {
   const t = useTranslations('drawer');
   const current = value === null ? '' : String(value);
   const [draft, setDraft] = useState(current);
@@ -25,6 +25,7 @@ function UrlInput({ definition, value, onSave }: CustomFieldInputProps) {
     <span className="flex items-center gap-1">
       <input
         type="url"
+        readOnly={readOnly}
         aria-label={definition.name}
         placeholder={t('emptyValue')}
         value={draft}
@@ -46,7 +47,7 @@ function UrlInput({ definition, value, onSave }: CustomFieldInputProps) {
   );
 }
 
-export function TaskCustomFieldRows({ task, save }: TaskCustomFieldsProps) {
+export function TaskCustomFieldRows({ task, save, readOnly = false }: TaskCustomFieldsProps) {
   const t = useTranslations('drawer');
   const definitions = useCustomFields(task.spaceId);
   const [showEmpty, setShowEmpty] = useState(false);
@@ -67,14 +68,15 @@ export function TaskCustomFieldRows({ task, save }: TaskCustomFieldsProps) {
               <Select
                 ariaLabel={definition.name}
                 variant="inline"
+                disabled={readOnly}
                 placeholder={t('emptyValue')}
                 value={value === null ? '' : String(value)}
                 options={[{ value: '', label: t('emptyValue') }, ...definition.options.map((option) => ({ value: option.id, label: option.label, icon: <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: option.color }} /> }))]}
                 onChange={(next) => saveField(definition.id, next || null)}
               />
             ) : null}
-            {definition.type === 'date' ? <DateField ariaLabel={definition.name} variant="inline" placeholder={t('emptyValue')} value={customFieldDay(value)} onChange={(day) => saveField(definition.id, isoFromDay(day))} /> : null}
-            {definition.type === 'url' ? <UrlInput key={String(value)} definition={definition} value={value} onSave={(next) => saveField(definition.id, next)} /> : null}
+            {definition.type === 'date' ? <DateField ariaLabel={definition.name} variant="inline" disabled={readOnly} placeholder={t('emptyValue')} value={customFieldDay(value)} onChange={(day) => saveField(definition.id, isoFromDay(day))} /> : null}
+            {definition.type === 'url' ? <UrlInput key={String(value)} definition={definition} value={value} readOnly={readOnly} onSave={(next) => saveField(definition.id, next)} /> : null}
           </TaskFieldRow>
         );
       })}

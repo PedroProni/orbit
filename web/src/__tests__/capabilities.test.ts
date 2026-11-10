@@ -24,6 +24,12 @@ describe('capabilitiesOf', () => {
     expect(capabilitiesOf(me('admin')).canManageAccess).toBe(true);
     expect(capabilitiesOf(me('owner')).canManageAccess).toBe(true);
   });
+
+  it('keeps a viewer a member who reads everything but writes nothing', () => {
+    expect(capabilitiesOf(me('viewer'))).toMatchObject({ loaded: true, isViewer: true, isGuest: false, member: true, canWrite: false, canModerateComments: false, canManageAccess: false, canManageStructure: false });
+    expect(capabilitiesOf(me('guest'))).toMatchObject({ isViewer: false, canWrite: false });
+    for (const role of ['member', 'admin', 'owner'] as const) expect(capabilitiesOf(me(role))).toMatchObject({ isViewer: false, canWrite: true });
+  });
 });
 
 describe('guestCanOpen', () => {

@@ -6,6 +6,7 @@ export interface TaskTimelineProps {
   task: Task;
   statuses: StatusDefinition[];
   readOnly: boolean;
+  limited: boolean;
 }
 
 export interface ActivityLineProps {

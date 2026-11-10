@@ -3,6 +3,7 @@ import { Task } from '@/types/api.types';
 export interface TaskPlanFieldProps {
   taskId: string;
   onError: (error: unknown) => void;
+  readOnly?: boolean;
 }
 
 export interface TaskDependenciesProps extends TaskPlanFieldProps {

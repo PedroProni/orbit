@@ -465,6 +465,18 @@ describe('Cópia do ClickUp', () => {
     expect((await store.findById('tasks', 'orbit-only')).title).toBe('Criada no Orbit');
   });
 
+  it('rodar de novo mantém o papel de leitor dado no Orbit, mesmo para quem é dono no ClickUp', async () => {
+    await copy();
+    const [dona] = await store.find('users', { clickup_id: '1' });
+    const [pessoa] = await store.find('users', { clickup_id: '2' });
+    await store.setFields('users', dona._id, { role: 'viewer' });
+    await store.setFields('users', pessoa._id, { role: 'viewer', status: 'disabled' });
+    await copy();
+    expect((await store.findById('users', dona._id)).role).toBe('viewer');
+    expect(await store.findById('users', pessoa._id)).toMatchObject({ role: 'viewer', status: 'disabled' });
+    expect(await store.count('users', { clickup_id: { $in: ['1', '2'] } })).toBe(2);
+  });
+
   it('mantém o anexo ligado ao comentário quando a tarefa também o lista', async () => {
     await copy();
     expect((await store.findById('attachments', 'att-c')).comment_id).toBe('c1');

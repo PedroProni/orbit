@@ -41,7 +41,7 @@ export function TaskComposer({ listId, space, label, variant = 'card', initialPi
   const me = useMe();
   const members = useMembers();
   const tasks = useTasks(listId, filters);
-  const people = (members.data ?? []).map((m) => ({ id: m.id, name: m.name, email: m.email }));
+  const people = (members.data ?? []).map((m) => ({ id: m.id, name: m.name, email: m.email, role: m.role }));
   const spaces = hierarchy.data ?? [space];
   const target = composerTarget(spaces, draft.listId ?? listId, space);
   const sameSpace = target.space.id === space.id;

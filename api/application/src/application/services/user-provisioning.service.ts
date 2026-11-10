@@ -7,6 +7,7 @@ import { UserEntity } from '@domain/entities/user.entity';
 import { WorkspaceEntity } from '@domain/entities/workspace.entity';
 import { UserRole, UserStatus } from '@domain/enums/user.enums';
 import { APP_NAME } from '@domain/constants/app.constant';
+import { USER_PROFILE_FIELDS, USER_PROFILE_WITH_CLICKUP_FIELDS } from '@domain/constants/user-patch-fields.constant';
 import { VerifiedIdentity } from '@domain/types/verified-identity.type';
 import { ProvisionOptions } from '@domain/types/provision-options.type';
 import { newId } from '@common/helpers/functions/id.helper';
@@ -26,7 +27,7 @@ export class UserProvisioningService {
     if (existing) {
       existing.updateProfile(identity.name || existing.getName(), identity.avatarUrl);
       if (options.clickupId) existing.setClickupId(options.clickupId);
-      return this.users.update(existing);
+      return this.users.patch(existing, options.clickupId ? USER_PROFILE_WITH_CLICKUP_FIELDS : USER_PROFILE_FIELDS);
     }
     const slug = options.workspaceSlug || 'main';
     let workspace = await this.workspaces.findOne({ slug });
@@ -37,6 +38,19 @@ export class UserProvisioningService {
       await this.spaces.create(SpaceFactory.createDefault(workspace.getId(), 'Acme'));
       role = UserRole.OWNER;
     }
-    return this.users.create(new UserEntity({ _id: newId(), workspaceId: workspace.getId(), email, name: identity.name || email, avatarUrl: identity.avatarUrl, clickupId: options.clickupId ?? null, role, status: UserStatus.ACTIVE, createdAt: now, updatedAt: now }));
+    return this.users.create(
+      new UserEntity({
+        _id: newId(),
+        workspaceId: workspace.getId(),
+        email,
+        name: identity.name || email,
+        avatarUrl: identity.avatarUrl,
+        clickupId: options.clickupId ?? null,
+        role,
+        status: UserStatus.ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      }),
+    );
   }
 }

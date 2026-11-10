@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/select';
 import { useMembers } from '@/hooks/use-orbit';
 import { useStatusLabel } from '@/hooks/use-status-label';
 import { bulkUpdate } from '@/lib/bulk-update';
+import { assignablePeople } from '@/lib/assignable-people';
 import { TaskPatch } from '@/services/orbit.types';
 import { useSelectionStore } from '@/stores/selection.store';
 import { useToastStore } from '@/stores/toast.store';
@@ -40,7 +41,7 @@ export function BulkBar({ space }: BulkBarProps) {
     <div role="toolbar" aria-label={t('label')} aria-busy={busy} className="anim-pop-in fixed bottom-4 left-1/2 z-40 flex max-w-[calc(100vw-1rem)] -translate-x-1/2 flex-wrap items-center gap-2 rounded-lg border border-linestrong bg-raised p-2 text-sm shadow-floating">
       <span className="px-1 text-xs text-muted">{t('selected', { count: ids.length })}</span>
       <Select disabled={busy} ariaLabel={t('status')} placeholder={t('status')} value="" options={space.statuses.map((status) => ({ value: status.name, label: statusLabel(status.name) }))} onChange={(status) => void apply({ status })} variant="ghost" className="w-auto" />
-      <Select disabled={busy} ariaLabel={t('assignee')} placeholder={t('assignee')} value="" options={(members.data ?? []).map((member) => ({ value: member.id, label: member.name }))} onChange={(id) => void apply({ addAssigneeIds: [id] })} variant="ghost" className="w-auto" />
+      <Select disabled={busy} ariaLabel={t('assignee')} placeholder={t('assignee')} value="" options={assignablePeople(members.data ?? []).map((member) => ({ value: member.id, label: member.name }))} onChange={(id) => void apply({ addAssigneeIds: [id] })} variant="ghost" className="w-auto" />
       <Select disabled={busy} ariaLabel={t('priority')} placeholder={t('priority')} value="" options={PRIORITIES.map((priority) => ({ value: priority, label: tt(`priority.${priority}`) }))} onChange={(priority) => void apply({ priority })} variant="ghost" className="w-auto" />
       <form
         onSubmit={(event) => {

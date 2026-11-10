@@ -7,6 +7,7 @@ import { MenuList } from '@/components/ui/menu-list';
 import { PriorityFlag } from '@/components/ui/priority-flag';
 import { TASK_KINDS } from '@/components/workspace/workspace.constants';
 import { formatShortDay } from '@/lib/calendar-day';
+import { assignablePeople } from '@/lib/assignable-people';
 import { TaskKind, TaskPriority } from '@/types/api.types';
 import { ComposerField } from './composer-field';
 import { ComposerFieldsProps } from './composer-fields.types';
@@ -54,7 +55,7 @@ export function ComposerFields({ names, look, draft, space, people, meId, sugges
         onToggle={() => onToggle('people')}
         onClose={onClose}
       >
-        <PeoplePicker people={people} selected={draft.assigneeIds} meId={meId} alwaysSearch label={tc('assignees')} onToggle={(id) => onChange({ assigneeIds: toggleIn(draft.assigneeIds, id) })} />
+        <PeoplePicker people={assignablePeople(people, draft.assigneeIds)} selected={draft.assigneeIds} meId={meId} alwaysSearch label={tc('assignees')} onToggle={(id) => onChange({ assigneeIds: toggleIn(draft.assigneeIds, id) })} />
       </ComposerField>
     ),
     date: (

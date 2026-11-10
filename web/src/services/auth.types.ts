@@ -44,3 +44,21 @@ export interface InviteUserResponse {
   user: Member;
   link: IssuedAccessLink;
 }
+
+export interface ChangeUserRoleInput {
+  userId: string;
+  role: string;
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface RevokedCount {
+  revoked: number;
+}
+
+export interface RevokedSession {
+  current: boolean;
+}

@@ -12,6 +12,11 @@ export class AccountAccessPolicy {
     return role !== UserRole.OWNER && AccountAccessPolicy.canAdminister(principal, role);
   }
 
+  static canChangeRole(principal: AuthPrincipal, targetId: string, current: UserRole, next: UserRole): boolean {
+    if (principal.role === UserRole.ADMIN && !AccountAccessPolicy.isPerson(principal)) return false;
+    return RolePolicy.canChangeRole(principal.role, current, next, principal.userId === targetId);
+  }
+
   static canAdminister(principal: AuthPrincipal, targetRole: UserRole): boolean {
     const administrator = principal.role === UserRole.OWNER || principal.role === UserRole.ADMIN;
     return administrator && AccountAccessPolicy.isPerson(principal) && RolePolicy.canManageUser(principal.role, targetRole);

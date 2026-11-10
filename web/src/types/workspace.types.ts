@@ -128,3 +128,25 @@ export interface InstantiateTemplateArgs {
   listId: string;
   title?: string;
 }
+
+export interface DashboardWidgetDraft {
+  type: DashboardWidgetType;
+  title: string;
+}
+
+export interface DashboardUpdateInput {
+  id: string;
+  name: string;
+  widgets: DashboardWidgetDraft[];
+}
+
+export interface DocSaveInput {
+  id: string;
+  title: string;
+  bodyMd: string;
+}
+
+export interface ChatPostInput {
+  id: string;
+  body: string;
+}

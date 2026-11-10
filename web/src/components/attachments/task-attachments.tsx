@@ -7,7 +7,7 @@ import { AttachButton } from './attach-button';
 import { AttachmentItem } from './attachment-item';
 import { UploadProgress } from './upload-progress';
 
-export function TaskAttachments({ taskId, controller }: TaskAttachmentsProps) {
+export function TaskAttachments({ taskId, controller, readOnly = false }: TaskAttachmentsProps) {
   const t = useTranslations('attachments');
   const list = useAttachments(taskId);
   const remove = useRemoveAttachment(taskId);
@@ -19,7 +19,7 @@ export function TaskAttachments({ taskId, controller }: TaskAttachmentsProps) {
         <h2 className="text-xs uppercase text-muted">
           {t('title')} {items.length ? `(${items.length})` : ''}
         </h2>
-        <AttachButton onFiles={(files) => controller.start(files)} />
+        {readOnly ? null : <AttachButton onFiles={(files) => controller.start(files)} />}
       </div>
       {controller.uploads.length ? (
         <ul className="mb-2 space-y-2">
@@ -31,7 +31,7 @@ export function TaskAttachments({ taskId, controller }: TaskAttachmentsProps) {
       {items.length ? (
         <ul className="space-y-2">
           {items.map((a) => (
-            <AttachmentItem key={a.id} attachment={a} onRemove={(id) => remove.mutate(id)} />
+            <AttachmentItem key={a.id} attachment={a} onRemove={readOnly ? undefined : (id) => remove.mutate(id)} />
           ))}
         </ul>
       ) : null}

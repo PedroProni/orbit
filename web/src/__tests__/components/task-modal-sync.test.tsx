@@ -21,7 +21,7 @@ vi.mock('@/hooks/use-orbit', () => ({
   useCustomFields: () => ({ data: [] }),
   useCreateTask: () => ({ mutate: vi.fn(), isPending: false }),
 }));
-vi.mock('@/hooks/use-capabilities', () => ({ useCapabilities: () => ({ isGuest: mocks.guest, member: !mocks.guest, canManageAccess: false, canManageWorkspace: false, userId: 'u1' }), useMe: () => ({ data: null }) }));
+vi.mock('@/hooks/use-capabilities', () => ({ useCapabilities: () => ({ isGuest: mocks.guest, member: !mocks.guest, canWrite: !mocks.guest, canManageAccess: false, canManageWorkspace: false, userId: 'u1' }), useMe: () => ({ data: null }) }));
 vi.mock('@/hooks/use-workspace', () => ({
   useTaskPlan: () => ({ data: { estimateMinutes: 90, taskKind: 'task', trackedMinutes: 30 } }),
   useTaskTime: () => ({ data: { entries: [] } }),

@@ -5,8 +5,9 @@ import { useTranslations } from 'next-intl';
 import { MarkdownView } from '@/components/common/markdown-view';
 import { EDITOR_ACTIONS, EDITOR_ICONS } from './docs.constants';
 import { wrapSelection } from './docs.helpers';
+import { DocEditorProps } from './docs.types';
 
-export function DocEditor({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+export function DocEditor({ value, onChange }: DocEditorProps) {
   const t = useTranslations('docs');
   const ref = useRef<HTMLTextAreaElement>(null);
   const apply = (before: string, after: string) => {

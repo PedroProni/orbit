@@ -63,11 +63,6 @@ export class UserEntity {
     return this.updatedAt;
   }
 
-  changeRole(role: UserRole): void {
-    this.role = role;
-    this.updatedAt = new Date();
-  }
-
   getClickupId(): string | null {
     return this.clickupId;
   }
@@ -98,6 +93,17 @@ export class UserEntity {
   }
 
   toProps(): UserEntityProps {
-    return { _id: this._id, workspaceId: this.workspaceId, email: this.email, name: this.name, avatarUrl: this.avatarUrl, clickupId: this.clickupId, role: this.role, status: this.status, createdAt: this.createdAt, updatedAt: this.updatedAt };
+    return {
+      _id: this._id,
+      workspaceId: this.workspaceId,
+      email: this.email,
+      name: this.name,
+      avatarUrl: this.avatarUrl,
+      clickupId: this.clickupId,
+      role: this.role,
+      status: this.status,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

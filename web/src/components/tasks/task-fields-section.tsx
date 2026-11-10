@@ -10,7 +10,7 @@ import { TaskPullRequestSlot } from './task-pull-request-slot';
 import { TaskUrlSlot } from './task-url-slot';
 import { TaskFieldsSectionProps } from './task-link-slots.types';
 
-export function TaskFieldsSection({ task, readOnly, save }: TaskFieldsSectionProps) {
+export function TaskFieldsSection({ task, readOnly, limited, save }: TaskFieldsSectionProps) {
   const t = useTranslations('drawer');
   const [open, setOpen] = useState(true);
   return (
@@ -33,7 +33,7 @@ export function TaskFieldsSection({ task, readOnly, save }: TaskFieldsSectionPro
           <TaskFieldRow icon={Images} label={t('prints')}>
             <TaskPrintsSlot taskId={task.id} readOnly={readOnly} folder={task.links.printsFolder} onSaveFolder={(printsFolder) => save({ links: { printsFolder } })} />
           </TaskFieldRow>
-          {readOnly ? null : <TaskCustomFieldRows task={task} save={save} />}
+          {limited ? null : <TaskCustomFieldRows task={task} save={save} readOnly={readOnly} />}
         </ul>
       ) : null}
     </section>

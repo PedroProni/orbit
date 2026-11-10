@@ -26,8 +26,9 @@ describe('SavedViewAccessPolicy', () => {
 });
 
 describe('RolePolicy', () => {
-  it('only owners change roles', () => {
-    expect(RolePolicy.canChangeRole(UserRole.ADMIN, UserRole.MEMBER, UserRole.GUEST)).toBe(false);
+  it('owners change any role and admins only move people among the low roles', () => {
+    expect(RolePolicy.canChangeRole(UserRole.ADMIN, UserRole.MEMBER, UserRole.GUEST)).toBe(true);
+    expect(RolePolicy.canChangeRole(UserRole.ADMIN, UserRole.MEMBER, UserRole.ADMIN)).toBe(false);
     expect(RolePolicy.canChangeRole(UserRole.OWNER, UserRole.MEMBER, UserRole.GUEST)).toBe(true);
   });
 });

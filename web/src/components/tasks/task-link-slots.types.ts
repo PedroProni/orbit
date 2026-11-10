@@ -25,5 +25,6 @@ export interface TaskSlotProps {
 export interface TaskFieldsSectionProps {
   task: Task;
   readOnly: boolean;
+  limited: boolean;
   save: SaveTaskPatch;
 }

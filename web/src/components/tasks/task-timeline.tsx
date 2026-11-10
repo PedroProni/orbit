@@ -10,15 +10,15 @@ import { TaskCommentComposer } from './task-comment-composer';
 import { formatCreatedDay, formatTimelineDay, localDayKey, mergeTimeline } from './task-timeline.helpers';
 import { TaskTimelineProps } from './task-timeline.types';
 
-export function TaskTimeline({ task, statuses, readOnly }: TaskTimelineProps) {
+export function TaskTimeline({ task, statuses, readOnly, limited }: TaskTimelineProps) {
   const t = useTranslations('drawer');
   const ta = useTranslations('activity');
   const locale = useLocale();
-  const comments = useComments(readOnly ? null : task.id);
+  const comments = useComments(limited ? null : task.id);
   const activity = useTaskActivity(task.id);
   const members = useMembers();
-  const definitions = useCustomFields(readOnly ? undefined : task.spaceId);
-  const attachments = useAttachments(readOnly ? null : task.id);
+  const definitions = useCustomFields(limited ? undefined : task.spaceId);
+  const attachments = useAttachments(limited ? null : task.id);
   const remove = useRemoveAttachment(task.id);
   const scroller = useRef<HTMLDivElement>(null);
   const items = mergeTimeline(comments.data ?? [], activity.data ?? []);

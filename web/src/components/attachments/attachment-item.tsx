@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { Download, FileText, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Attachment } from '@/types/api.types';
 import { orbitService } from '@/services/orbit.service';
 import { useAttachmentUrl } from '@/hooks/use-attachments';
 import { useToastStore } from '@/stores/toast.store';
 import { formatBytes, isImageMime } from './attachments.helpers';
+import { AttachmentItemProps } from './attachments.types';
 
-export function AttachmentItem({ attachment, onRemove }: { attachment: Attachment; onRemove: (id: string) => void }) {
+export function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
   const t = useTranslations('attachments');
   const image = isImageMime(attachment.mimeType);
   const preview = useAttachmentUrl(attachment.id, image);
@@ -32,7 +32,7 @@ export function AttachmentItem({ attachment, onRemove }: { attachment: Attachmen
         <p className="truncate">{attachment.filename}</p>
         <p className="text-xs text-muted">{formatBytes(attachment.sizeBytes)}</p>
       </div>
-      {confirming ? (
+      {confirming && onRemove ? (
         <div className="flex items-center gap-2 text-xs">
           <button type="button" onClick={() => onRemove(attachment.id)} className="text-danger">
             {t('confirmRemove')}
@@ -46,9 +46,11 @@ export function AttachmentItem({ attachment, onRemove }: { attachment: Attachmen
           <button type="button" aria-label={t('download', { name: attachment.filename })} onClick={download} className="hover:text-fg">
             <Download size={14} />
           </button>
-          <button type="button" aria-label={t('remove', { name: attachment.filename })} onClick={() => setConfirming(true)} className="hover:text-danger">
-            <Trash2 size={14} />
-          </button>
+          {onRemove ? (
+            <button type="button" aria-label={t('remove', { name: attachment.filename })} onClick={() => setConfirming(true)} className="hover:text-danger">
+              <Trash2 size={14} />
+            </button>
+          ) : null}
         </div>
       )}
     </li>

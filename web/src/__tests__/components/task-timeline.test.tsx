@@ -55,7 +55,7 @@ describe('TaskTimeline', () => {
     vi.spyOn(orbitService, 'comments').mockResolvedValue([comment({})]);
     vi.spyOn(orbitService, 'attachments').mockResolvedValue([]);
     vi.spyOn(orbitService, 'taskActivity').mockResolvedValue([entry({ diff: { status: { before: 'to-do', after: 'doing' } } }), entry({ id: 'e2', action: 'task.created', createdAt: '2026-03-01T12:00:00Z' })]);
-    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />);
+    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} limited={false} />);
     await screen.findByText('Primeiro comentário');
     await waitFor(() => expect(screen.getAllByRole('separator')).toHaveLength(2));
     const kinds = Array.from(document.querySelectorAll('[data-kind]')).map((node) => node.getAttribute('data-kind'));
@@ -75,7 +75,7 @@ describe('TaskTimeline', () => {
       entry({ id: 'e3', action: 'task.pull_request_linked', actorId: 'github', diff: { pullRequests: { before: null, after: 'acme-org/orbit#15' } } }),
       entry({ id: 'e4', action: 'task.pull_request_unlinked', createdAt: '2026-03-02T11:30:00Z', diff: { pullRequests: { before: 'acme-org/orbit#15', after: null } } }),
     ]);
-    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />);
+    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} limited={false} />);
     const lines = () => Array.from(document.querySelectorAll('[data-kind="activity"]')).map((node) => node.querySelector('div')?.textContent);
     await waitFor(() => expect(lines()).toEqual(['GitHub linked pull request acme-org/orbit#15', 'Bruno Lima unlinked pull request acme-org/orbit#15']));
   });
@@ -85,7 +85,7 @@ describe('TaskTimeline', () => {
     vi.spyOn(orbitService, 'comments').mockResolvedValue([comment({ authorId: 'automation', bodyMd: 'Lembrete automático' })]);
     vi.spyOn(orbitService, 'attachments').mockResolvedValue([]);
     vi.spyOn(orbitService, 'taskActivity').mockResolvedValue([entry({ id: 'e5', actorId: 'automation', diff: { priority: { before: 'low', after: 'urgent' } } })]);
-    const { unmount } = renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />);
+    const { unmount } = renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} limited={false} />);
     const activityLine = () => document.querySelector('[data-kind="activity"]');
     await waitFor(() => expect(activityLine()?.querySelector('div')?.textContent).toBe('Automation changed prioritypriority: Low -> Urgent'));
     expect(activityLine()?.querySelector('[data-actor="automation"] svg')).toBeTruthy();
@@ -93,7 +93,7 @@ describe('TaskTimeline', () => {
     expect(commentLine.querySelector('[data-actor="automation"]')?.getAttribute('aria-label')).toBe('Automation');
     expect(screen.queryByText('Someone')).toBeNull();
     unmount();
-    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />, 'pt');
+    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} limited={false} />, 'pt');
     await waitFor(() => expect(document.querySelector('[data-kind="activity"] [data-actor="automation"]')?.textContent).toBe('Automação'));
   });
 
@@ -102,7 +102,7 @@ describe('TaskTimeline', () => {
     vi.spyOn(orbitService, 'comments').mockResolvedValue([]);
     vi.spyOn(orbitService, 'attachments').mockResolvedValue([]);
     vi.spyOn(orbitService, 'taskActivity').mockResolvedValue([]);
-    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />);
+    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} limited={false} />);
     expect(await screen.findByText('No activity yet')).toBeTruthy();
     expect(document.querySelectorAll('[data-kind]')).toHaveLength(0);
   });
@@ -112,7 +112,7 @@ describe('TaskTimeline', () => {
     const comments = vi.spyOn(orbitService, 'comments').mockResolvedValue([]);
     const attachments = vi.spyOn(orbitService, 'attachments').mockResolvedValue([]);
     const activity = vi.spyOn(orbitService, 'taskActivity').mockResolvedValue([entry({ action: 'task.created' })]);
-    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly />);
+    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly limited />);
     await waitFor(() => expect(activity).toHaveBeenCalled());
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(comments).not.toHaveBeenCalled();

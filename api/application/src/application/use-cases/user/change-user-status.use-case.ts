@@ -6,6 +6,7 @@ import { AuthTokenRepository } from '@domain/repositories/auth-token.repository'
 import { AuthTokenKind } from '@domain/enums/auth-token.enums';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
 import { UserStatus } from '@domain/enums/user.enums';
+import { USER_STATUS_FIELDS } from '@domain/constants/user-patch-fields.constant';
 import { RolePolicy } from '@domain/policies/role.policy';
 import { AuditService } from '@application/services/audit.service';
 import { UserPresenter } from '@application/presenters/user.presenter';
@@ -26,7 +27,7 @@ export class ChangeUserStatusUseCase {
     if (!RolePolicy.canManageUser(principal.role, target.getRole())) throw new ForbiddenException('Not allowed to manage this user');
     if (status === UserStatus.DISABLED) target.disable();
     else target.enable();
-    const saved = await this.users.update(target);
+    const saved = await this.users.patch(target, USER_STATUS_FIELDS);
     if (status === UserStatus.DISABLED) {
       const now = new Date();
       await this.sessions.revokeAllForUser(userId, null, now);

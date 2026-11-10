@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Command, Menu, PanelLeftClose, PanelLeftOpen, UserRound } from 'lucide-react';
+import { Command, Eye, Menu, PanelLeftClose, PanelLeftOpen, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { APP_NAME } from '@/config/app.constants';
 import { useMe, useRealtime } from '@/hooks/use-orbit';
@@ -25,6 +25,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/cn';
 import { LocaleSwitch } from '@/components/common/locale-switch';
 import { ThemeToggle } from '@/components/common/theme-toggle';
+import { AppShellProps } from './app-shell.types';
 import { Sidebar } from './sidebar';
 import { SearchBox } from './search-box';
 import { NotificationsBell } from './notifications-bell';
@@ -33,7 +34,7 @@ import { CreateTaskDialog } from '@/components/tasks/create-task/create-task-dia
 
 const CommandPalette = dynamic(() => import('./command-palette').then((m) => m.CommandPalette));
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children }: AppShellProps) {
   const t = useTranslations('shell');
   const router = useRouter();
   const { authenticated, hydrated, clear } = useSessionStore();
@@ -51,7 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const caps = useCapabilities();
   const pathname = usePathname();
   useRealtime(caps.member);
-  useShortcuts(caps.member);
+  useShortcuts(caps.canWrite);
 
   useEffect(() => {
     if (hydrated && !authenticated) router.replace('/login');
@@ -95,6 +96,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Command size={12} />
             {tp('shortcut')}
           </button>
+          {caps.isViewer ? (
+            <span role="status" title={t('readOnlyChipHint')} className="flex shrink-0 items-center gap-1 rounded-full border border-line bg-panel2 px-2 py-0.5 text-xs text-muted">
+              <Eye size={12} aria-hidden="true" />
+              {t('readOnlyChip')}
+            </span>
+          ) : null}
           {caps.member ? <NotificationsBell /> : null}
           <ThemeToggle />
           <LocaleSwitch />
