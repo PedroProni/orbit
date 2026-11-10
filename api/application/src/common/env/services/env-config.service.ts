@@ -13,14 +13,6 @@ export class EnvConfigService implements IEnvConfig {
     return this.configService.get<string>('MONGODB_URI') || 'mongodb://localhost:27017/orbit';
   }
 
-  getAuthToken(): string {
-    return this.configService.get<string>('AUTH_TOKEN') || '';
-  }
-
-  getDecryptToken(): string {
-    return this.configService.get<string>('DECRYPT_TOKEN') || '';
-  }
-
   getLocalDomain(): string {
     return this.configService.get<string>('LOCAL_DOMAIN') || 'http://localhost:3000';
   }

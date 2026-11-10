@@ -46,7 +46,7 @@ npx tsc --noEmit
 - Administração (`/admin/*`): visão geral, espaços, status, tipos de tarefa, campos, grupos, pessoas, automações, formulários, modelos, tokens de API, auditoria e GitHub.
 - Páginas públicas: login, esqueci a senha, definir senha e formulário público (`/f/:chave`).
 
-## Funcionalidades (passos 4 a 7)
+## Funcionalidades (passos 4 a 8)
 
 ### Passo 4: administração, criação de tarefas e GitHub
 - Área de administração para a estrutura do workspace (espaços, pastas, listas, status, campos e grupos).
@@ -71,3 +71,8 @@ npx tsc --noEmit
 - Falha ao salvar mostra um aviso e mantém o que a pessoa digitou.
 - Chat e documentos no celular mostram uma coluna por vez, com botão de voltar.
 - No log de auditoria, um período invertido esconde a lista até a data ser corrigida.
+
+### Passo 8: achados do uso interno
+- No celular, o título da tarefa na lista quebra em até duas linhas e a busca do cabeçalho mostra um texto curto.
+- Avisos no topo, abaixo do cabeçalho: canto superior direito no computador e largura toda no celular, com o recuo da área segura.
+- O formulário de meta volta para os valores padrão depois de criar.

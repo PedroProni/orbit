@@ -6,7 +6,7 @@ import { SpaceRepository } from '@domain/repositories/space.repository';
 import { UserEntity } from '@domain/entities/user.entity';
 import { WorkspaceEntity } from '@domain/entities/workspace.entity';
 import { UserRole, UserStatus } from '@domain/enums/user.enums';
-import { APP_NAME } from '@domain/constants/app.constant';
+import { APP_NAME, DEFAULT_SPACE_NAME } from '@domain/constants/app.constant';
 import { USER_PROFILE_FIELDS, USER_PROFILE_WITH_CLICKUP_FIELDS } from '@domain/constants/user-patch-fields.constant';
 import { VerifiedIdentity } from '@domain/types/verified-identity.type';
 import { ProvisionOptions } from '@domain/types/provision-options.type';
@@ -35,7 +35,7 @@ export class UserProvisioningService {
     const now = new Date();
     if (!workspace) {
       workspace = await this.workspaces.create(new WorkspaceEntity({ _id: newId(), name: APP_NAME, slug, createdAt: now, updatedAt: now }));
-      await this.spaces.create(SpaceFactory.createDefault(workspace.getId(), 'Acme'));
+      await this.spaces.create(SpaceFactory.createDefault(workspace.getId(), DEFAULT_SPACE_NAME));
       role = UserRole.OWNER;
     }
     return this.users.create(

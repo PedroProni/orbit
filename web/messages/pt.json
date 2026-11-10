@@ -46,6 +46,7 @@
   "search": {
     "label": "Buscar",
     "placeholder": "Buscar tarefas e comentários",
+    "placeholderShort": "Buscar",
     "empty": "Nenhum resultado",
     "inComment": "Comentário"
   },

@@ -53,8 +53,8 @@ Os valores de exemplo estão em [`application/.env.example`](application/.env.ex
 | `S3_BUCKET` | Bucket dos anexos | `orbit-files` | `orbit` |
 | `S3_ACCESS_KEY`, `S3_SECRET_KEY` | Chaves do MinIO local. Vazias na AWS | vazio | chaves do MinIO local |
 | `PRESIGN_TTL_SECONDS` | Validade das URLs assinadas de anexo | `300` | `300` |
-| `LOCAL_DOMAIN` | Origem do front local aceita no CORS | `http://localhost:3000` | `http://localhost:3001` |
-| `MOBILE_DOMAIN`, `PROD_DOMAIN` | Outras origens aceitas no CORS | vazio | vazio |
+| `LOCAL_DOMAIN` | Origem do front aceita no CORS. Atrás do proxy do próprio front (`/backend`), use a URL pública do front | `http://localhost:3000` | `http://localhost:3001` |
+| `MOBILE_DOMAIN`, `PROD_DOMAIN` | Outras origens aceitas no CORS. Uma origem fora da lista recebe 403 (`CORS_ORIGIN_NOT_ALLOWED`) e a rota não roda; pedidos sem `Origin` passam | vazio | vazio |
 | `SWAGGER_AUTH_USERNAME`, `SWAGGER_AUTH_PASSWORD` | Acesso ao Swagger. Troque fora do ambiente local | `admin`, `admin` | `admin`, `admin` |
 | `PORT` | Porta HTTP | `3000` | `3000` |
 | `BIND_HOST` | Interface em que a API escuta. Vazio escuta em todas; use `127.0.0.1` quando só um proxy local deve alcançar a API | vazio | vazio |
@@ -70,7 +70,22 @@ Os valores de exemplo estão em [`application/.env.example`](application/.env.ex
 node dist/cli/access/issue-access-link.js --mongo-uri <uri> --base-url <url do front> --out <arquivo> --email <e-mail>
 ```
 
-## Funcionalidades (passos 4 a 7)
+### Primeiro dono de uma instância nova
+
+Numa instância sem dono, o primeiro dono é criado pela linha de comando, que só aceita Mongo local (use `--allow-remote` para um Mongo de outra máquina):
+
+```bash
+npm run access:create-owner -- --mongo-uri <uri> --email <e-mail> --name <nome> --base-url <url do front> --out <arquivo>
+```
+
+- Cria o workspace, o espaço padrão e o dono, e grava no arquivo (permissão 600) o link para definir a senha. O link não aparece na saída nem no log.
+- Só funciona enquanto não existe nenhum dono. Uma segunda execução, inclusive em paralelo, é recusada e não cria nem promove ninguém.
+- Se o workspace já existir sem dono (por exemplo, depois de uma importação), ele é reaproveitado.
+- A criação fica na auditoria como `auth.owner_bootstrapped`.
+
+Com o Cloudflare Access ou o login de desenvolvimento ligados, a primeira pessoa que entra num banco vazio também vira dona, como antes. Esse caminho só existe atrás do Access, com a checagem de domínio, ou com `ENABLE_DEV_LOGIN=true`.
+
+## Funcionalidades (passos 4 a 8)
 
 ### Passo 4: administração, criação de tarefas e GitHub
 - Área de administração com espaços, pastas, listas, status, campos personalizados e grupos.
@@ -93,3 +108,10 @@ node dist/cli/access/issue-access-link.js --mongo-uri <uri> --base-url <url do f
 
 ### Passo 7: acabamento
 - Acabamento visual das telas de painéis, metas, chat, documentos, caixa de entrada e conta no front, sem mudança de contrato na API.
+
+### Passo 8: achados do uso interno
+- Comando `access:create-owner` para criar o primeiro dono de uma instância nova (ver "Primeiro dono de uma instância nova").
+- `GET /tasks` com `statuses` e sem `includeClosed` passa a trazer as tarefas fechadas desses status, e a resposta diz se incluiu as fechadas (`includeClosed`).
+- `GET /hierarchy` aceita `workspace:read` ou `tasks:read`, para um token de tarefas resolver os nomes de espaço e lista.
+- Login de desenvolvimento desligado responde 404 antes de validar o corpo.
+- Origem fora do CORS recebe 403 em JSON em vez de 500, e o cabeçalho `x-orbit-csrf` entra no preflight.

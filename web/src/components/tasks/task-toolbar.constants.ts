@@ -1,0 +1,1 @@
+export const SEARCH_PLACEHOLDER_EXTRA_CH = 2;

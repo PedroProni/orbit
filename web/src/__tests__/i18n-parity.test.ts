@@ -10,6 +10,7 @@ const BASE = load('en');
 const flatten = (obj: Record<string, unknown>, prefix = ''): string[] => Object.entries(obj).flatMap(([key, value]) => (value && typeof value === 'object' ? flatten(value as Record<string, unknown>, `${prefix}${key}.`) : [`${prefix}${key}`]));
 
 const REQUIRED = [
+  'search.placeholderShort',
   'ui.cancel',
   'ui.retry',
   'ui.loadError',

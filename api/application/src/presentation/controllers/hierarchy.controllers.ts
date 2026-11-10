@@ -2,10 +2,11 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@ne
 import { ApiTags } from '@nestjs/swagger';
 import { GuestReadable } from '@infrastructure/auth/guest-readable.decorator';
 import { Authenticated } from '@infrastructure/auth/authenticated.decorator';
+import { AuthenticatedAny } from '@infrastructure/auth/authenticated-any.decorator';
 import { CurrentPrincipal } from '@infrastructure/auth/current-principal.decorator';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
 import { SprintKind } from '@domain/enums/list.enums';
-import { SCOPE_STRUCTURE_WRITE, SCOPE_WORKSPACE_READ } from '@domain/constants/scopes.constant';
+import { SCOPE_STRUCTURE_WRITE, SCOPE_TASKS_READ, SCOPE_WORKSPACE_READ } from '@domain/constants/scopes.constant';
 import { toDateOrNull } from '@common/helpers/functions/date.helper';
 import { GetHierarchyUseCase } from '@application/use-cases/hierarchy/get-hierarchy.use-case';
 import { CreateSpaceUseCase } from '@application/use-cases/hierarchy/create-space.use-case';
@@ -39,7 +40,7 @@ export class HierarchyController {
 
   @Get('hierarchy')
   @GuestReadable()
-  @Authenticated(SCOPE_WORKSPACE_READ)
+  @AuthenticatedAny(SCOPE_WORKSPACE_READ, SCOPE_TASKS_READ)
   tree(@CurrentPrincipal() principal: AuthPrincipal) {
     return this.getHierarchy.execute(principal);
   }
@@ -53,7 +54,7 @@ export class HierarchyController {
   @Patch('spaces/:id')
   @Authenticated(SCOPE_STRUCTURE_WRITE)
   patchSpace(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string, @Body() dto: UpdateSpaceDto) {
-    return this.updateSpace.execute(principal, id, { ...dto, statuses: dto.statuses?.map((s) => ({ name: s.name, color: s.color, type: s.type, order: s.order ?? 0 })) });
+    return this.updateSpace.execute(principal, id, { ...dto, statuses: dto.statuses?.map(s => ({ name: s.name, color: s.color, type: s.type, order: s.order ?? 0 })) });
   }
 
   @Post('spaces/:id/folders')
@@ -78,7 +79,14 @@ export class HierarchyController {
   @Post('spaces/:id/lists')
   @Authenticated(SCOPE_STRUCTURE_WRITE)
   list(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') spaceId: string, @Body() dto: CreateListDto) {
-    return this.createList.execute(principal, { spaceId, folderId: dto.folderId ?? null, name: dto.name, kind: dto.kind ?? SprintKind.LIST, startDate: toDateOrNull(dto.startDate), endDate: toDateOrNull(dto.endDate) });
+    return this.createList.execute(principal, {
+      spaceId,
+      folderId: dto.folderId ?? null,
+      name: dto.name,
+      kind: dto.kind ?? SprintKind.LIST,
+      startDate: toDateOrNull(dto.startDate),
+      endDate: toDateOrNull(dto.endDate),
+    });
   }
 
   @Patch('lists/:id')

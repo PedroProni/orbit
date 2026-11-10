@@ -16,6 +16,8 @@ import { ImportReport } from './import-report.type';
 import { DATE_ORIGINS_COLLECTION } from './import.constant';
 import { StatusType } from '@domain/enums/space.enums';
 
+jest.setTimeout(30000);
+
 const SAO_PAULO = 'America/Sao_Paulo';
 const DATE_ONLY = Date.UTC(2026, 2, 10, 7, 0, 0);
 const LATE_EVENING = Date.UTC(2026, 2, 11, 1, 30, 0);

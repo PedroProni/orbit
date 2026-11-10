@@ -1,5 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, INestApplication, Injectable, Logger } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express';
 import { EnvConfigService } from '@common/env/services/env-config.service';
+import { CORS_ALLOWED_HEADERS, CORS_METHODS, CORS_ORIGIN_NOT_ALLOWED } from '@domain/constants/cors.constant';
 
 @Injectable()
 export class CorsService {
@@ -7,25 +9,29 @@ export class CorsService {
 
   constructor(private readonly envService: EnvConfigService) {}
 
-  async setCors(app: any) {
-    const allowedOrigins = [this.envService.getProdDomain().trim().replace(/\/$/, ''), this.envService.getMobileDomain().trim().replace(/\/$/, ''), this.envService.getLocalDomain().trim().replace(/\/$/, '')];
+  setCors(app: INestApplication): void {
+    const allowedOrigins = new Set([this.envService.getProdDomain(), this.envService.getMobileDomain(), this.envService.getLocalDomain()].map(origin => this.normalize(origin)).filter(Boolean));
+    const isAllowed = (origin?: string) => !origin || allowedOrigins.has(this.normalize(origin));
+
+    app.use((request: Request, response: Response, next: NextFunction) => {
+      const origin = request.headers.origin;
+      if (isAllowed(origin)) return next();
+      this.logger.warn(`Blocked CORS origin: ${String(origin).slice(0, 200)}`);
+      const refusal = new ForbiddenException(CORS_ORIGIN_NOT_ALLOWED);
+      response.status(refusal.getStatus()).json(refusal.getResponse());
+    });
 
     app.enableCors({
-      origin: (origin: string, callback: (err: Error | null, allow?: boolean) => void) => {
-        const sanitizedOrigin = origin?.trim().replace(/\/$/, '');
-
-        if (!origin || allowedOrigins.includes(sanitizedOrigin)) {
-          callback(null, true);
-        } else {
-          this.logger.warn(`Blocked CORS origin: ${origin}`);
-          callback(new Error('Not allowed by CORS'), false);
-        }
-      },
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'x-api-key', 'user-token'],
+      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => callback(null, isAllowed(origin)),
+      methods: [...CORS_METHODS],
+      allowedHeaders: [...CORS_ALLOWED_HEADERS],
       credentials: true,
     });
 
     this.logger.log('CORS has been configured');
+  }
+
+  private normalize(origin: string): string {
+    return origin.trim().replace(/\/$/, '').toLowerCase();
   }
 }

@@ -46,6 +46,30 @@ describe('API tokens: shown once, never above the owner role, revoke wins over u
     expect(JSON.stringify(audits)).not.toContain(raw);
   });
 
+  it('a token with tasks:read resolves space and list names on /hierarchy, a token with neither read scope gets 403', async () => {
+    const list = await ctx.http().post(`/spaces/${spaceId}/lists`).set(auth(owner)).send({ name: 'Lista do token' }).expect(201);
+    const names = (body: Array<{ name: string; lists?: Array<{ name: string }>; folders?: Array<{ lists?: Array<{ name: string }> }> }>) =>
+      body.flatMap(space => [space.name, ...(space.lists ?? []).map(l => l.name), ...(space.folders ?? []).flatMap(f => (f.lists ?? []).map(l => l.name))]);
+    const bearer = (raw: string) => ({ Authorization: `Bearer ${raw}` });
+    const readOnly = await issue(admin, ['tasks:read']);
+    const readWrite = await issue(admin, ['tasks:read', 'tasks:write']);
+    const workspaceOnly = await issue(admin, ['workspace:read']);
+    const writeOnly = await issue(admin, ['tasks:write']);
+    const commentsOnly = await issue(admin, ['comments:write', 'users:read']);
+    for (const token of [readOnly, readWrite, workspaceOnly]) {
+      const tree = await ctx.http().get('/hierarchy').set(bearer(token.raw)).expect(200);
+      expect(names(tree.body)).toEqual(expect.arrayContaining(['Lista do token']));
+    }
+    const task = await ctx.http().post(`/lists/${list.body.id}/tasks`).set(bearer(readWrite.raw)).send({ title: 'Criada pelo token' }).expect(201);
+    expect(task.body.listId).toBe(list.body.id);
+    for (const token of [writeOnly, commentsOnly]) {
+      const res = await ctx.http().get('/hierarchy').set(bearer(token.raw)).expect(403);
+      expect(res.body.message).toBe('Insufficient scope');
+    }
+    await ctx.http().post(`/spaces/${spaceId}/lists`).set(bearer(readOnly.raw)).send({ name: 'Não pode' }).expect(403);
+    await ctx.http().get('/hierarchy').expect(401);
+  });
+
   it('refuses a token asking for more than the creator holds', async () => {
     await ctx
       .http()

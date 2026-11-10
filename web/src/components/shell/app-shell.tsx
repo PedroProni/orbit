@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Command, Eye, Menu, PanelLeftClose, PanelLeftOpen, UserRound } from 'lucide-react';
+import { Command, Eye, LogOut, Menu, PanelLeftClose, PanelLeftOpen, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { APP_NAME } from '@/config/app.constants';
 import { useMe, useRealtime } from '@/hooks/use-orbit';
@@ -81,7 +81,7 @@ export function AppShell({ children }: AppShellProps) {
       </aside>
       {sidebarOpen ? <button type="button" aria-label={t('closeMenu')} className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => toggleSidebar(false)} /> : null}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-line bg-panel px-3 py-2">
+        <header className="flex items-center gap-2 border-b border-line bg-panel px-3 py-2 sm:gap-3">
           <button type="button" aria-label={t('openMenu')} className="md:hidden" onClick={() => toggleSidebar(true)}>
             <Menu size={20} />
           </button>
@@ -91,7 +91,7 @@ export function AppShell({ children }: AppShellProps) {
             </button>
           </Tooltip>
           <span className="hidden font-semibold md:block">{APP_NAME}</span>
-          <div className="flex-1">{caps.isGuest ? null : <SearchBox />}</div>
+          <div className="min-w-0 flex-1">{caps.isGuest ? null : <SearchBox />}</div>
           <button type="button" aria-label={tp('open')} onClick={() => setPaletteOpen(true)} className="hidden items-center gap-1 rounded border border-line px-2 py-1 text-xs text-muted hover:text-fg sm:flex">
             <Command size={12} />
             {tp('shortcut')}
@@ -111,8 +111,9 @@ export function AppShell({ children }: AppShellProps) {
           <Link href="/account" aria-label={t('account')} className="text-muted hover:text-fg sm:hidden">
             <UserRound size={16} />
           </Link>
-          <button type="button" className="text-xs text-muted hover:text-fg" onClick={() => void signOut()}>
-            {t('signOut')}
+          <button type="button" aria-label={t('signOut')} title={t('signOut')} className="shrink-0 text-xs text-muted hover:text-fg" onClick={() => void signOut()}>
+            <LogOut size={16} className="sm:hidden" aria-hidden="true" />
+            <span className="hidden sm:inline">{t('signOut')}</span>
           </button>
         </header>
         <main className="min-h-0 flex-1 overflow-auto">{guestCanOpen(pathname) || caps.member || me.isError ? children : caps.isGuest ? <AccessDenied /> : null}</main>

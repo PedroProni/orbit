@@ -12,6 +12,7 @@ import { workspaceService } from '@/services/workspace.service';
 import { Goal } from '@/types/workspace.types';
 import { RowsSkeleton } from './screen-skeletons';
 import { SCREEN_INPUT_CLASS, SCREEN_NARROW_CLASS, SCREEN_PRIMARY_BUTTON_CLASS } from './screens.constants';
+import { GOAL_DEFAULT_CURRENT, GOAL_DEFAULT_TARGET } from './goals.constants';
 
 export function GoalsScreen() {
   const t = useTranslations('goals');
@@ -19,8 +20,8 @@ export function GoalsScreen() {
   const goals = useGoals();
   const { canWrite } = useCapabilities();
   const [name, setName] = useState('');
-  const [target, setTarget] = useState('100');
-  const [current, setCurrent] = useState('0');
+  const [target, setTarget] = useState(GOAL_DEFAULT_TARGET);
+  const [current, setCurrent] = useState(GOAL_DEFAULT_CURRENT);
   const [removing, setRemoving] = useState<Goal | null>(null);
   const create = useInvalidating(workspaceService.createGoal, ['goals'], 'goalCreateFailed');
   const remove = useInvalidating(workspaceService.deleteGoal, ['goals']);
@@ -34,7 +35,16 @@ export function GoalsScreen() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!valid) return;
-            create.mutate({ name: name.trim(), description: '', targets: [{ name: t('mainTarget'), kind: 'number', targetValue: Number(target), currentValue: Number(current) }] }, { onSuccess: () => setName('') });
+            create.mutate(
+              { name: name.trim(), description: '', targets: [{ name: t('mainTarget'), kind: 'number', targetValue: Number(target), currentValue: Number(current) }] },
+              {
+                onSuccess: () => {
+                  setName('');
+                  setTarget(GOAL_DEFAULT_TARGET);
+                  setCurrent(GOAL_DEFAULT_CURRENT);
+                },
+              },
+            );
           }}
         >
           <input aria-label={t('name')} placeholder={t('name')} value={name} onChange={(e) => setName(e.target.value)} className={`${SCREEN_INPUT_CLASS} basis-full sm:min-w-48 sm:flex-1 sm:basis-0`} />

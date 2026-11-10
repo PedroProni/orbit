@@ -112,6 +112,17 @@ describe('AppShell session', () => {
     expect(useSessionStore.getState().authenticated).toBe(false);
   });
 
+  it('keeps sign out as an icon with its name on phones so the header leaves room for the search box', async () => {
+    openShell();
+    const button = await screen.findByRole('button', { name: 'Sign out' });
+    expect(button.querySelector('svg')?.getAttribute('class')).toContain('sm:hidden');
+    expect(screen.getByText('Sign out').className.split(' ')).toEqual(['hidden', 'sm:inline']);
+    const header = button.closest('header') as HTMLElement;
+    expect(header.className.split(' ')).toContain('gap-2');
+    expect(header.className.split(' ')).toContain('sm:gap-3');
+    expect(header.className.split(' ')).not.toContain('gap-3');
+  });
+
   it('stays and warns when the server could not end the session', async () => {
     vi.spyOn(authService, 'logout').mockRejectedValue(new ApiError(500, 'boom'));
     openShell();

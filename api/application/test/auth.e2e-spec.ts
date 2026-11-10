@@ -1,3 +1,5 @@
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 import { closeTestApp, createTestApp, TestContext } from './helpers/create-test-app';
 
 describe('Auth, users and tokens (e2e)', () => {
@@ -131,8 +133,18 @@ describe('Auth, users and tokens (e2e)', () => {
   it('an admin sees and revokes only its own tokens, the owner sees and revokes all', async () => {
     const auth = (t: { token: string }) => ({ Authorization: `Bearer ${t.token}` });
     const otherAdmin = await ctx.login('admin2@acme.test', 'Admin 2', 'admin');
-    const first = await ctx.http().post('/api-tokens').set(auth(admin)).send({ name: 'do admin', scopes: ['tasks:read'] }).expect(201);
-    const second = await ctx.http().post('/api-tokens').set(auth(otherAdmin)).send({ name: 'do outro', scopes: ['tasks:read'] }).expect(201);
+    const first = await ctx
+      .http()
+      .post('/api-tokens')
+      .set(auth(admin))
+      .send({ name: 'do admin', scopes: ['tasks:read'] })
+      .expect(201);
+    const second = await ctx
+      .http()
+      .post('/api-tokens')
+      .set(auth(otherAdmin))
+      .send({ name: 'do outro', scopes: ['tasks:read'] })
+      .expect(201);
     const firstList = await ctx.http().get('/api-tokens').set(auth(admin)).expect(200);
     const firstIds = firstList.body.map((t: { id: string }) => t.id);
     expect(firstIds).toContain(first.body.id);
@@ -149,9 +161,20 @@ describe('Auth, users and tokens (e2e)', () => {
     await ctx.http().get('/api-tokens').set(auth(member)).expect(403);
   });
 
-  it('dev login is hidden when disabled', async () => {
+  it('dev login answers 404 before validating the body when disabled, and validates only when enabled', async () => {
     process.env.ENABLE_DEV_LOGIN = 'false';
-    await ctx.http().post('/auth/dev-login').send({ email: 'z@acme.test', name: 'Z' }).expect(404);
-    process.env.ENABLE_DEV_LOGIN = 'true';
+    try {
+      for (const body of [undefined, {}, { email: 'nao-e-email' }, { email: 'z@acme.test', name: 'Z', extra: 1 }, { email: 'z@acme.test', name: 'Z' }]) {
+        const res = await ctx.http().post('/auth/dev-login').send(body);
+        expect(res.status).toBe(404);
+        expect(JSON.stringify(res.body)).not.toMatch(/email|name|should/i);
+        expect(res.headers['set-cookie']).toBeUndefined();
+      }
+      expect(await ctx.app.get<Connection>(getConnectionToken()).collection('users').countDocuments({ email: 'z@acme.test' })).toBe(0);
+    } finally {
+      process.env.ENABLE_DEV_LOGIN = 'true';
+    }
+    const invalid = await ctx.http().post('/auth/dev-login').send({ email: 'nao-e-email' }).expect(400);
+    expect(JSON.stringify(invalid.body.message)).toMatch(/email/);
   });
 });

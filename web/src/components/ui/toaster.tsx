@@ -45,7 +45,7 @@ export function Toaster() {
   }, [items, run]);
 
   return (
-    <div role="status" aria-live="polite" className="pointer-events-none fixed bottom-4 right-4 z-[60] flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2">
+    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] z-[60] flex flex-col gap-2 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] sm:left-auto sm:right-4 sm:w-80 sm:max-w-[calc(100vw-2rem)] sm:px-0">
       {items.map((item) => {
         const Icon = TOAST_ICONS[item.kind];
         return (

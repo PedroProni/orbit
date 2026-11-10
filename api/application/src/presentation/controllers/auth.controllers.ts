@@ -1,11 +1,12 @@
 import { GuestReadable } from '@infrastructure/auth/guest-readable.decorator';
-import { Body, Controller, Delete, Get, Header, Headers, HttpCode, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Headers, HttpCode, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Authenticated } from '@infrastructure/auth/authenticated.decorator';
 import { CurrentPrincipal } from '@infrastructure/auth/current-principal.decorator';
 import { ClientContext } from '@infrastructure/auth/client-context.decorator';
 import { SessionCookieService } from '@infrastructure/auth/session-cookie.service';
+import { DevLoginEnabledGuard } from '@infrastructure/auth/dev-login-enabled.guard';
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
 import { SessionContext } from '@domain/types/session-context.type';
 import { LoginAccessUseCase } from '@application/use-cases/auth/login-access.use-case';
@@ -55,6 +56,7 @@ export class AuthController {
   }
 
   @Post('dev-login')
+  @UseGuards(DevLoginEnabledGuard)
   @HttpCode(200)
   async dev(@Body() dto: DevLoginDto, @ClientContext() context: SessionContext, @Res({ passthrough: true }) response: Response) {
     const result = await this.devLogin.execute(dto, context);

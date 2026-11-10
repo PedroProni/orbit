@@ -11,7 +11,16 @@ const state = vi.hoisted(() => ({ goals: [] as unknown[] }));
 
 vi.mock('@/hooks/use-workspace', () => ({
   useGoals: () => ({ data: state.goals }),
-  useInvalidating: (fn: (args: unknown) => unknown) => ({ mutate: (args: unknown) => fn(args), mutateAsync: async (args: unknown) => fn(args), isPending: false }),
+  useInvalidating: (fn: (args: unknown) => unknown) => ({
+    mutate: (args: unknown, options?: { onSuccess?: () => void }) => {
+      void Promise.resolve(fn(args)).then(
+        () => options?.onSuccess?.(),
+        () => undefined,
+      );
+    },
+    mutateAsync: async (args: unknown) => fn(args),
+    isPending: false,
+  }),
 }));
 
 describe('GoalsScreen', () => {
@@ -33,6 +42,31 @@ describe('GoalsScreen', () => {
     fireEvent.change(screen.getByLabelText('Current value'), { target: { value: '5' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create goal' }));
     expect(workspaceService.createGoal).toHaveBeenCalledWith({ name: 'Launch', description: '', targets: [{ name: 'Main target', kind: 'number', targetValue: 50, currentValue: 5 }] });
+  });
+
+  it('clears the name and puts target and current back to 100 and 0 after a goal is created', async () => {
+    vi.mocked(workspaceService.createGoal).mockResolvedValueOnce(undefined as never);
+    renderWithProviders(<GoalsScreen />);
+    fireEvent.change(screen.getByLabelText('Goal name'), { target: { value: 'Primeira' } });
+    fireEvent.change(screen.getByLabelText('Target value'), { target: { value: '7' } });
+    fireEvent.change(screen.getByLabelText('Current value'), { target: { value: '3' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create goal' }));
+    await waitFor(() => expect((screen.getByLabelText('Target value') as HTMLInputElement).value).toBe('100'));
+    expect((screen.getByLabelText('Current value') as HTMLInputElement).value).toBe('0');
+    expect((screen.getByLabelText('Goal name') as HTMLInputElement).value).toBe('');
+  });
+
+  it('keeps what was typed when creating the goal fails', async () => {
+    vi.mocked(workspaceService.createGoal).mockRejectedValueOnce(new Error('falhou'));
+    renderWithProviders(<GoalsScreen />);
+    fireEvent.change(screen.getByLabelText('Goal name'), { target: { value: 'Segunda' } });
+    fireEvent.change(screen.getByLabelText('Target value'), { target: { value: '7' } });
+    fireEvent.change(screen.getByLabelText('Current value'), { target: { value: '3' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create goal' }));
+    await waitFor(() => expect(workspaceService.createGoal).toHaveBeenCalled());
+    expect((screen.getByLabelText('Target value') as HTMLInputElement).value).toBe('7');
+    expect((screen.getByLabelText('Current value') as HTMLInputElement).value).toBe('3');
+    expect((screen.getByLabelText('Goal name') as HTMLInputElement).value).toBe('Segunda');
   });
 
   it('renders goal progress and deletes a goal only after the confirmation', async () => {

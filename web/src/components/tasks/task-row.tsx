@@ -54,7 +54,7 @@ export function TaskRow({ task, people, statuses, readOnly = false }: TaskRowPro
               <PriorityFlag priority={task.priority} />
             </span>
           </Tooltip>
-          <button type="button" disabled={temp} onClick={() => openTask(task.id)} className="min-w-0 flex-1 truncate text-left disabled:opacity-70">
+          <button type="button" disabled={temp} onClick={() => openTask(task.id)} className="line-clamp-2 min-w-0 flex-1 break-words text-left disabled:opacity-70 md:truncate">
             {task.title}
           </button>
           <span className="row-hover-actions flex shrink-0 items-center gap-1 text-muted">

@@ -72,7 +72,9 @@ application/src/
 ├── infrastructure/                  # FRAMEWORK & EXTERNAL CONCERNS
 │   ├── infrastructure.module.ts     # Imports all infra sub-modules
 │   ├── auth/
-│   │   ├── auth.guard.ts            # AuthGuard - validates Bearer/raw token
+│   │   ├── principal.guard.ts       # PrincipalGuard - session cookie, Bearer session or API token
+│   │   ├── scopes.guard.ts          # ScopesGuard - checks the scopes of the route
+│   │   ├── authenticated.decorator.ts # @Authenticated(...scopes)
 │   │   └── auth.module.ts
 │   ├── database/
 │   │   ├── database.module.ts       # Registers schemas + persistence providers
@@ -163,20 +165,7 @@ The project uses TypeScript path aliases (defined in `application/tsconfig.json`
 
 All environment variables are accessed through `EnvConfigService` (`common/env/services/env-config.service.ts`), which wraps NestJS's `ConfigService`. Direct `process.env` access is only used in `main.ts` and a few shared filters/services.
 
-| Variable | Purpose | Used in |
-|----------|---------|---------|
-| `MONGODB_URI` | MongoDB connection string | `mongo-connect.module.ts` |
-| `AUTH_TOKEN` | Token for API authentication | `auth.guard.ts` |
-| `DECRYPT_TOKEN` | Token for decryption (available via service) | `env-config.service.ts` |
-| `LOCAL_DOMAIN` | CORS allowed origin (local) | `cors.service.ts` |
-| `MOBILE_DOMAIN` | CORS allowed origin (mobile) | `cors.service.ts` |
-| `PROD_DOMAIN` | CORS allowed origin (production) | `cors.service.ts` |
-| `SWAGGER_AUTH_USERNAME` | Basic auth for Swagger UI | `swagger-auth.middleware.ts` |
-| `SWAGGER_AUTH_PASSWORD` | Basic auth for Swagger UI | `swagger-auth.middleware.ts` |
-| `NODE_ENV` | Environment name (used for conditional behavior) | `main.ts`, filters, audit logger |
-| `PORT` | HTTP listen port (default: 3000) | `main.ts` |
-
-Default values are defined in `application/.env.example`.
+The full list of variables, with what each one does, the value the code uses when it is missing and the value in `application/.env.example`, is the table in [README.md, "Variáveis de ambiente"](README.md#variáveis-de-ambiente). Keep that table as the single source when a variable is added or changed.
 
 ---
 
@@ -372,7 +361,7 @@ When adding a new domain (e.g., `product`), follow these steps **in this order**
 ### Step 5: Presentation Layer (Controller)
 
 16. **Create the controller** at `src/presentation/controllers/product.controllers.ts`:
-    - `@UseGuards(AuthGuard)` for protected routes
+    - `@Authenticated(SCOPE_...)` for protected routes (session cookie, Bearer session or API token, plus the scopes of the route)
     - `@ApiTags('Product')` for Swagger grouping
     - Inject use cases in constructor
     - Use application mapper in each endpoint: `ApplicationProductMapper.toCreateCommand(dto)`
@@ -405,7 +394,7 @@ When adding a new domain (e.g., `product`), follow these steps **in this order**
 ```
 HTTP Request
   → RequestIdMiddleware (assigns UUID)
-  → AuthGuard (validates token)
+  → PrincipalGuard (session or API token) + ScopesGuard (route scopes)
   → Controller (parses input)
   → ApplicationMapper.toCommand(dto)
   → UseCase.execute(command)
@@ -553,7 +542,6 @@ describe('Product E2E', () => {
   beforeAll(async () => {
     mongod = await MongoMemoryServer.create();
     process.env.MONGODB_URI = mongod.getUri();
-    process.env.AUTH_TOKEN = 'test-token';
     // ... create app, init
   });
 

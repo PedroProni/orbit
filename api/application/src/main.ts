@@ -30,7 +30,7 @@ async function bootstrap() {
   applyTrustProxy(app, hops);
 
   const corsService = app.get(CorsService);
-  await corsService.setCors(app);
+  corsService.setCors(app);
 
   mountSwaggerAuth(app);
 

@@ -211,6 +211,28 @@ describe('Tasks (e2e)', () => {
     await ctx.http().get('/tasks?limit=9999').set(auth(member)).expect(400);
   });
 
+  it('says whether closed tasks are included, and asking for a status brings its closed tasks unless includeClosed=false', async () => {
+    const list = await ctx.http().post(`/spaces/${spaceId}/lists`).set(auth(owner)).send({ name: 'Closed echo' }).expect(201);
+    const lid = list.body.id as string;
+    await ctx.http().post(`/lists/${lid}/tasks`).set(auth(member)).send({ title: 'Aberta do eco' }).expect(201);
+    await ctx.http().post(`/lists/${lid}/tasks`).set(auth(member)).send({ title: 'Fechada do eco', status: 'completed' }).expect(201);
+    const titles = (res: { body: { data: { title: string }[] } }) => res.body.data.map(task => task.title).sort();
+    const byDefault = await ctx.http().get(`/tasks?listId=${lid}`).set(auth(member)).expect(200);
+    expect(titles(byDefault)).toEqual(['Aberta do eco']);
+    expect(byDefault.body.includeClosed).toBe(false);
+    const byStatus = await ctx.http().get(`/tasks?listId=${lid}&statuses=completed`).set(auth(member)).expect(200);
+    expect(titles(byStatus)).toEqual(['Fechada do eco']);
+    expect(byStatus.body.includeClosed).toBe(true);
+    const byStatusOpenOnly = await ctx.http().get(`/tasks?listId=${lid}&statuses=completed&includeClosed=false`).set(auth(member)).expect(200);
+    expect(titles(byStatusOpenOnly)).toEqual([]);
+    expect(byStatusOpenOnly.body.includeClosed).toBe(false);
+    const all = await ctx.http().get(`/tasks?listId=${lid}&includeClosed=true`).set(auth(member)).expect(200);
+    expect(titles(all)).toEqual(['Aberta do eco', 'Fechada do eco']);
+    expect(all.body.includeClosed).toBe(true);
+    const outsiderView = await ctx.http().get(`/tasks?listId=${lid}&statuses=completed`).set(auth(outsider)).expect(200);
+    expect(outsiderView.body.data).toEqual([]);
+  });
+
   it('filters tasks without assignee alone, with people and with search, and counts top level tasks per assignee', async () => {
     const list = await ctx.http().post(`/spaces/${spaceId}/lists`).set(auth(owner)).send({ name: 'Counts' }).expect(201);
     const lid = list.body.id;

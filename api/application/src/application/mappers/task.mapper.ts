@@ -54,7 +54,7 @@ export class ApplicationTaskMapper {
       unassigned: dto.unassigned ?? false,
       tags: dto.tags,
       search: dto.q?.trim() || undefined,
-      includeClosed: dto.includeClosed ?? false,
+      includeClosed: dto.includeClosed ?? Boolean(dto.statuses?.length),
       includeArchived: dto.includeArchived ?? false,
       updatedAfter: dto.updatedAfter ? new Date(dto.updatedAfter) : undefined,
       updatedBefore: dto.updatedBefore ? new Date(dto.updatedBefore) : undefined,

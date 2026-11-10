@@ -17,6 +17,7 @@
     "migrate:inline-files": "node dist/cli/migrations/rewrite-inline-files.js",
     "migrate:custom-fields": "node dist/cli/migrations/consolidate-custom-fields.js",
     "access:link": "node dist/cli/access/issue-access-link.js",
+    "access:create-owner": "node dist/cli/access/create-owner.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

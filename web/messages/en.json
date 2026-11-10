@@ -46,6 +46,7 @@
   "search": {
     "label": "Search",
     "placeholder": "Search tasks and comments",
+    "placeholderShort": "Search",
     "empty": "No results",
     "inComment": "Comment"
   },

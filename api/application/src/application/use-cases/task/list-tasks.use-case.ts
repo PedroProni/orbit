@@ -18,9 +18,9 @@ export class ListTasksUseCase {
 
   async execute(principal: AuthPrincipal, query: ListTasksQuery) {
     const filter = await this.filters.build(principal, query);
-    if (!filter) return { data: [], total: 0, page: query.page, limit: query.limit };
+    if (!filter) return { data: [], total: 0, page: query.page, limit: query.limit, includeClosed: query.includeClosed };
     const result = await this.tasks.findPaged(filter, query.page, query.limit, { [query.orderBy]: query.reverse ? 1 : -1, _id: 1 });
     const summaries = await this.attachmentSummaries.forTasks(principal, result.data);
-    return { ...result, data: result.data.map(task => TaskPresenter.toListItem(task, summaries.get(task.getId()) ?? EMPTY_TASK_ATTACHMENT_SUMMARY)) };
+    return { ...result, includeClosed: query.includeClosed, data: result.data.map(task => TaskPresenter.toListItem(task, summaries.get(task.getId()) ?? EMPTY_TASK_ATTACHMENT_SUMMARY)) };
   }
 }

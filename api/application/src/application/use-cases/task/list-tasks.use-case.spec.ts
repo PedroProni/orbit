@@ -35,7 +35,7 @@ describe('ListTasksUseCase', () => {
     const filters = { build: jest.fn().mockResolvedValue(null) };
     const summaries = { forTasks: jest.fn() };
     const useCase = new ListTasksUseCase(tasks as unknown as TaskRepository, filters as unknown as TaskQueryFilterService, summaries as unknown as TaskAttachmentSummaryService);
-    await expect(useCase.execute(principal, query)).resolves.toEqual({ data: [], total: 0, page: 1, limit: 50 });
+    await expect(useCase.execute(principal, query)).resolves.toEqual({ data: [], total: 0, page: 1, limit: 50, includeClosed: false });
     expect(tasks.findPaged).not.toHaveBeenCalled();
     expect(summaries.forTasks).not.toHaveBeenCalled();
   });

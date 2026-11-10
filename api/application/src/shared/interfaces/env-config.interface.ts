@@ -1,7 +1,5 @@
 export interface IEnvConfig {
   getMongoUri(): string;
-  getAuthToken(): string;
-  getDecryptToken(): string;
   getProdDomain(): string;
   getMobileDomain(): string;
   getLocalDomain(): string;

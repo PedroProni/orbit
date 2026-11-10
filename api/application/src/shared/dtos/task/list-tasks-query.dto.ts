@@ -1,4 +1,5 @@
 import { Transform, Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsDateString, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 const toArray = ({ value }: { value: unknown }) => (value === undefined ? undefined : Array.isArray(value) ? value : String(value).split(',').filter(Boolean));
@@ -56,6 +57,7 @@ export class ListTasksQueryDto {
   @IsString()
   q?: string;
 
+  @ApiPropertyOptional({ description: 'Include closed tasks. Defaults to false, or to true when statuses is given. The response echoes the value applied.' })
   @IsOptional()
   @Transform(toBool)
   @IsBoolean()

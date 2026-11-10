@@ -17,6 +17,13 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push: nav.push }) }));
 describe('Toaster', () => {
   beforeEach(() => useToastStore.setState({ items: [] }));
 
+  it('stacks toasts below the header: full width at the top on mobile with safe-area padding, top right from sm up', () => {
+    renderWithProviders(<Toaster />);
+    const classes = screen.getByRole('status').className.split(' ');
+    expect(classes).toEqual(expect.arrayContaining(['inset-x-0', 'top-[calc(3.5rem+env(safe-area-inset-top))]', 'pl-[max(0.75rem,env(safe-area-inset-left))]', 'pr-[max(0.75rem,env(safe-area-inset-right))]', 'sm:left-auto', 'sm:right-4', 'sm:w-80', 'sm:px-0']));
+    expect(classes.some((name) => name.startsWith('bottom-'))).toBe(false);
+  });
+
   it('renders translated toasts, dismisses on click and expires after the ttl', () => {
     vi.useFakeTimers();
     renderWithProviders(<Toaster />);

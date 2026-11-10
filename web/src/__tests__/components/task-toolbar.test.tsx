@@ -29,6 +29,18 @@ describe('TaskToolbar', () => {
     expect(useUiStore.getState().filters.q).toBe('login');
   });
 
+  it('sizes the search box to the whole placeholder in both languages, so it is never cut on phones', () => {
+    const { unmount } = renderWithProviders(<TaskToolbar listId="l1" space={makeSpace()} readOnly={false} />, 'pt');
+    const inList = screen.getByRole('textbox', { name: 'Buscar nesta lista' }) as HTMLInputElement;
+    expect(inList.style.width).toBe(`${'Buscar nesta lista'.length + 2}ch`);
+    expect(inList.className.split(' ')).not.toContain('w-28');
+    unmount();
+    renderWithProviders(<TaskToolbar listId={null} space={makeSpace()} readOnly={false} />);
+    const all = screen.getByRole('textbox', { name: 'Search all tasks' }) as HTMLInputElement;
+    expect(all.style.width).toBe(`${'Search all tasks'.length + 2}ch`);
+    expect(all.className.split(' ')).toContain('max-w-full');
+  });
+
   it('opens the full create form on this list from New task, on every view, without opening an inline composer', () => {
     const { unmount } = renderWithProviders(<TaskToolbar listId="l1" space={makeSpace({ requiredTags: ['P4T'] })} readOnly={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'New task' }));

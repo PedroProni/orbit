@@ -64,6 +64,14 @@ describe('TaskListView', () => {
     expect(mocks.mutate).toHaveBeenLastCalledWith({ id: 'a', patch: { dueDate: null } });
   });
 
+  it('wraps a long title to two lines on mobile and truncates it on one line from md up', () => {
+    const long = 'Um título bem comprido de tarefa que precisa aparecer quase inteiro no celular sem ser cortado no meio';
+    renderWithProviders(<TaskListView tasks={[makeTask({ id: 'c', title: long, status: 'to-do' })]} space={space} listId="l1" />);
+    const classes = screen.getByRole('button', { name: long }).className.split(' ');
+    expect(classes).toEqual(expect.arrayContaining(['line-clamp-2', 'break-words', 'md:truncate', 'min-w-0']));
+    expect(classes).not.toContain('truncate');
+  });
+
   it('opens the task when the title is clicked', () => {
     renderWithProviders(<TaskListView tasks={tasks} space={space} listId="l1" />);
     fireEvent.click(screen.getByText('Beta'));
