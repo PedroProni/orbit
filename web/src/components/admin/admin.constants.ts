@@ -29,6 +29,8 @@ export const ADMIN_SECTIONS = [
   { group: 'integrations', items: [{ href: '/admin/api-tokens', key: 'apiTokens', icon: KeyRound }] },
 ] as const;
 
+export const ADMIN_NAV_ACTIVE_SELECTOR = '[aria-current="page"]';
+export const ADMIN_NAV_SCROLL: ScrollIntoViewOptions = { block: 'nearest', inline: 'center' };
 export const ADMIN_HOME = '/admin/people';
 export const ADMIN_PAGE_CLASS = 'mx-auto max-w-4xl p-4 md:p-6';
 export const ADMIN_PANEL_CLASS = 'rounded-xl border border-line bg-panel';

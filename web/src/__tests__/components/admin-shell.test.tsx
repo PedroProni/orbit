@@ -55,6 +55,22 @@ describe('administration area', () => {
     expect(screen.getByText('Something broken that needs a fix.')).toBeTruthy();
   });
 
+  it('scrolls the section menu so the current section is in view on a narrow screen', async () => {
+    const scrolled: Element[] = [];
+    Element.prototype.scrollIntoView = vi.fn(function (this: Element) {
+      scrolled.push(this);
+    });
+    vi.spyOn(orbitService, 'me').mockResolvedValue(principal('admin'));
+    renderWithProviders(
+      <AdminShell>
+        <TaskTypesAdminPage />
+      </AdminShell>,
+    );
+    const current = await screen.findByRole('link', { name: 'Task types' });
+    expect(scrolled).toEqual([current]);
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', inline: 'center' });
+  });
+
   it('shows the area in Portuguese', async () => {
     vi.spyOn(orbitService, 'me').mockResolvedValue(principal('admin'));
     renderWithProviders(
