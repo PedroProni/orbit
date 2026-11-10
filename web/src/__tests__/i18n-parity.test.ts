@@ -11,6 +11,7 @@ const flatten = (obj: Record<string, unknown>, prefix = ''): string[] => Object.
 
 const REQUIRED = [
   'search.placeholderShort',
+  'tasks.priority.noneShort',
   'ui.cancel',
   'ui.retry',
   'ui.loadError',

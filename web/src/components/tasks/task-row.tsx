@@ -82,7 +82,7 @@ export function TaskRow({ task, people, statuses, readOnly = false }: TaskRowPro
           <AvatarStack people={assignees} />
         </span>
         <DateField variant="ghost" disabled={readOnly} ariaLabel={t('columns.due')} value={dayFromIso(task.dueDate)} onChange={(day) => patch({ dueDate: isoFromDay(day) })} className="hidden md:flex" />
-        <Select variant="ghost" disabled={readOnly} ariaLabel={t('columns.priority')} value={task.priority ?? ''} options={[{ value: '', label: t('priority.none'), icon: <PriorityFlag priority={null} /> }, ...PRIORITIES.map((p) => ({ value: p, label: t(`priority.${p}`), icon: <PriorityFlag priority={p} /> }))]} onChange={(priority) => patch({ priority: (priority || null) as TaskPriority | null })} className="hidden md:flex" />
+        <Select variant="ghost" disabled={readOnly} ariaLabel={t('columns.priority')} value={task.priority ?? ''} options={[{ value: '', label: t('priority.noneShort'), icon: <PriorityFlag priority={null} /> }, ...PRIORITIES.map((p) => ({ value: p, label: t(`priority.${p}`), icon: <PriorityFlag priority={p} /> }))]} onChange={(priority) => patch({ priority: (priority || null) as TaskPriority | null })} className="hidden md:flex" />
         <span className="hidden gap-1 lg:flex">
           {task.tags.slice(0, 2).map((tag) => (
             <span key={tag} className="rounded bg-accentsoft px-1.5 py-0.5 text-[11px]">

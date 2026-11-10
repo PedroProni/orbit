@@ -47,7 +47,7 @@ describe('TaskListView', () => {
   it('sends a null priority when the empty option is chosen', () => {
     renderWithProviders(<TaskListView tasks={tasks} space={space} listId="l1" />);
     const section = screen.getByRole('region', { name: 'To do' });
-    chooseOption(within(section).getByLabelText('Priority'), 'No priority');
+    chooseOption(within(section).getByLabelText('Priority'), 'None');
     expect(mocks.mutate).toHaveBeenCalledWith({ id: 'a', patch: { priority: null } });
   });
 
@@ -70,6 +70,15 @@ describe('TaskListView', () => {
     const classes = screen.getByRole('button', { name: long }).className.split(' ');
     expect(classes).toEqual(expect.arrayContaining(['line-clamp-2', 'break-words', 'md:truncate', 'min-w-0']));
     expect(classes).not.toContain('truncate');
+  });
+
+  it('labels a task with no priority with the short word in both languages, so the desktop priority column never cuts it', () => {
+    const task = makeTask({ id: 'd', title: 'Delta', status: 'to-do', priority: null });
+    const { unmount } = renderWithProviders(<TaskListView tasks={[task]} space={space} listId="l1" />, 'pt');
+    expect(screen.getByLabelText('Prioridade').textContent).toBe('Nenhuma');
+    unmount();
+    renderWithProviders(<TaskListView tasks={[task]} space={space} listId="l1" />);
+    expect(screen.getByLabelText('Priority').textContent).toBe('None');
   });
 
   it('opens the task when the title is clicked', () => {

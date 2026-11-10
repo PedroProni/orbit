@@ -86,7 +86,8 @@
       "high": "High",
       "normal": "Normal",
       "low": "Low",
-      "none": "No priority"
+      "none": "No priority",
+      "noneShort": "None"
     },
     "subtasks": "Subtasks",
     "checklist": "Checklist",
