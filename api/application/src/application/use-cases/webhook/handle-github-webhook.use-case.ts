@@ -4,6 +4,8 @@ import { TaskRepository } from '@domain/repositories/task.repository';
 import { WebhookDeliveryRepository } from '@domain/repositories/webhook-delivery.repository';
 import { SpaceRepository } from '@domain/repositories/space.repository';
 import { WebhookDeliveryEntity } from '@domain/entities/webhook-delivery.entity';
+import { WebhookDeliveryOutcome } from '@domain/enums/webhook-delivery.enums';
+import { WEBHOOK_DELIVERY_ACTION_MAX_LENGTH, WEBHOOK_DELIVERY_EVENT_MAX_LENGTH, WEBHOOK_DELIVERY_FAILURE_CODE, WEBHOOK_DELIVERY_REPOSITORY_MAX_LENGTH } from '@domain/constants/webhook-delivery.constant';
 import { TaskEntity } from '@domain/entities/task.entity';
 import { PullRequestLinkSource, PullRequestState } from '@domain/enums/pull-request-link.enums';
 import { AuditActorType } from '@domain/enums/audit-log.enums';
@@ -40,8 +42,23 @@ export class HandleGithubWebhookUseCase {
   ) {}
 
   async execute(deliveryId: string, event: string, payload: GithubPullRequestPayload): Promise<GithubWebhookOutcome> {
-    if (!(await this.claim(deliveryId, event))) return { status: 'duplicate', linked: [] };
-    const repository = payload.repository?.full_name;
+    const repository = typeof payload.repository?.full_name === 'string' && payload.repository.full_name ? payload.repository.full_name : null;
+    const action = typeof payload.action === 'string' && payload.action ? payload.action : null;
+    if (!(await this.claim(deliveryId, event, action, repository))) {
+      await this.deliveries.countDuplicate(deliveryId, new Date());
+      return { status: 'duplicate', linked: [] };
+    }
+    try {
+      const outcome = await this.process(event, repository, payload);
+      await this.deliveries.finish(deliveryId, outcome.status === 'processed' ? WebhookDeliveryOutcome.PROCESSED : WebhookDeliveryOutcome.IGNORED, outcome.linked.length, null, new Date());
+      return outcome;
+    } catch (error) {
+      await this.deliveries.finish(deliveryId, WebhookDeliveryOutcome.FAILED, 0, WEBHOOK_DELIVERY_FAILURE_CODE, new Date()).catch(() => false);
+      throw error;
+    }
+  }
+
+  private async process(event: string, repository: string | null, payload: GithubPullRequestPayload): Promise<GithubWebhookOutcome> {
     if (!repository) return { status: 'ignored', linked: [] };
     if (event === GITHUB_EVENT.PULL_REQUEST) return this.pullRequest(repository, payload);
     if (event === GITHUB_EVENT.PUSH) return this.push(repository, payload);
@@ -66,9 +83,8 @@ export class HandleGithubWebhookUseCase {
     for (const taskId of TaskReferencePolicy.extract(pr.title, pr.body, pr.headRef)) {
       const task = await this.tasks.findOne({ _id: taskId });
       if (!task) continue;
-      const write = await this.linkWriter.upsert(
-        { _id: newId(), workspaceId: task.getWorkspaceId(), taskId, repository, number: pr.number, url: pr.url, source: PullRequestLinkSource.WEBHOOK, createdBy: null, now },
-        link => link.applyGithub(pr, null, now),
+      const write = await this.linkWriter.upsert({ _id: newId(), workspaceId: task.getWorkspaceId(), taskId, repository, number: pr.number, url: pr.url, source: PullRequestLinkSource.WEBHOOK, createdBy: null, now }, (link) =>
+        link.applyGithub(pr, null, now),
       );
       linked.push(taskId);
       if (!transition) continue;
@@ -140,10 +156,25 @@ export class HandleGithubWebhookUseCase {
     return { workspaceId: task.getWorkspaceId(), actorType: AuditActorType.WEBHOOK, actorId: GITHUB_ACTOR_ID, userId: GITHUB_ACTOR_ID, role: UserRole.MEMBER, scopes: [] };
   }
 
-  private async claim(deliveryId: string, event: string): Promise<boolean> {
+  private async claim(deliveryId: string, event: string, action: string | null, repository: string | null): Promise<boolean> {
     const now = new Date();
     try {
-      await this.deliveries.create(new WebhookDeliveryEntity({ _id: newId(), deliveryId, event, createdAt: now, updatedAt: now }));
+      await this.deliveries.create(
+        new WebhookDeliveryEntity({
+          _id: newId(),
+          deliveryId,
+          event: event.slice(0, WEBHOOK_DELIVERY_EVENT_MAX_LENGTH),
+          action: action?.slice(0, WEBHOOK_DELIVERY_ACTION_MAX_LENGTH) ?? null,
+          repository: repository?.slice(0, WEBHOOK_DELIVERY_REPOSITORY_MAX_LENGTH) ?? null,
+          outcome: null,
+          linkedTasks: 0,
+          duplicates: 0,
+          failureCode: null,
+          finishedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        }),
+      );
       return true;
     } catch (error) {
       if ((error as { code?: number }).code === DUPLICATE_KEY_CODE) return false;

@@ -28,7 +28,7 @@ describe('Sidebar access to the administration area', () => {
   it.each(['owner', 'admin'])('shows the Administration link and the create buttons to %s', (role) => {
     mocks.role = role;
     renderWithProviders(<Sidebar />);
-    expect(screen.getByRole('link', { name: 'Administration' }).getAttribute('href')).toBe('/admin/people');
+    expect(screen.getByRole('link', { name: 'Administration' }).getAttribute('href')).toBe('/admin/general');
     expect(screen.getByRole('button', { name: 'New space' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Create in Engineering' })).toBeTruthy();
   });

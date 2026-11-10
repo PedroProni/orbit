@@ -809,7 +809,9 @@
       "people": "People",
       "structure": "Structure",
       "automation": "Automation",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "workspace": "Workspace",
+      "security": "Security"
     },
     "sections": {
       "people": "Members and roles",
@@ -821,7 +823,10 @@
       "automations": "Automations",
       "templates": "Templates",
       "forms": "Forms",
-      "apiTokens": "API tokens"
+      "apiTokens": "API tokens",
+      "general": "General",
+      "auditLog": "Audit log",
+      "github": "GitHub"
     },
     "loadError": "It was not possible to load this page. Try again.",
     "spacePicker": "Space",
@@ -1207,6 +1212,312 @@
       "revokeFor": "Revoke {name}",
       "revokeTitle": "Revoke token",
       "confirmRevoke": "Revoke \"{name}\"? Anything using it stops working right away."
+    },
+    "loadMore": "Load more",
+    "loadingMore": "Loading...",
+    "integrationState": {
+      "configured": "Configured",
+      "missing": "Not configured"
+    },
+    "general": {
+      "subtitle": "What this workspace has and which integrations are set up. Values of secrets are never shown here.",
+      "devLoginOn": "Development sign-in is on: anyone who reaches the server can sign in without a password. Turn it off outside local and demo environments.",
+      "workspaceTitle": "Workspace",
+      "name": "Name",
+      "slug": "Address",
+      "createdAt": "Created",
+      "unknown": "Not available",
+      "membersTitle": "People",
+      "statuses": {
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "contentTitle": "Content",
+      "counts": {
+        "spaces": "Spaces",
+        "folders": "Folders",
+        "lists": "Lists",
+        "openTasks": "Open tasks",
+        "closedTasks": "Closed tasks",
+        "docs": "Docs"
+      },
+      "integrationsTitle": "Integrations",
+      "integrations": {
+        "githubWebhookSecret": "GitHub webhook secret",
+        "githubToken": "GitHub token",
+        "automationKey": "Automation key",
+        "fileStorage": "File storage"
+      },
+      "integrationHints": {
+        "githubWebhookSecret": "Lets Orbit check that pull request events really come from GitHub.",
+        "githubToken": "Lets Orbit read checks, branches and commits of the configured repositories.",
+        "automationKey": "Protects the secrets of automation webhooks.",
+        "fileStorage": "Needed to upload attachments and images."
+      },
+      "repositories": "{count, plural, =0 {No GitHub repository is synced.} one {# GitHub repository is synced.} other {# GitHub repositories are synced.}}"
+    },
+    "auditLog": {
+      "subtitle": "Who did what in this workspace, newest first. Sensitive values are removed before anything is shown.",
+      "empty": "Nothing recorded for these filters",
+      "emptyHint": "Change the filters or clear the period to see more.",
+      "openTask": "Open task {name}",
+      "deleted": "Deleted item",
+      "nameHidden": "Name hidden",
+      "transition": "From {before} to {after}",
+      "changedFields": "Changed: {fields}",
+      "metaKeys": {
+        "title": "Title",
+        "name": "Name",
+        "role": "Role",
+        "status": "Status",
+        "ip": "IP",
+        "scopes": "Permissions"
+      },
+      "actor": {
+        "deletedPerson": "Removed person",
+        "token": "API token {name}",
+        "hiddenToken": "API token",
+        "system": {
+          "github": "GitHub",
+          "automation": "Automation",
+          "recurrence": "Recurring tasks",
+          "login": "Sign-in",
+          "forgotPassword": "Password reset",
+          "accessLink": "Access link tool",
+          "form": "Public form",
+          "other": "System"
+        }
+      },
+      "filters": {
+        "label": "Audit log filters",
+        "person": "Who",
+        "action": "Action",
+        "entity": "Item",
+        "from": "From",
+        "to": "To",
+        "anyone": "Anyone",
+        "anyAction": "Any action",
+        "anyEntity": "Any item",
+        "invalidRange": "The start date must be on or before the end date."
+      },
+      "groups": {
+        "attachment": "Files",
+        "auth": "Sign-in and sessions",
+        "automation": "Automations",
+        "comment": "Comments",
+        "custom_field": "Custom fields",
+        "dashboard": "Dashboards",
+        "doc": "Docs",
+        "folder": "Folders",
+        "form": "Forms",
+        "goal": "Goals",
+        "group": "Groups",
+        "guest": "Guest access",
+        "list": "Lists",
+        "saved_view": "Saved views",
+        "space": "Spaces",
+        "task": "Tasks",
+        "template": "Templates",
+        "token": "API tokens",
+        "user": "People"
+      },
+      "entityTypes": {
+        "api_token": "API token",
+        "attachment": "File",
+        "automation": "Automation",
+        "comment": "Comment",
+        "custom_field": "Custom field",
+        "dashboard": "Dashboard",
+        "doc": "Doc",
+        "folder": "Folder",
+        "form": "Form",
+        "goal": "Goal",
+        "group": "Group",
+        "list": "List",
+        "saved_view": "Saved view",
+        "session": "Session",
+        "space": "Space",
+        "task": "Task",
+        "template": "Template",
+        "user": "Person"
+      },
+      "actions": {
+        "attachment": {
+          "confirmed": "uploaded a file",
+          "created": "added a file",
+          "deleted": "deleted a file",
+          "requested": "started a file upload"
+        },
+        "auth": {
+          "access_link_generated": "generated an access link",
+          "login_succeeded": "signed in",
+          "login_failed": "had a failed sign-in",
+          "logout": "signed out",
+          "password_changed": "changed the password",
+          "password_set": "set a password",
+          "reset_requested": "asked for a password link",
+          "session_revoked": "ended a session",
+          "sessions_revoked": "ended every session"
+        },
+        "automation": {
+          "created": "created an automation",
+          "deleted": "deleted an automation",
+          "updated": "changed an automation"
+        },
+        "comment": {
+          "created": "commented",
+          "deleted": "deleted a comment",
+          "updated": "edited a comment"
+        },
+        "custom_field": {
+          "created": "created a custom field",
+          "deleted": "deleted a custom field",
+          "updated": "changed a custom field"
+        },
+        "dashboard": {
+          "created": "created a dashboard",
+          "deleted": "deleted a dashboard"
+        },
+        "doc": {
+          "archived": "archived a doc",
+          "created": "created a doc",
+          "updated": "edited a doc"
+        },
+        "folder": {
+          "created": "created a folder",
+          "deleted": "deleted a folder",
+          "renamed": "renamed a folder"
+        },
+        "form": {
+          "created": "created a form",
+          "deleted": "deleted a form",
+          "key_rotated": "changed the public link of a form",
+          "owner_changed": "changed the owner of a form",
+          "updated": "changed a form"
+        },
+        "goal": {
+          "created": "created a goal",
+          "deleted": "deleted a goal",
+          "updated": "changed a goal"
+        },
+        "group": {
+          "created": "created a group",
+          "deleted": "deleted a group"
+        },
+        "guest": {
+          "access_set": "changed what a guest can see"
+        },
+        "list": {
+          "created": "created a list",
+          "deleted": "deleted a list",
+          "updated": "changed a list"
+        },
+        "saved_view": {
+          "created": "saved a view",
+          "deleted": "deleted a saved view",
+          "updated": "changed a saved view"
+        },
+        "space": {
+          "created": "created a space",
+          "updated": "changed a space"
+        },
+        "task": {
+          "created": "created a task",
+          "deleted": "deleted a task",
+          "dependency_added": "added a dependency",
+          "dependency_removed": "removed a dependency",
+          "plan_changed": "changed the planning of a task",
+          "pull_request_linked": "linked a pull request",
+          "pull_request_unlinked": "unlinked a pull request",
+          "recurrence_removed": "stopped a task from repeating",
+          "recurrence_set": "made a task repeat",
+          "recurrence_spawned": "created the next copy of a repeating task",
+          "updated": "changed a task"
+        },
+        "template": {
+          "created": "created a template",
+          "deleted": "deleted a template",
+          "updated": "changed a template"
+        },
+        "token": {
+          "created": "created an API token",
+          "revoked": "revoked an API token"
+        },
+        "user": {
+          "invited": "invited a person",
+          "role_changed": "changed the role of a person",
+          "status_changed": "changed the status of a person"
+        }
+      },
+      "fields": {
+        "title": "Title",
+        "descriptionMd": "Description",
+        "status": "Status",
+        "priority": "Priority",
+        "tags": "Tags",
+        "assigneeIds": "Assignees",
+        "watcherIds": "Watchers",
+        "points": "Points",
+        "startDate": "Start date",
+        "dueDate": "Due date",
+        "customFields": "Custom fields",
+        "links": "Links",
+        "checklists": "Checklists",
+        "dateClosed": "Closed date",
+        "archived": "Archived",
+        "listId": "List",
+        "spaceId": "Space",
+        "parentId": "Parent task",
+        "name": "Name",
+        "fields": "Questions",
+        "active": "Accepting answers",
+        "listIds": "Lists"
+      },
+      "values": {
+        "active": "Active",
+        "disabled": "Disabled",
+        "owner": "Owner",
+        "admin": "Administrator",
+        "member": "Member",
+        "viewer": "Viewer",
+        "guest": "Guest"
+      }
+    },
+    "github": {
+      "subtitle": "How Orbit is connected to GitHub. Secrets and tokens are only reported as set or not set.",
+      "secret": "Webhook secret",
+      "secretHint": "Events without a valid signature are refused.",
+      "secretMissing": "Without it every GitHub event is refused.",
+      "token": "Read token",
+      "tokenHint": "Used only to read checks, branches and commits.",
+      "tokenMissing": "Without it tasks only show what the webhook sends.",
+      "webhookTitle": "Webhook address",
+      "webhookHint": "In the GitHub repository settings, point the webhook to the API address followed by this path.",
+      "repositoriesTitle": "Synced repositories",
+      "syncEvery": "{minutes, plural, one {Synced every minute} other {Synced every # minutes}}",
+      "syncOff": "Automatic sync is off",
+      "noRepositories": "No repository is configured for sync.",
+      "syncing": "Syncing",
+      "lastSync": "Last sync {when}",
+      "neverSynced": "Never synced",
+      "deliveriesTitle": "Recent deliveries",
+      "deliveriesHint": "Each event GitHub sent, what Orbit did with it and how many times it was repeated. Payloads and headers are never stored here.",
+      "eventFilter": "Event",
+      "anyEvent": "Any event",
+      "outcomeFilter": "Result",
+      "anyOutcome": "Any result",
+      "outcomes": {
+        "processed": "Processed",
+        "ignored": "Ignored",
+        "failed": "Failed",
+        "pending": "In progress"
+      },
+      "noRepository": "No repository",
+      "linkedTasks": "{count, plural, =0 {No task linked} one {# task linked} other {# tasks linked}}",
+      "duplicates": "{count, plural, one {Repeated once} other {Repeated # times}}",
+      "failure": "Processing failed",
+      "noDeliveries": "No deliveries yet",
+      "noDeliveriesHint": "Deliveries show up here after GitHub sends the first event."
     }
   },
   "createTask": {

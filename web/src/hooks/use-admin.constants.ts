@@ -5,3 +5,7 @@ export const AUTOMATIONS_KEY = 'automations';
 export const FORMS_KEY = 'forms';
 export const API_TOKENS_KEY = 'api-tokens';
 export const TEMPLATES_KEY = 'templates';
+export const AUDIT_LOGS_KEY = 'audit-logs';
+export const GITHUB_INTEGRATION_KEY = 'github-integration';
+export const GITHUB_DELIVERIES_KEY = 'github-deliveries';
+export const WORKSPACE_SUMMARY_KEY = 'workspace-summary';

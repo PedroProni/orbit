@@ -5,6 +5,9 @@ import { GithubPullRequestPayload } from '@domain/types/github-pull-request-payl
 import { PULL_REQUEST_GITHUB_FIELDS } from '@domain/constants/pull-request-link.constant';
 import { GithubRefKind } from '@domain/enums/github.enums';
 import { PullRequestLinkWriterService } from '@application/services/pull-request-link-writer.service';
+import { WebhookDeliveryEntity } from '@domain/entities/webhook-delivery.entity';
+import { WebhookDeliveryOutcome } from '@domain/enums/webhook-delivery.enums';
+import { WEBHOOK_DELIVERY_FAILURE_CODE } from '@domain/constants/webhook-delivery.constant';
 
 const TASK_ID = '86abc1234';
 const manualRow = () =>
@@ -38,7 +41,7 @@ const payload = (action: string, merged = false): GithubPullRequestPayload => ({
 const duplicate = () => Object.assign(new Error('E11000 duplicate key'), { code: 11000 });
 
 const setup = () => {
-  const deliveries = { create: jest.fn().mockResolvedValue(undefined) };
+  const deliveries = { create: jest.fn().mockResolvedValue(undefined), finish: jest.fn().mockResolvedValue(true), countDuplicate: jest.fn().mockResolvedValue(undefined) };
   const links = { findForTask: jest.fn().mockResolvedValue(null), create: jest.fn().mockResolvedValue(undefined), patch: jest.fn().mockResolvedValue(undefined) };
   const task = { getWorkspaceId: () => 'w1', getId: () => TASK_ID, getSpaceId: () => 's1', getStatus: () => 'in development' };
   const tasks = { findOne: jest.fn().mockResolvedValue(task) };
@@ -179,5 +182,55 @@ describe('HandleGithubWebhookUseCase', () => {
     expect(await useCase.execute('d20', 'status', { sha: 'abc1234', repository: { full_name: 'PedroProni/orbit-api' } })).toEqual({ status: 'ignored', linked: [] });
     expect(sync.refreshChecks).toHaveBeenNthCalledWith(1, 'PedroProni/orbit-api', 'abc1234');
     expect(sync.refreshChecks).toHaveBeenCalledTimes(2);
+  });
+
+  describe('delivery outcome', () => {
+    it('stores event, action and repository when it claims the delivery, then records processed with the linked task count', async () => {
+      const { useCase, deliveries } = setup();
+      await useCase.execute('d30', 'pull_request', payload('opened'));
+      const claimed = (deliveries.create.mock.calls as WebhookDeliveryEntity[][])[0][0];
+      expect([claimed.getDeliveryId(), claimed.getEvent(), claimed.getAction(), claimed.getRepository(), claimed.getOutcome(), claimed.getDuplicates()]).toEqual(['d30', 'pull_request', 'opened', 'acme-org/orbit', null, 0]);
+      expect(deliveries.finish).toHaveBeenCalledTimes(1);
+      expect(deliveries.finish).toHaveBeenCalledWith('d30', WebhookDeliveryOutcome.PROCESSED, 1, null, expect.any(Date));
+    });
+
+    it('records ignored for an event it does not handle and for a payload without repository', async () => {
+      const { useCase, deliveries } = setup();
+      await useCase.execute('d31', 'issues', { action: 'opened', repository: { full_name: 'PedroProni/orbit-api' } });
+      await useCase.execute('d32', 'pull_request', { action: 'opened' });
+      expect(deliveries.finish).toHaveBeenNthCalledWith(1, 'd31', WebhookDeliveryOutcome.IGNORED, 0, null, expect.any(Date));
+      expect(deliveries.finish).toHaveBeenNthCalledWith(2, 'd32', WebhookDeliveryOutcome.IGNORED, 0, null, expect.any(Date));
+      expect((deliveries.create.mock.calls as WebhookDeliveryEntity[][])[1][0].getRepository()).toBeNull();
+    });
+
+    it('counts a duplicate on the existing row and never records a second outcome', async () => {
+      const { useCase, deliveries } = setup();
+      deliveries.create.mockRejectedValueOnce(duplicate());
+      await useCase.execute('d33', 'pull_request', payload('opened'));
+      expect(deliveries.countDuplicate).toHaveBeenCalledWith('d33', expect.any(Date));
+      expect(deliveries.finish).not.toHaveBeenCalled();
+    });
+
+    it('records failed with a short code, never the error message, and still throws', async () => {
+      const { useCase, deliveries, links } = setup();
+      links.create.mockRejectedValueOnce(new Error('payload secret text'));
+      await expect(useCase.execute('d34', 'pull_request', payload('opened'))).rejects.toThrow('payload secret text');
+      expect(deliveries.finish).toHaveBeenCalledTimes(1);
+      expect(deliveries.finish).toHaveBeenCalledWith('d34', WebhookDeliveryOutcome.FAILED, 0, WEBHOOK_DELIVERY_FAILURE_CODE, expect.any(Date));
+    });
+
+    it('keeps the original error when recording the failure also fails', async () => {
+      const { useCase, deliveries, links } = setup();
+      links.create.mockRejectedValueOnce(new Error('down'));
+      deliveries.finish.mockRejectedValueOnce(new Error('db down'));
+      await expect(useCase.execute('d35', 'pull_request', payload('opened'))).rejects.toThrow('down');
+    });
+
+    it('caps the stored event, action and repository length and ignores a non-string action', async () => {
+      const { useCase, deliveries } = setup();
+      await useCase.execute('d36', 'x'.repeat(500), { action: 7 as never, repository: { full_name: 'r'.repeat(900) } });
+      const claimed = (deliveries.create.mock.calls as WebhookDeliveryEntity[][])[0][0];
+      expect([claimed.getEvent().length, claimed.getAction(), claimed.getRepository()?.length]).toEqual([64, null, 200]);
+    });
   });
 });

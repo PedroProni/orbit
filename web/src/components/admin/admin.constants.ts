@@ -1,7 +1,8 @@
-import { Bot, CalendarDays, FileText, FolderTree, KeyRound, LayoutTemplate, Link2, ListChecks, ListFilter, Shapes, SlidersHorizontal, Users, UsersRound } from 'lucide-react';
+import { Bot, Building2, CalendarDays, FileText, FolderTree, GitBranch, KeyRound, LayoutTemplate, Link2, ListChecks, ListFilter, ScrollText, Shapes, SlidersHorizontal, Users, UsersRound } from 'lucide-react';
 import { CustomFieldType, StatusType } from '@/types/api.types';
 
 export const ADMIN_SECTIONS = [
+  { group: 'workspace', items: [{ href: '/admin/general', key: 'general', icon: Building2 }] },
   {
     group: 'people',
     items: [
@@ -26,12 +27,19 @@ export const ADMIN_SECTIONS = [
       { href: '/admin/forms', key: 'forms', icon: FileText },
     ],
   },
-  { group: 'integrations', items: [{ href: '/admin/api-tokens', key: 'apiTokens', icon: KeyRound }] },
+  {
+    group: 'integrations',
+    items: [
+      { href: '/admin/api-tokens', key: 'apiTokens', icon: KeyRound },
+      { href: '/admin/github', key: 'github', icon: GitBranch },
+    ],
+  },
+  { group: 'security', items: [{ href: '/admin/audit-log', key: 'auditLog', icon: ScrollText }] },
 ] as const;
 
 export const ADMIN_NAV_ACTIVE_SELECTOR = '[aria-current="page"]';
 export const ADMIN_NAV_SCROLL: ScrollIntoViewOptions = { block: 'nearest', inline: 'center' };
-export const ADMIN_HOME = '/admin/people';
+export const ADMIN_HOME = '/admin/general';
 export const ADMIN_PAGE_CLASS = 'mx-auto max-w-4xl p-4 md:p-6';
 export const ADMIN_PANEL_CLASS = 'rounded-xl border border-line bg-panel';
 export const ADMIN_DIALOG_PANEL_CLASS = 'w-full max-w-md rounded-xl border border-linestrong bg-raised p-5 shadow-floating';

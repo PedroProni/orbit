@@ -809,7 +809,9 @@
       "people": "Pessoas",
       "structure": "Estrutura",
       "automation": "Automação",
-      "integrations": "Integrações"
+      "integrations": "Integrações",
+      "workspace": "Workspace",
+      "security": "Segurança"
     },
     "sections": {
       "people": "Membros e papéis",
@@ -821,7 +823,10 @@
       "automations": "Automações",
       "templates": "Modelos",
       "forms": "Formulários",
-      "apiTokens": "Tokens de API"
+      "apiTokens": "Tokens de API",
+      "general": "Geral",
+      "auditLog": "Auditoria",
+      "github": "GitHub"
     },
     "loadError": "Não foi possível carregar esta página. Tente de novo.",
     "spacePicker": "Espaço",
@@ -1207,6 +1212,312 @@
       "revokeFor": "Revogar {name}",
       "revokeTitle": "Revogar token",
       "confirmRevoke": "Revogar \"{name}\"? O que estiver usando o token para de funcionar na hora."
+    },
+    "loadMore": "Carregar mais",
+    "loadingMore": "Carregando...",
+    "integrationState": {
+      "configured": "Configurado",
+      "missing": "Não configurado"
+    },
+    "general": {
+      "subtitle": "O que este workspace tem e quais integrações estão configuradas. Valores de segredos nunca aparecem aqui.",
+      "devLoginOn": "O login de desenvolvimento está ligado: qualquer pessoa que chegue ao servidor entra sem senha. Desligue fora dos ambientes local e de demonstração.",
+      "workspaceTitle": "Workspace",
+      "name": "Nome",
+      "slug": "Endereço",
+      "createdAt": "Criado em",
+      "unknown": "Não disponível",
+      "membersTitle": "Pessoas",
+      "statuses": {
+        "active": "Ativas",
+        "disabled": "Desativadas"
+      },
+      "contentTitle": "Conteúdo",
+      "counts": {
+        "spaces": "Espaços",
+        "folders": "Pastas",
+        "lists": "Listas",
+        "openTasks": "Tarefas abertas",
+        "closedTasks": "Tarefas fechadas",
+        "docs": "Documentos"
+      },
+      "integrationsTitle": "Integrações",
+      "integrations": {
+        "githubWebhookSecret": "Segredo do webhook do GitHub",
+        "githubToken": "Token do GitHub",
+        "automationKey": "Chave das automações",
+        "fileStorage": "Armazenamento de arquivos"
+      },
+      "integrationHints": {
+        "githubWebhookSecret": "Permite ao Orbit conferir que os eventos de pull request vêm mesmo do GitHub.",
+        "githubToken": "Permite ao Orbit ler checks, branches e commits dos repositórios configurados.",
+        "automationKey": "Protege os segredos dos webhooks das automações.",
+        "fileStorage": "Necessário para enviar anexos e imagens."
+      },
+      "repositories": "{count, plural, =0 {Nenhum repositório do GitHub é sincronizado.} one {# repositório do GitHub é sincronizado.} other {# repositórios do GitHub são sincronizados.}}"
+    },
+    "auditLog": {
+      "subtitle": "Quem fez o quê neste workspace, do mais recente para o mais antigo. Valores sensíveis são removidos antes de aparecer.",
+      "empty": "Nada registrado com esses filtros",
+      "emptyHint": "Mude os filtros ou limpe o período para ver mais.",
+      "openTask": "Abrir a tarefa {name}",
+      "deleted": "Item apagado",
+      "nameHidden": "Nome oculto",
+      "transition": "De {before} para {after}",
+      "changedFields": "Alterou: {fields}",
+      "metaKeys": {
+        "title": "Título",
+        "name": "Nome",
+        "role": "Papel",
+        "status": "Situação",
+        "ip": "IP",
+        "scopes": "Permissões"
+      },
+      "actor": {
+        "deletedPerson": "Pessoa removida",
+        "token": "Token de API {name}",
+        "hiddenToken": "Token de API",
+        "system": {
+          "github": "GitHub",
+          "automation": "Automação",
+          "recurrence": "Tarefas recorrentes",
+          "login": "Entrada",
+          "forgotPassword": "Recuperação de senha",
+          "accessLink": "Ferramenta de link de acesso",
+          "form": "Formulário público",
+          "other": "Sistema"
+        }
+      },
+      "filters": {
+        "label": "Filtros da auditoria",
+        "person": "Quem",
+        "action": "Ação",
+        "entity": "Item",
+        "from": "De",
+        "to": "Até",
+        "anyone": "Todos",
+        "anyAction": "Qualquer ação",
+        "anyEntity": "Qualquer item",
+        "invalidRange": "A data inicial precisa ser igual ou anterior à final."
+      },
+      "groups": {
+        "attachment": "Arquivos",
+        "auth": "Entrada e sessões",
+        "automation": "Automações",
+        "comment": "Comentários",
+        "custom_field": "Campos personalizados",
+        "dashboard": "Painéis",
+        "doc": "Documentos",
+        "folder": "Pastas",
+        "form": "Formulários",
+        "goal": "Metas",
+        "group": "Grupos",
+        "guest": "Acesso de convidados",
+        "list": "Listas",
+        "saved_view": "Visualizações salvas",
+        "space": "Espaços",
+        "task": "Tarefas",
+        "template": "Modelos",
+        "token": "Tokens de API",
+        "user": "Pessoas"
+      },
+      "entityTypes": {
+        "api_token": "Token de API",
+        "attachment": "Arquivo",
+        "automation": "Automação",
+        "comment": "Comentário",
+        "custom_field": "Campo personalizado",
+        "dashboard": "Painel",
+        "doc": "Documento",
+        "folder": "Pasta",
+        "form": "Formulário",
+        "goal": "Meta",
+        "group": "Grupo",
+        "list": "Lista",
+        "saved_view": "Visualização salva",
+        "session": "Sessão",
+        "space": "Espaço",
+        "task": "Tarefa",
+        "template": "Modelo",
+        "user": "Pessoa"
+      },
+      "actions": {
+        "attachment": {
+          "confirmed": "enviou um arquivo",
+          "created": "adicionou um arquivo",
+          "deleted": "apagou um arquivo",
+          "requested": "iniciou o envio de um arquivo"
+        },
+        "auth": {
+          "access_link_generated": "gerou um link de acesso",
+          "login_succeeded": "entrou",
+          "login_failed": "teve uma tentativa de entrada recusada",
+          "logout": "saiu",
+          "password_changed": "trocou a senha",
+          "password_set": "definiu uma senha",
+          "reset_requested": "pediu um link de senha",
+          "session_revoked": "encerrou uma sessão",
+          "sessions_revoked": "encerrou todas as sessões"
+        },
+        "automation": {
+          "created": "criou uma automação",
+          "deleted": "apagou uma automação",
+          "updated": "alterou uma automação"
+        },
+        "comment": {
+          "created": "comentou",
+          "deleted": "apagou um comentário",
+          "updated": "editou um comentário"
+        },
+        "custom_field": {
+          "created": "criou um campo personalizado",
+          "deleted": "apagou um campo personalizado",
+          "updated": "alterou um campo personalizado"
+        },
+        "dashboard": {
+          "created": "criou um painel",
+          "deleted": "apagou um painel"
+        },
+        "doc": {
+          "archived": "arquivou um documento",
+          "created": "criou um documento",
+          "updated": "editou um documento"
+        },
+        "folder": {
+          "created": "criou uma pasta",
+          "deleted": "apagou uma pasta",
+          "renamed": "renomeou uma pasta"
+        },
+        "form": {
+          "created": "criou um formulário",
+          "deleted": "apagou um formulário",
+          "key_rotated": "trocou o link público de um formulário",
+          "owner_changed": "trocou o responsável de um formulário",
+          "updated": "alterou um formulário"
+        },
+        "goal": {
+          "created": "criou uma meta",
+          "deleted": "apagou uma meta",
+          "updated": "alterou uma meta"
+        },
+        "group": {
+          "created": "criou um grupo",
+          "deleted": "apagou um grupo"
+        },
+        "guest": {
+          "access_set": "alterou o que um convidado vê"
+        },
+        "list": {
+          "created": "criou uma lista",
+          "deleted": "apagou uma lista",
+          "updated": "alterou uma lista"
+        },
+        "saved_view": {
+          "created": "salvou uma visualização",
+          "deleted": "apagou uma visualização salva",
+          "updated": "alterou uma visualização salva"
+        },
+        "space": {
+          "created": "criou um espaço",
+          "updated": "alterou um espaço"
+        },
+        "task": {
+          "created": "criou uma tarefa",
+          "deleted": "apagou uma tarefa",
+          "dependency_added": "adicionou uma dependência",
+          "dependency_removed": "removeu uma dependência",
+          "plan_changed": "alterou o planejamento de uma tarefa",
+          "pull_request_linked": "vinculou um pull request",
+          "pull_request_unlinked": "desvinculou um pull request",
+          "recurrence_removed": "parou a repetição de uma tarefa",
+          "recurrence_set": "fez uma tarefa se repetir",
+          "recurrence_spawned": "criou a próxima cópia de uma tarefa recorrente",
+          "updated": "alterou uma tarefa"
+        },
+        "template": {
+          "created": "criou um modelo",
+          "deleted": "apagou um modelo",
+          "updated": "alterou um modelo"
+        },
+        "token": {
+          "created": "criou um token de API",
+          "revoked": "revogou um token de API"
+        },
+        "user": {
+          "invited": "convidou uma pessoa",
+          "role_changed": "trocou o papel de uma pessoa",
+          "status_changed": "alterou a situação de uma pessoa"
+        }
+      },
+      "fields": {
+        "title": "Título",
+        "descriptionMd": "Descrição",
+        "status": "Status",
+        "priority": "Prioridade",
+        "tags": "Tags",
+        "assigneeIds": "Responsáveis",
+        "watcherIds": "Observadores",
+        "points": "Pontos",
+        "startDate": "Data de início",
+        "dueDate": "Prazo",
+        "customFields": "Campos personalizados",
+        "links": "Links",
+        "checklists": "Checklists",
+        "dateClosed": "Data de fechamento",
+        "archived": "Arquivada",
+        "listId": "Lista",
+        "spaceId": "Espaço",
+        "parentId": "Tarefa principal",
+        "name": "Nome",
+        "fields": "Perguntas",
+        "active": "Recebendo respostas",
+        "listIds": "Listas"
+      },
+      "values": {
+        "active": "Ativa",
+        "disabled": "Desativada",
+        "owner": "Dono",
+        "admin": "Administrador",
+        "member": "Membro",
+        "viewer": "Leitor",
+        "guest": "Convidado"
+      }
+    },
+    "github": {
+      "subtitle": "Como o Orbit está ligado ao GitHub. Segredos e tokens aparecem só como configurados ou não.",
+      "secret": "Segredo do webhook",
+      "secretHint": "Eventos sem assinatura válida são recusados.",
+      "secretMissing": "Sem ele todo evento do GitHub é recusado.",
+      "token": "Token de leitura",
+      "tokenHint": "Usado só para ler checks, branches e commits.",
+      "tokenMissing": "Sem ele as tarefas mostram só o que o webhook envia.",
+      "webhookTitle": "Endereço do webhook",
+      "webhookHint": "Nas configurações do repositório no GitHub, aponte o webhook para o endereço da API seguido deste caminho.",
+      "repositoriesTitle": "Repositórios sincronizados",
+      "syncEvery": "{minutes, plural, one {Sincroniza a cada minuto} other {Sincroniza a cada # minutos}}",
+      "syncOff": "A sincronização automática está desligada",
+      "noRepositories": "Nenhum repositório está configurado para sincronizar.",
+      "syncing": "Sincronizando",
+      "lastSync": "Última sincronização {when}",
+      "neverSynced": "Nunca sincronizado",
+      "deliveriesTitle": "Entregas recentes",
+      "deliveriesHint": "Cada evento que o GitHub enviou, o que o Orbit fez com ele e quantas vezes ele se repetiu. Conteúdo e cabeçalhos nunca ficam guardados aqui.",
+      "eventFilter": "Evento",
+      "anyEvent": "Qualquer evento",
+      "outcomeFilter": "Resultado",
+      "anyOutcome": "Qualquer resultado",
+      "outcomes": {
+        "processed": "Processada",
+        "ignored": "Ignorada",
+        "failed": "Falhou",
+        "pending": "Em andamento"
+      },
+      "noRepository": "Sem repositório",
+      "linkedTasks": "{count, plural, =0 {Nenhuma tarefa ligada} one {# tarefa ligada} other {# tarefas ligadas}}",
+      "duplicates": "{count, plural, one {Repetida uma vez} other {Repetida # vezes}}",
+      "failure": "O processamento falhou",
+      "noDeliveries": "Nenhuma entrega ainda",
+      "noDeliveriesHint": "As entregas aparecem aqui depois que o GitHub enviar o primeiro evento."
     }
   },
   "createTask": {

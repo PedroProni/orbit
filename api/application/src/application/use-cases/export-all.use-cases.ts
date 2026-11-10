@@ -41,6 +41,10 @@ import { CreateTaskUseCase } from '@application/use-cases/task/create-task.use-c
 import { UpdateTaskUseCase } from '@application/use-cases/task/update-task.use-case';
 import { GetTaskUseCase } from '@application/use-cases/task/get-task.use-case';
 import { TaskActivityUseCase } from '@application/use-cases/task/task-activity.use-case';
+import { ListAuditLogsUseCase } from '@application/use-cases/audit/list-audit-logs.use-case';
+import { GithubIntegrationUseCase } from '@application/use-cases/integration/github-integration.use-case';
+import { WorkspaceSummaryUseCase } from '@application/use-cases/workspace/workspace-summary.use-case';
+import { AuditReferenceService } from '@application/services/audit-reference.service';
 import { ListTasksUseCase } from '@application/use-cases/task/list-tasks.use-case';
 import { TaskAssigneeCountsUseCase } from '@application/use-cases/task/task-assignee-counts.use-case';
 import { DeleteTaskUseCase } from '@application/use-cases/task/delete-task.use-case';
@@ -201,6 +205,10 @@ export default [
   GuestAccessUseCase,
   InboxUseCase,
   TaskActivityUseCase,
+  ListAuditLogsUseCase,
+  GithubIntegrationUseCase,
+  WorkspaceSummaryUseCase,
+  AuditReferenceService,
   PasswordLoginUseCase,
   LogoutUseCase,
   ListSessionsUseCase,

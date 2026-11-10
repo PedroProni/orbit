@@ -10,7 +10,7 @@ export const NAV_ITEMS = [
   { href: '/chat', key: 'chat', icon: MessageSquare },
 ] as const;
 
-export const ADMIN_NAV_ITEMS = [{ href: '/admin/people', key: 'admin', icon: Settings }] as const;
+export const ADMIN_NAV_ITEMS = [{ href: '/admin/general', key: 'admin', icon: Settings }] as const;
 export const SPACE_CREATE_TRIGGER_CLASS = 'ml-0.5 shrink-0 rounded p-1 text-muted transition-opacity hover:bg-panel2 hover:text-fg md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100';
 export const NEW_SPACE_BUTTON_CLASS = 'mb-2 flex w-full items-center gap-2 rounded px-2 py-1 text-sm text-muted transition-colors hover:bg-panel2 hover:text-fg';
 

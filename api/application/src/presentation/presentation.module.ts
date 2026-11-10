@@ -28,6 +28,9 @@ import { SavedViewController } from '@presentation/controllers/saved-view.contro
 import { PlanningController } from '@presentation/controllers/planning.controllers';
 import { DocController, GoalController, DashboardController } from '@presentation/controllers/knowledge.controllers';
 import { AutomationController } from '@presentation/controllers/automation.controller';
+import { AuditLogController } from '@presentation/controllers/audit-log.controllers';
+import { GithubIntegrationController } from '@presentation/controllers/github-integration.controllers';
+import { WorkspaceController } from '@presentation/controllers/workspace.controllers';
 import { FormController, PublicFormController, ChatController, UserGroupController, GuestAccessController, InboxController } from '@presentation/controllers/workspace-extras.controllers';
 const controllers: any = [
   AuthController,
@@ -44,6 +47,9 @@ const controllers: any = [
   SearchController,
   ClickupCompatController,
   GithubWebhookController,
+  GithubIntegrationController,
+  AuditLogController,
+  WorkspaceController,
   SavedViewController,
   PlanningController,
   DocController,

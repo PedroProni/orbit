@@ -1,0 +1,22 @@
+import { AuditLogDraft } from './audit-log.types';
+
+export const AUDIT_ACTION_GROUPS = ['attachment', 'auth', 'automation', 'comment', 'custom_field', 'dashboard', 'doc', 'folder', 'form', 'goal', 'group', 'guest', 'list', 'saved_view', 'space', 'task', 'template', 'token', 'user'] as const;
+export const AUDIT_ENTITY_TYPES = ['api_token', 'attachment', 'automation', 'comment', 'custom_field', 'dashboard', 'doc', 'folder', 'form', 'goal', 'group', 'list', 'saved_view', 'session', 'space', 'task', 'template', 'user'] as const;
+export const AUDIT_SYSTEM_ACTOR_KEYS: Record<string, string> = { github: 'github', automation: 'automation', recurrence: 'recurrence', login: 'login', 'forgot-password': 'forgotPassword', 'issue-access-link': 'accessLink' };
+export const AUDIT_FORM_ACTOR_PREFIX = 'form:';
+export const AUDIT_FILTERABLE_SYSTEM_ACTORS = ['automation', 'github', 'recurrence'] as const;
+export const AUDIT_META_DETAIL_KEYS = ['title', 'name', 'role', 'status', 'ip'] as const;
+export const AUDIT_META_CHANGED_KEY = 'changed';
+export const AUDIT_META_TRANSLATED_VALUE_KEYS = ['role', 'status'];
+export const AUDIT_META_DIFF_KEY = 'diff';
+export const AUDIT_META_SCOPES_KEY = 'scopes';
+export const AUDIT_META_TASK_KEY = 'taskId';
+export const AUDIT_META_BEFORE_KEY = 'before';
+export const AUDIT_META_AFTER_KEY = 'after';
+export const AUDIT_NAME_HIDDEN_ENTITY_TYPES = ['api_token'];
+export const AUDIT_ALL = '';
+export const AUDIT_DAY_START = 'T00:00:00';
+export const AUDIT_DAY_END = 'T23:59:59.999';
+export const AUDIT_TASK_ENTITY = 'task';
+export const AUDIT_COMMENT_ENTITY = 'comment';
+export const EMPTY_AUDIT_DRAFT: AuditLogDraft = { actorId: AUDIT_ALL, group: AUDIT_ALL, entityType: AUDIT_ALL, fromDay: AUDIT_ALL, toDay: AUDIT_ALL };

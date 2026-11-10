@@ -8,5 +8,6 @@ export interface Capabilities {
   canModerateComments: boolean;
   canManageAccess: boolean;
   canManageStructure: boolean;
+  canReadAudit: boolean;
   isOwner: boolean;
 }
