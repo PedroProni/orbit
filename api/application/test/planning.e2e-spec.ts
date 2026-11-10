@@ -85,7 +85,12 @@ describe('Planning (e2e)', () => {
     const tpl = await ctx.http().post('/task-templates').set(auth(member)).send(dto).expect(201);
     expect(tpl.body.tags).toEqual(['bug']);
     await ctx.http().post('/task-templates').set(auth(outsider)).send(dto).expect(404);
-    await ctx.http().post('/task-templates').set(auth(member)).send({ ...dto, titleTemplate: '' }).expect(400);
+    await ctx
+      .http()
+      .post('/task-templates')
+      .set(auth(member))
+      .send({ ...dto, titleTemplate: '' })
+      .expect(400);
     const created = await ctx.http().post(`/task-templates/${tpl.body.id}/instantiate`).set(auth(member)).send({ listId }).expect(201);
     expect(created.body.title).toBe('Corrigir bug');
     const plan = await ctx.http().get(`/tasks/${created.body.id}/plan`).set(auth(member)).expect(200);
@@ -108,7 +113,12 @@ describe('Planning (e2e)', () => {
     expect((await ctx.http().get(`/tasks/${plain}/plan`).set(auth(member)).expect(200)).body.taskKind).toBe('task');
     const before = await plans.countDocuments({});
     await ctx.http().post(`/lists/${listId}/tasks`).set(auth(member)).send({ title: 'Tipo errado', taskKind: 'epic' }).expect(400);
-    await ctx.http().post(`/lists/${listId}/tasks`).set(auth(member)).send({ title: 'Pessoa errada', taskKind: 'bug', assigneeIds: ['nobody'] }).expect(400);
+    await ctx
+      .http()
+      .post(`/lists/${listId}/tasks`)
+      .set(auth(member))
+      .send({ title: 'Pessoa errada', taskKind: 'bug', assigneeIds: ['nobody'] })
+      .expect(400);
     await ctx.http().post(`/lists/${listId}/tasks`).set(auth(outsider)).send({ title: 'Fora', taskKind: 'bug' }).expect(404);
     const guest = await ctx.login('guest-kind@acme.test', 'Guest', 'guest');
     const refused = await ctx.http().post(`/lists/${listId}/tasks`).set(auth(guest)).send({ title: 'Convidado', taskKind: 'bug' });
@@ -134,6 +144,18 @@ describe('Planning (e2e)', () => {
     expect(spawned.body.title).toBe('Recorrente');
     await ctx.http().delete(`/tasks/${t}/recurrence`).set(auth(owner)).expect(204);
     await ctx.http().delete(`/tasks/${t}/recurrence`).set(auth(owner)).expect(404);
+  });
+
+  it('refuses a recurrence on a subtask and accepts it on its top-level parent', async () => {
+    const parent = await mk('Pai recorrente');
+    const child = (await ctx.http().post(`/lists/${listId}/tasks`).set(auth(member)).send({ title: 'Filha', parentId: parent }).expect(201)).body.id as string;
+    const refused = await ctx.http().put(`/tasks/${child}/recurrence`).set(auth(member)).send({ frequency: 'weekly', interval: 1 }).expect(400);
+    expect(refused.body.message).toBe('Subtasks cannot recur');
+    const none = await ctx.http().get(`/tasks/${child}/recurrence`).set(auth(owner)).expect(200);
+    expect(none.body?.frequency).toBeUndefined();
+    const accepted = await ctx.http().put(`/tasks/${parent}/recurrence`).set(auth(member)).send({ frequency: 'weekly', interval: 1 }).expect(200);
+    expect(accepted.body).toMatchObject({ frequency: 'weekly', interval: 1, active: true });
+    await ctx.http().delete(`/tasks/${parent}/recurrence`).set(auth(owner)).expect(204);
   });
 
   it('drops the rule when the source task is gone and skips a run without duplicating when task creation fails', async () => {

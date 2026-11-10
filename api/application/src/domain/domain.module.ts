@@ -5,7 +5,7 @@ import { LoginAttemptPersistence } from '@infrastructure/database/persistence/lo
 import { USER_CREDENTIAL_INJECT_TOKEN, AUTH_TOKEN_INJECT_TOKEN, AUTH_SESSION_INJECT_TOKEN, LOGIN_ATTEMPT_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '@infrastructure/database/database.module';
-import { WORKSPACE_INJECT_TOKEN, USER_INJECT_TOKEN, SPACE_INJECT_TOKEN, FOLDER_INJECT_TOKEN, TASK_LIST_INJECT_TOKEN, CUSTOM_FIELD_DEFINITION_INJECT_TOKEN, TASK_INJECT_TOKEN, COMMENT_INJECT_TOKEN, ATTACHMENT_INJECT_TOKEN, NOTIFICATION_INJECT_TOKEN, API_TOKEN_INJECT_TOKEN, AUDIT_LOG_INJECT_TOKEN, PULL_REQUEST_LINK_INJECT_TOKEN, WEBHOOK_DELIVERY_INJECT_TOKEN, SAVED_VIEW_INJECT_TOKEN, TASK_DEPENDENCY_INJECT_TOKEN, TASK_PLAN_INJECT_TOKEN, TIME_ENTRY_INJECT_TOKEN, TASK_TEMPLATE_INJECT_TOKEN, RECURRENCE_RULE_INJECT_TOKEN, DOC_INJECT_TOKEN, GOAL_INJECT_TOKEN, DASHBOARD_INJECT_TOKEN, FORM_INJECT_TOKEN, AUTOMATION_INJECT_TOKEN, CHAT_CHANNEL_INJECT_TOKEN, CHAT_MESSAGE_INJECT_TOKEN, USER_GROUP_INJECT_TOKEN, GUEST_ACCESS_INJECT_TOKEN, GITHUB_REF_INJECT_TOKEN, GITHUB_SYNC_STATE_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
+import { WORKSPACE_INJECT_TOKEN, USER_INJECT_TOKEN, SPACE_INJECT_TOKEN, FOLDER_INJECT_TOKEN, TASK_LIST_INJECT_TOKEN, CUSTOM_FIELD_DEFINITION_INJECT_TOKEN, TASK_INJECT_TOKEN, COMMENT_INJECT_TOKEN, ATTACHMENT_INJECT_TOKEN, NOTIFICATION_INJECT_TOKEN, API_TOKEN_INJECT_TOKEN, AUDIT_LOG_INJECT_TOKEN, PULL_REQUEST_LINK_INJECT_TOKEN, WEBHOOK_DELIVERY_INJECT_TOKEN, SAVED_VIEW_INJECT_TOKEN, TASK_DEPENDENCY_INJECT_TOKEN, TASK_PLAN_INJECT_TOKEN, TIME_ENTRY_INJECT_TOKEN, TASK_TEMPLATE_INJECT_TOKEN, RECURRENCE_RULE_INJECT_TOKEN, DOC_INJECT_TOKEN, GOAL_INJECT_TOKEN, DASHBOARD_INJECT_TOKEN, FORM_INJECT_TOKEN, AUTOMATION_INJECT_TOKEN, AUTOMATION_RUN_INJECT_TOKEN, CHAT_CHANNEL_INJECT_TOKEN, CHAT_MESSAGE_INJECT_TOKEN, USER_GROUP_INJECT_TOKEN, GUEST_ACCESS_INJECT_TOKEN, GITHUB_REF_INJECT_TOKEN, GITHUB_SYNC_STATE_INJECT_TOKEN } from '@domain/constants/inject-token.constant';
 import { WorkspacePersistence } from '@infrastructure/database/persistence/workspace.persistence';
 import { UserPersistence } from '@infrastructure/database/persistence/user.persistence';
 import { SpacePersistence } from '@infrastructure/database/persistence/space.persistence';
@@ -33,6 +33,7 @@ import { GoalPersistence } from '@infrastructure/database/persistence/goal.persi
 import { DashboardPersistence } from '@infrastructure/database/persistence/dashboard.persistence';
 import { FormPersistence } from '@infrastructure/database/persistence/form.persistence';
 import { AutomationPersistence } from '@infrastructure/database/persistence/automation.persistence';
+import { AutomationRunPersistence } from '@infrastructure/database/persistence/automation-run.persistence';
 import { ChatChannelPersistence } from '@infrastructure/database/persistence/chat-channel.persistence';
 import { ChatMessagePersistence } from '@infrastructure/database/persistence/chat-message.persistence';
 import { UserGroupPersistence } from '@infrastructure/database/persistence/user-group.persistence';
@@ -72,6 +73,7 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
     { provide: DASHBOARD_INJECT_TOKEN, useExisting: DashboardPersistence },
     { provide: FORM_INJECT_TOKEN, useExisting: FormPersistence },
     { provide: AUTOMATION_INJECT_TOKEN, useExisting: AutomationPersistence },
+    { provide: AUTOMATION_RUN_INJECT_TOKEN, useExisting: AutomationRunPersistence },
     { provide: CHAT_CHANNEL_INJECT_TOKEN, useExisting: ChatChannelPersistence },
     { provide: CHAT_MESSAGE_INJECT_TOKEN, useExisting: ChatMessagePersistence },
     { provide: USER_GROUP_INJECT_TOKEN, useExisting: UserGroupPersistence },
@@ -109,6 +111,7 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
     DASHBOARD_INJECT_TOKEN,
     FORM_INJECT_TOKEN,
     AUTOMATION_INJECT_TOKEN,
+    AUTOMATION_RUN_INJECT_TOKEN,
     CHAT_CHANNEL_INJECT_TOKEN,
     CHAT_MESSAGE_INJECT_TOKEN,
     USER_GROUP_INJECT_TOKEN,

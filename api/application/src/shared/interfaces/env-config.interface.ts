@@ -26,4 +26,7 @@ export interface IEnvConfig {
   getGithubRepositories(): string[];
   getGithubSyncIntervalMs(): number;
   getGithubApiUrl(): string;
+  getAutomationSecretKey(): string;
+  getAutomationDateIntervalMs(): number;
+  isAutomationWebhookPrivateAllowed(): boolean;
 }

@@ -1,8 +1,9 @@
 'use client';
 
+import { Bot } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useStatusLabel } from '@/hooks/use-status-label';
-import { ACTIVITY_PEOPLE_FIELDS } from './tasks.constants';
+import { ACTIVITY_PEOPLE_FIELDS, AUTOMATION_ACTOR_ID } from './tasks.constants';
 import { customFieldChanges, formatActivityValue, statusColor } from './task-helpers';
 import { actorName, formatTimelineTime, linkChanges, pullRequestChange, visibleActivityFields } from './task-timeline.helpers';
 import { ActivityLineProps, StatusNameProps } from './task-timeline.types';
@@ -24,7 +25,7 @@ export function ActivityLine({ entry, statuses, members, definitions }: Activity
   const td = useTranslations('drawer');
   const tp = useTranslations('tasks');
   const locale = useLocale();
-  const nameOf = (id: string) => actorName(id, members, { github: t('github'), someone: t('someone') });
+  const nameOf = (id: string) => actorName(id, members, { github: t('github'), automation: t('automation'), someone: t('someone') });
   const fields = visibleActivityFields(entry);
   const statusOnly = entry.action !== 'task.created' && fields.length === 1 && fields[0] === 'status';
   const pullRequest = entry.action === 'task.created' ? null : pullRequestChange(entry, fields);
@@ -34,12 +35,12 @@ export function ActivityLine({ entry, statuses, members, definitions }: Activity
     <li data-kind="activity" className="flex gap-2 px-1 py-1 text-xs text-muted">
       <div className="min-w-0 flex-1 space-y-0.5">
         <p>
-          <span className="font-medium text-fg/80">{nameOf(entry.actorId)}</span>{' '}
+          <span data-actor={entry.actorId === AUTOMATION_ACTOR_ID ? AUTOMATION_ACTOR_ID : undefined} className="font-medium text-fg/80">
+            {entry.actorId === AUTOMATION_ACTOR_ID ? <Bot size={12} aria-hidden="true" className="mr-0.5 inline-block align-[-2px] text-accent" /> : null}
+            {nameOf(entry.actorId)}
+          </span>{' '}
           {statusOnly
-            ? t.rich('statusChanged', {
-                before: () => <StatusName name={entry.diff.status.before} statuses={statuses} />,
-                after: () => <StatusName name={entry.diff.status.after} statuses={statuses} />,
-              })
+            ? t.rich('statusChanged', { before: () => <StatusName name={entry.diff.status.before} statuses={statuses} />, after: () => <StatusName name={entry.diff.status.after} statuses={statuses} /> })
             : pullRequest
               ? t(pullRequest.kind === 'linked' ? 'pullRequestLinked' : 'pullRequestUnlinked', { pr: pullRequest.pr })
               : summary}

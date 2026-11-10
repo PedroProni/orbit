@@ -1,4 +1,4 @@
-import { CalendarDays, FolderTree, Link2, ListChecks, ListFilter, Shapes, SlidersHorizontal, Users, UsersRound } from 'lucide-react';
+import { Bot, CalendarDays, FolderTree, Link2, ListChecks, ListFilter, Shapes, SlidersHorizontal, Users, UsersRound } from 'lucide-react';
 import { CustomFieldType, StatusType } from '@/types/api.types';
 
 export const ADMIN_SECTIONS = [
@@ -14,14 +14,11 @@ export const ADMIN_SECTIONS = [
     items: [
       { href: '/admin/spaces', key: 'spaces', icon: FolderTree },
       { href: '/admin/statuses', key: 'statuses', icon: ListChecks },
-      {
-        href: '/admin/custom-fields',
-        key: 'customFields',
-        icon: SlidersHorizontal,
-      },
+      { href: '/admin/custom-fields', key: 'customFields', icon: SlidersHorizontal },
       { href: '/admin/task-types', key: 'taskTypes', icon: Shapes },
     ],
   },
+  { group: 'automation', items: [{ href: '/admin/automations', key: 'automations', icon: Bot }] },
 ] as const;
 
 export const ADMIN_HOME = '/admin/people';
@@ -45,8 +42,4 @@ export const TASK_KINDS = ['task', 'milestone', 'bug', 'feature', 'chore'] as co
 export const NO_FOLDER = '';
 export const STATUS_NAME_MAX_LENGTH = 60;
 export const DEFAULT_STATUS_COUNT = 7;
-export const CUSTOM_FIELD_ICONS = {
-  dropdown: ListFilter,
-  url: Link2,
-  date: CalendarDays,
-} as const;
+export const CUSTOM_FIELD_ICONS = { dropdown: ListFilter, url: Link2, date: CalendarDays } as const;

@@ -55,7 +55,8 @@
     "type": {
       "mention": "You were mentioned",
       "assignment": "Assigned to you",
-      "status_change": "Status changed"
+      "status_change": "Status changed",
+      "automation": "An automation notified you"
     }
   },
   "tasks": {
@@ -447,7 +448,8 @@
     },
     "statusChanged": "changed status from <before></before> to <after></after>",
     "pullRequestLinked": "linked pull request {pr}",
-    "pullRequestUnlinked": "unlinked pull request {pr}"
+    "pullRequestUnlinked": "unlinked pull request {pr}",
+    "automation": "Automation"
   },
   "ui": {
     "close": "Close",
@@ -565,7 +567,11 @@
     "printsImagesOnly": "Prints must be images",
     "githubCooldown": "GitHub was just refreshed. Wait 30 seconds and try again.",
     "githubNotConfigured": "GitHub sync is not set up on the server.",
-    "githubUnavailable": "GitHub is not answering right now. Try again in a few minutes."
+    "githubUnavailable": "GitHub is not answering right now. Try again in a few minutes.",
+    "automationSecretKeyMissing": "Webhook secrets are not set up on the server. Ask the person who runs Orbit to configure the key.",
+    "automationWebhookUrlInvalid": "The webhook address must be a valid https:// link.",
+    "automationWebhookUrlPrivate": "The webhook address points to a private or internal network.",
+    "automationInvalid": "This automation is not valid. Check the trigger and the action."
   },
   "authErrors": {
     "invalidCredentials": "Email or password is incorrect.",
@@ -791,7 +797,8 @@
     "deniedHint": "Only owners and administrators open the administration area.",
     "groups": {
       "people": "People",
-      "structure": "Structure"
+      "structure": "Structure",
+      "automation": "Automation"
     },
     "sections": {
       "people": "Members and roles",
@@ -799,7 +806,8 @@
       "spaces": "Spaces, folders and lists",
       "statuses": "Statuses and rules",
       "customFields": "Custom fields",
-      "taskTypes": "Task types"
+      "taskTypes": "Task types",
+      "automations": "Automations"
     },
     "loadError": "It was not possible to load this page. Try again.",
     "spacePicker": "Space",
@@ -935,6 +943,129 @@
     "sidebar": {
       "newSpace": "New space",
       "createIn": "Create in {name}"
+    },
+    "automations": {
+      "subtitle": "Let Orbit react to task changes: assign people, add tags, change fields, comment, notify or call a webhook.",
+      "add": "New automation",
+      "empty": "No automations yet",
+      "emptyHint": "Create one to save the repetitive steps of your team.",
+      "createTitle": "New automation",
+      "editTitle": "Edit automation",
+      "deleteTitle": "Delete automation",
+      "confirmDelete": "Delete the automation {name}? Its run history goes with it.",
+      "editFor": "Edit automation {name}",
+      "deleteFor": "Delete automation {name}",
+      "toggleFor": "Turn automation {name} on or off",
+      "scopeLabel": "Runs on",
+      "scopeAll": "All lists",
+      "scopeList": "{space} / {list}",
+      "scopeMissing": "A list that no longer exists",
+      "whenLegend": "When",
+      "thenLegend": "Then",
+      "triggerLabel": "Trigger",
+      "actionLabel": "Action",
+      "statusLabel": "Status",
+      "priorityLabel": "Priority",
+      "personLabel": "Person",
+      "dateLabel": "Date",
+      "tagLabel": "Tag",
+      "commentLabel": "Comment",
+      "commentCount": "{count}/{max}",
+      "notifyLabel": "Who gets notified",
+      "notifyPeople": "People to notify",
+      "webhookLabel": "Webhook URL",
+      "webhookPlaceholder": "https://example.com/hooks/orbit",
+      "webhookHint": "Orbit sends a signed POST with the task to this HTTPS address.",
+      "choose": "Choose",
+      "anyPriority": "Any priority",
+      "anyone": "Anyone",
+      "noMembers": "There are no active people in the workspace yet.",
+      "unknownPerson": "a removed person",
+      "removedTask": "A task that no longer exists",
+      "sentence": "When {trigger}, {action}.",
+      "triggers": {
+        "task_created": "A task is created",
+        "status_changed": "The status changes",
+        "priority_changed": "The priority changes",
+        "assignee_added": "Someone is assigned",
+        "date_reached": "A date arrives"
+      },
+      "actions": {
+        "assign": "Assign a person",
+        "add_tag": "Add a tag",
+        "set_priority": "Set the priority",
+        "set_status": "Change the status",
+        "comment": "Post a comment",
+        "notify": "Send a notification",
+        "webhook": "Call a webhook"
+      },
+      "triggerText": {
+        "task_created": "a task is created",
+        "status_changed": "a task moves to {status}",
+        "priority_changed": "the priority changes to {priority}",
+        "priority_changed_any": "the priority changes",
+        "assignee_added": "{person} is assigned",
+        "assignee_added_any": "someone is assigned",
+        "date_reached_start_date": "the start date arrives",
+        "date_reached_due_date": "the due date arrives"
+      },
+      "actionText": {
+        "assign": "assign {person}",
+        "add_tag": "add the tag {tag}",
+        "set_priority": "set the priority to {priority}",
+        "set_status": "move it to {status}",
+        "comment": "post a comment",
+        "notify_assignees": "notify the assignees",
+        "notify_watchers": "notify the watchers",
+        "notify_users": "notify {people}",
+        "webhook": "call the webhook at {host}"
+      },
+      "dates": {
+        "start_date": "Start date",
+        "due_date": "Due date"
+      },
+      "notifyTargets": {
+        "assignees": "The assignees",
+        "watchers": "The watchers",
+        "users": "Chosen people"
+      },
+      "problems": {
+        "nameRequired": "Give the automation a name.",
+        "triggerValueRequired": "Choose the value for the trigger.",
+        "actionValueRequired": "Fill in the value for the action.",
+        "commentTooLong": "The comment can have up to 2000 characters.",
+        "webhookHttps": "The webhook address must be a valid https:// link.",
+        "webhookTooLong": "The webhook address can have up to 2048 characters.",
+        "usersRequired": "Choose at least one person to notify."
+      },
+      "rotateSecret": "Generate a new secret",
+      "rotateHint": "The current secret stops working when you save.",
+      "lastRun": "Last run",
+      "neverRan": "Never ran",
+      "runStatus": {
+        "done": "Done",
+        "skipped": "Skipped",
+        "failed": "Failed"
+      },
+      "history": "History",
+      "historyEmpty": "No runs yet.",
+      "historyError": "Could not load the history.",
+      "reasons": {
+        "status_not_in_space": "The status does not exist in the task space",
+        "no_change": "Nothing to change",
+        "webhook_timeout": "The webhook took too long to answer",
+        "webhook_status": "The webhook answered with status {code}",
+        "webhook_blocked_address": "The webhook address points to a blocked network",
+        "task_not_found": "The task no longer exists",
+        "error": "Something went wrong"
+      },
+      "secretTitle": "Webhook secret",
+      "secretBody": "Use this secret to check the signature Orbit sends with each webhook call.",
+      "secretLabel": "Secret",
+      "secretWarning": "Copy it now. For your safety it will not be shown again.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "secretDone": "I saved it"
     }
   },
   "createTask": {

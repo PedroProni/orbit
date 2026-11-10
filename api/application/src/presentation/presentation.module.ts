@@ -27,7 +27,8 @@ import { SavedViewController } from '@presentation/controllers/saved-view.contro
 
 import { PlanningController } from '@presentation/controllers/planning.controllers';
 import { DocController, GoalController, DashboardController } from '@presentation/controllers/knowledge.controllers';
-import { FormController, PublicFormController, AutomationController, ChatController, UserGroupController, GuestAccessController, InboxController } from '@presentation/controllers/workspace-extras.controllers';
+import { AutomationController } from '@presentation/controllers/automation.controller';
+import { FormController, PublicFormController, ChatController, UserGroupController, GuestAccessController, InboxController } from '@presentation/controllers/workspace-extras.controllers';
 const controllers: any = [
   AuthController,
   UserController,

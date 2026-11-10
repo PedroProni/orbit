@@ -1,4 +1,4 @@
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { AutomationActionType, AutomationTriggerType } from '@domain/enums/automation.enums';
 
 export class SaveAutomationDto {
@@ -16,6 +16,12 @@ export class SaveAutomationDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(120)
+  triggerValue?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
   triggerStatus?: string | null;
 
   @IsEnum(AutomationActionType)
@@ -23,8 +29,14 @@ export class SaveAutomationDto {
 
   @IsString()
   @IsNotEmpty()
-  @MaxLength(120)
+  @MaxLength(2048)
   actionValue!: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsString({ each: true })
+  actionUserIds?: string[];
 
   @IsOptional()
   @IsBoolean()

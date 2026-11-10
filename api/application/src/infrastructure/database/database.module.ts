@@ -35,6 +35,7 @@ import { Goal, GoalSchema } from '@infrastructure/database/schemas/goal.schema';
 import { Dashboard, DashboardSchema } from '@infrastructure/database/schemas/dashboard.schema';
 import { Form, FormSchema } from '@infrastructure/database/schemas/form.schema';
 import { Automation, AutomationSchema } from '@infrastructure/database/schemas/automation.schema';
+import { AutomationRun, AutomationRunSchema } from '@infrastructure/database/schemas/automation-run.schema';
 import { ChatChannel, ChatChannelSchema } from '@infrastructure/database/schemas/chat-channel.schema';
 import { ChatMessage, ChatMessageSchema } from '@infrastructure/database/schemas/chat-message.schema';
 import { UserGroup, UserGroupSchema } from '@infrastructure/database/schemas/user-group.schema';
@@ -70,6 +71,7 @@ import { GoalPersistence } from '@infrastructure/database/persistence/goal.persi
 import { DashboardPersistence } from '@infrastructure/database/persistence/dashboard.persistence';
 import { FormPersistence } from '@infrastructure/database/persistence/form.persistence';
 import { AutomationPersistence } from '@infrastructure/database/persistence/automation.persistence';
+import { AutomationRunPersistence } from '@infrastructure/database/persistence/automation-run.persistence';
 import { ChatChannelPersistence } from '@infrastructure/database/persistence/chat-channel.persistence';
 import { ChatMessagePersistence } from '@infrastructure/database/persistence/chat-message.persistence';
 import { UserGroupPersistence } from '@infrastructure/database/persistence/user-group.persistence';
@@ -112,6 +114,7 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
       { name: Dashboard.name, schema: DashboardSchema },
       { name: Form.name, schema: FormSchema },
       { name: Automation.name, schema: AutomationSchema },
+      { name: AutomationRun.name, schema: AutomationRunSchema },
       { name: ChatChannel.name, schema: ChatChannelSchema },
       { name: ChatMessage.name, schema: ChatMessageSchema },
       { name: UserGroup.name, schema: UserGroupSchema },
@@ -151,6 +154,7 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
     DashboardPersistence,
     FormPersistence,
     AutomationPersistence,
+    AutomationRunPersistence,
     ChatChannelPersistence,
     ChatMessagePersistence,
     UserGroupPersistence,
@@ -190,6 +194,7 @@ import { GuestAccessPersistence } from '@infrastructure/database/persistence/gue
     DashboardPersistence,
     FormPersistence,
     AutomationPersistence,
+    AutomationRunPersistence,
     ChatChannelPersistence,
     ChatMessagePersistence,
     UserGroupPersistence,

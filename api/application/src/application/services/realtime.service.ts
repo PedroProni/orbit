@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Observable, Subject, filter } from 'rxjs';
 import { TaskEvent } from '@domain/types/task-event.type';
+import { newId } from '@common/helpers/functions/id.helper';
 
 @Injectable()
 export class RealtimeService {
@@ -10,11 +11,11 @@ export class RealtimeService {
     return this.bus.asObservable();
   }
 
-  publish(event: Omit<TaskEvent, 'at'>): void {
-    this.bus.next({ ...event, at: new Date() });
+  publish(event: Omit<TaskEvent, 'at' | 'eventId'>): void {
+    this.bus.next({ ...event, eventId: newId(), at: new Date() });
   }
 
   stream(workspaceId: string): Observable<TaskEvent> {
-    return this.bus.pipe(filter((event) => event.workspaceId === workspaceId));
+    return this.bus.pipe(filter(event => event.workspaceId === workspaceId));
   }
 }

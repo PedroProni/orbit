@@ -26,6 +26,7 @@ export interface TaskCommentComposerProps {
 
 export interface ActorLabels {
   github: string;
+  automation: string;
   someone: string;
 }
 

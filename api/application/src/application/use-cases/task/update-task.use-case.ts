@@ -137,6 +137,9 @@ export class UpdateTaskUseCase {
       actorId: principal.userId,
       status: saved.getStatus(),
       statusChanged: changed.includes('status'),
+      priority: saved.getPriority(),
+      priorityChanged: changed.includes('priority'),
+      addedAssigneeIds: addedAssignees,
     });
     return TaskPresenter.toView(saved);
   }

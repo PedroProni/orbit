@@ -12,6 +12,7 @@ export const ACTIVITY_HIDDEN_FIELDS = ['updatedAt', 'dateClosed', 'checklists', 
 export const ACTIVITY_FIELDS = ['title', 'status', 'priority', 'tags', 'assigneeIds', 'watcherIds', 'points', 'startDate', 'dueDate', 'listId', 'spaceId', 'parentId', 'archived', 'customFields', 'links', 'pullRequests'] as const;
 export const ACTIVITY_PEOPLE_FIELDS = ['assigneeIds', 'watcherIds'];
 export const GITHUB_ACTOR_ID = 'github';
+export const AUTOMATION_ACTOR_ID = 'automation';
 export const PULL_REQUEST_ACTIVITY_FIELD = 'pullRequests';
 export const TASK_LINK_PARAM = 'task';
 export const PREFIX_ERROR_PREFIX = 'Title must start with';

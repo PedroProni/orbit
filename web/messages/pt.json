@@ -55,7 +55,8 @@
     "type": {
       "mention": "Você foi mencionado",
       "assignment": "Atribuída a você",
-      "status_change": "Status alterado"
+      "status_change": "Status alterado",
+      "automation": "Uma automação notificou você"
     }
   },
   "tasks": {
@@ -447,7 +448,8 @@
     },
     "statusChanged": "mudou o status de <before></before> para <after></after>",
     "pullRequestLinked": "vinculou o pull request {pr}",
-    "pullRequestUnlinked": "desvinculou o pull request {pr}"
+    "pullRequestUnlinked": "desvinculou o pull request {pr}",
+    "automation": "Automação"
   },
   "ui": {
     "close": "Fechar",
@@ -565,7 +567,11 @@
     "printsImagesOnly": "Prints precisam ser imagens",
     "githubCooldown": "O GitHub acabou de ser atualizado. Aguarde 30 segundos e tente de novo.",
     "githubNotConfigured": "A sincronização com o GitHub não está configurada no servidor.",
-    "githubUnavailable": "O GitHub não está respondendo agora. Tente de novo em alguns minutos."
+    "githubUnavailable": "O GitHub não está respondendo agora. Tente de novo em alguns minutos.",
+    "automationSecretKeyMissing": "Os segredos de webhook não estão configurados no servidor. Peça a quem mantém o Orbit para configurar a chave.",
+    "automationWebhookUrlInvalid": "O endereço do webhook precisa ser um link https:// válido.",
+    "automationWebhookUrlPrivate": "O endereço do webhook aponta para uma rede privada ou interna.",
+    "automationInvalid": "Esta automação não é válida. Confira o gatilho e a ação."
   },
   "authErrors": {
     "invalidCredentials": "E-mail ou senha incorretos.",
@@ -791,7 +797,8 @@
     "deniedHint": "Só donos e administradores abrem a área de administração.",
     "groups": {
       "people": "Pessoas",
-      "structure": "Estrutura"
+      "structure": "Estrutura",
+      "automation": "Automação"
     },
     "sections": {
       "people": "Membros e papéis",
@@ -799,7 +806,8 @@
       "spaces": "Espaços, pastas e listas",
       "statuses": "Status e regras",
       "customFields": "Campos personalizados",
-      "taskTypes": "Tipos de tarefa"
+      "taskTypes": "Tipos de tarefa",
+      "automations": "Automações"
     },
     "loadError": "Não foi possível carregar esta página. Tente de novo.",
     "spacePicker": "Espaço",
@@ -935,6 +943,129 @@
     "sidebar": {
       "newSpace": "Novo espaço",
       "createIn": "Criar em {name}"
+    },
+    "automations": {
+      "subtitle": "Deixe o Orbit reagir às mudanças das tarefas: atribuir pessoas, adicionar tags, mudar campos, comentar, notificar ou chamar um webhook.",
+      "add": "Nova automação",
+      "empty": "Nenhuma automação ainda",
+      "emptyHint": "Crie uma para poupar os passos repetitivos do time.",
+      "createTitle": "Nova automação",
+      "editTitle": "Editar automação",
+      "deleteTitle": "Excluir automação",
+      "confirmDelete": "Excluir a automação {name}? O histórico de execuções vai junto.",
+      "editFor": "Editar automação {name}",
+      "deleteFor": "Excluir automação {name}",
+      "toggleFor": "Ligar ou desligar a automação {name}",
+      "scopeLabel": "Vale para",
+      "scopeAll": "Todas as listas",
+      "scopeList": "{space} / {list}",
+      "scopeMissing": "Uma lista que não existe mais",
+      "whenLegend": "Quando",
+      "thenLegend": "Então",
+      "triggerLabel": "Gatilho",
+      "actionLabel": "Ação",
+      "statusLabel": "Status",
+      "priorityLabel": "Prioridade",
+      "personLabel": "Pessoa",
+      "dateLabel": "Data",
+      "tagLabel": "Tag",
+      "commentLabel": "Comentário",
+      "commentCount": "{count}/{max}",
+      "notifyLabel": "Quem recebe a notificação",
+      "notifyPeople": "Pessoas a notificar",
+      "webhookLabel": "URL do webhook",
+      "webhookPlaceholder": "https://exemplo.com/hooks/orbit",
+      "webhookHint": "O Orbit envia um POST assinado com a tarefa para este endereço HTTPS.",
+      "choose": "Escolha",
+      "anyPriority": "Qualquer prioridade",
+      "anyone": "Qualquer pessoa",
+      "noMembers": "Ainda não há pessoas ativas no espaço de trabalho.",
+      "unknownPerson": "uma pessoa removida",
+      "removedTask": "Uma tarefa que não existe mais",
+      "sentence": "Quando {trigger}, {action}.",
+      "triggers": {
+        "task_created": "Uma tarefa é criada",
+        "status_changed": "O status muda",
+        "priority_changed": "A prioridade muda",
+        "assignee_added": "Alguém entra como responsável",
+        "date_reached": "Uma data chega"
+      },
+      "actions": {
+        "assign": "Atribuir uma pessoa",
+        "add_tag": "Adicionar uma tag",
+        "set_priority": "Definir a prioridade",
+        "set_status": "Mudar o status",
+        "comment": "Publicar um comentário",
+        "notify": "Enviar uma notificação",
+        "webhook": "Chamar um webhook"
+      },
+      "triggerText": {
+        "task_created": "uma tarefa é criada",
+        "status_changed": "uma tarefa passa para {status}",
+        "priority_changed": "a prioridade muda para {priority}",
+        "priority_changed_any": "a prioridade muda",
+        "assignee_added": "{person} entra como responsável",
+        "assignee_added_any": "alguém entra como responsável",
+        "date_reached_start_date": "chega a data de início",
+        "date_reached_due_date": "chega a data de entrega"
+      },
+      "actionText": {
+        "assign": "atribuir a {person}",
+        "add_tag": "adicionar a tag {tag}",
+        "set_priority": "definir a prioridade como {priority}",
+        "set_status": "mover para {status}",
+        "comment": "publicar um comentário",
+        "notify_assignees": "notificar os responsáveis",
+        "notify_watchers": "notificar os observadores",
+        "notify_users": "notificar {people}",
+        "webhook": "chamar o webhook em {host}"
+      },
+      "dates": {
+        "start_date": "Data de início",
+        "due_date": "Data de entrega"
+      },
+      "notifyTargets": {
+        "assignees": "Os responsáveis",
+        "watchers": "Os observadores",
+        "users": "Pessoas escolhidas"
+      },
+      "problems": {
+        "nameRequired": "Dê um nome à automação.",
+        "triggerValueRequired": "Escolha o valor do gatilho.",
+        "actionValueRequired": "Preencha o valor da ação.",
+        "commentTooLong": "O comentário pode ter até 2000 caracteres.",
+        "webhookHttps": "O endereço do webhook precisa ser um link https:// válido.",
+        "webhookTooLong": "O endereço do webhook pode ter até 2048 caracteres.",
+        "usersRequired": "Escolha pelo menos uma pessoa para notificar."
+      },
+      "rotateSecret": "Gerar um novo segredo",
+      "rotateHint": "O segredo atual para de funcionar quando você salvar.",
+      "lastRun": "Última execução",
+      "neverRan": "Nunca executou",
+      "runStatus": {
+        "done": "Feita",
+        "skipped": "Ignorada",
+        "failed": "Falhou"
+      },
+      "history": "Histórico",
+      "historyEmpty": "Nenhuma execução ainda.",
+      "historyError": "Não foi possível carregar o histórico.",
+      "reasons": {
+        "status_not_in_space": "O status não existe no espaço da tarefa",
+        "no_change": "Nada a mudar",
+        "webhook_timeout": "O webhook demorou demais para responder",
+        "webhook_status": "O webhook respondeu com o status {code}",
+        "webhook_blocked_address": "O endereço do webhook aponta para uma rede bloqueada",
+        "task_not_found": "A tarefa não existe mais",
+        "error": "Algo deu errado"
+      },
+      "secretTitle": "Segredo do webhook",
+      "secretBody": "Use este segredo para conferir a assinatura que o Orbit envia em cada chamada do webhook.",
+      "secretLabel": "Segredo",
+      "secretWarning": "Copie agora. Por segurança, ele não será mostrado de novo.",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "secretDone": "Já guardei"
     }
   },
   "createTask": {

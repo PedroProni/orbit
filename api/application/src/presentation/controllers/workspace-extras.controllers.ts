@@ -5,14 +5,12 @@ import { CurrentPrincipal } from '@infrastructure/auth/current-principal.decorat
 import { AuthPrincipal } from '@domain/types/auth-principal.type';
 import { SCOPE_STRUCTURE_WRITE, SCOPE_TASKS_READ, SCOPE_TASKS_WRITE, SCOPE_USERS_MANAGE } from '@domain/constants/scopes.constant';
 import { FormsUseCase } from '@application/use-cases/form/forms.use-case';
-import { AutomationsUseCase } from '@application/use-cases/automation/automations.use-case';
 import { ChatUseCase } from '@application/use-cases/chat/chat.use-case';
 import { UserGroupsUseCase } from '@application/use-cases/group/user-groups.use-case';
 import { GuestAccessUseCase } from '@application/use-cases/user/guest-access.use-case';
 import { InboxUseCase } from '@application/use-cases/inbox/inbox.use-case';
 import { SaveFormDto } from '@shared/dtos/form/save-form.dto';
 import { SubmitFormDto } from '@shared/dtos/form/submit-form.dto';
-import { SaveAutomationDto } from '@shared/dtos/automation/save-automation.dto';
 import { CreateChannelDto, PostMessageDto } from '@shared/dtos/chat/chat.dto';
 import { SaveGroupDto } from '@shared/dtos/group/save-group.dto';
 import { SetGuestAccessDto } from '@shared/dtos/guest/set-guest-access.dto';
@@ -61,37 +59,6 @@ export class PublicFormController {
   @Post(':key')
   submit(@Param('key') key: string, @Body() dto: SubmitFormDto) {
     return this.forms.submit(key, dto.answers);
-  }
-}
-
-@ApiTags('Automations')
-@Controller('automations')
-export class AutomationController {
-  constructor(private readonly automations: AutomationsUseCase) {}
-
-  @Get()
-  @Authenticated(SCOPE_STRUCTURE_WRITE)
-  list(@CurrentPrincipal() principal: AuthPrincipal) {
-    return this.automations.list(principal);
-  }
-
-  @Post()
-  @Authenticated(SCOPE_STRUCTURE_WRITE)
-  create(@CurrentPrincipal() principal: AuthPrincipal, @Body() dto: SaveAutomationDto) {
-    return this.automations.create(principal, dto);
-  }
-
-  @Patch(':id')
-  @Authenticated(SCOPE_STRUCTURE_WRITE)
-  update(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string, @Body() dto: SaveAutomationDto) {
-    return this.automations.update(principal, id, dto);
-  }
-
-  @Delete(':id')
-  @HttpCode(204)
-  @Authenticated(SCOPE_STRUCTURE_WRITE)
-  async remove(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string) {
-    await this.automations.remove(principal, id);
   }
 }
 

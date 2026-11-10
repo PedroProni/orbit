@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { AUTOMATION_ACTOR_ID } from '@/components/tasks/tasks.constants';
 import { useMarkRead, useNotifications } from '@/hooks/use-orbit';
 import { useUiStore } from '@/stores/ui.store';
 
 export function NotificationsBell() {
   const t = useTranslations('notifications');
+  const ta = useTranslations('activity');
   const [open, setOpen] = useState(false);
   const notifications = useNotifications();
   const markRead = useMarkRead();
@@ -40,6 +42,12 @@ export function NotificationsBell() {
                     setOpen(false);
                   }}
                 >
+                  {n.actorId === AUTOMATION_ACTOR_ID ? (
+                    <span data-actor={AUTOMATION_ACTOR_ID} className="mb-0.5 flex items-center gap-1 text-xs font-medium text-accent">
+                      <Bot size={12} aria-hidden="true" />
+                      {ta('automation')}
+                    </span>
+                  ) : null}
                   <span className={n.readAt ? 'text-muted' : 'text-fg'}>{t(`type.${n.type}`)}</span>
                   <span className="ml-2 text-xs text-muted">{n.taskId}</span>
                 </button>

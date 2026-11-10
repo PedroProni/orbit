@@ -25,10 +25,11 @@ describe('timeline helpers', () => {
     expect(linkChanges({ figma: null, notion: 'https://n.so/a' }, { figma: 'https://f.com/x', notion: 'https://n.so/a', printsFolder: '' })).toEqual([{ key: 'figma', before: '-', after: 'https://f.com/x' }]);
   });
 
-  it('names the actor, with GitHub for the webhook and a fallback for an unknown id', () => {
-    const labels = { github: 'GitHub', someone: 'Someone' };
+  it('names the actor, with GitHub for the webhook, Automation for the rules and a fallback for an unknown id', () => {
+    const labels = { github: 'GitHub', automation: 'Automation', someone: 'Someone' };
     expect(actorName('u1', MEMBERS, labels)).toBe('Ana Souza');
     expect(actorName('github', MEMBERS, labels)).toBe('GitHub');
+    expect(actorName('automation', MEMBERS, labels)).toBe('Automation');
     expect(actorName('gone', MEMBERS, labels)).toBe('Someone');
   });
 
@@ -77,6 +78,23 @@ describe('TaskTimeline', () => {
     renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />);
     const lines = () => Array.from(document.querySelectorAll('[data-kind="activity"]')).map((node) => node.querySelector('div')?.textContent);
     await waitFor(() => expect(lines()).toEqual(['GitHub linked pull request acme-org/orbit#15', 'Bruno Lima unlinked pull request acme-org/orbit#15']));
+  });
+
+  it('names Automation with the bot icon as the actor of a change made by an automation, in both languages', async () => {
+    vi.spyOn(orbitService, 'me').mockResolvedValue(principal('member'));
+    vi.spyOn(orbitService, 'comments').mockResolvedValue([comment({ authorId: 'automation', bodyMd: 'Lembrete automático' })]);
+    vi.spyOn(orbitService, 'attachments').mockResolvedValue([]);
+    vi.spyOn(orbitService, 'taskActivity').mockResolvedValue([entry({ id: 'e5', actorId: 'automation', diff: { priority: { before: 'low', after: 'urgent' } } })]);
+    const { unmount } = renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />);
+    const activityLine = () => document.querySelector('[data-kind="activity"]');
+    await waitFor(() => expect(activityLine()?.querySelector('div')?.textContent).toBe('Automation changed prioritypriority: Low -> Urgent'));
+    expect(activityLine()?.querySelector('[data-actor="automation"] svg')).toBeTruthy();
+    const commentLine = await waitFor(() => document.querySelector('[data-kind="comment"]') as HTMLElement);
+    expect(commentLine.querySelector('[data-actor="automation"]')?.getAttribute('aria-label')).toBe('Automation');
+    expect(screen.queryByText('Someone')).toBeNull();
+    unmount();
+    renderWithProviders(<TaskTimeline task={makeTask()} statuses={STATUSES} readOnly={false} />, 'pt');
+    await waitFor(() => expect(document.querySelector('[data-kind="activity"] [data-actor="automation"]')?.textContent).toBe('Automação'));
   });
 
   it('shows the empty state when the task has no comments or activity yet', async () => {

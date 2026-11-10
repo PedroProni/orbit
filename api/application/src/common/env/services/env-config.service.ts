@@ -4,6 +4,7 @@ import { IEnvConfig } from '@shared/interfaces/env-config.interface';
 import { GithubRepositoryPolicy } from '@domain/policies/github-repository.policy';
 import { GITHUB_DEFAULT_SYNC_INTERVAL_MS } from '@domain/constants/github-sync.constant';
 import { GITHUB_API_BASE_URL } from '@domain/constants/github-api.constant';
+import { AUTOMATION_DATE_DEFAULT_INTERVAL_MS } from '@domain/constants/automation.constant';
 
 @Injectable()
 export class EnvConfigService implements IEnvConfig {
@@ -133,5 +134,17 @@ export class EnvConfigService implements IEnvConfig {
     } catch {
       return GITHUB_API_BASE_URL;
     }
+  }
+
+  getAutomationSecretKey(): string {
+    return (this.configService.get<string>('AUTOMATION_SECRET_KEY') || '').trim();
+  }
+
+  getAutomationDateIntervalMs(): number {
+    return Number(this.configService.get<string>('AUTOMATION_DATE_INTERVAL_MS') ?? AUTOMATION_DATE_DEFAULT_INTERVAL_MS);
+  }
+
+  isAutomationWebhookPrivateAllowed(): boolean {
+    return this.configService.get<string>('AUTOMATION_WEBHOOK_ALLOW_PRIVATE') === 'true' && this.configService.get<string>('NODE_ENV') !== 'production';
   }
 }

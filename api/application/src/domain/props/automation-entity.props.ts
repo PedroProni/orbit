@@ -1,5 +1,4 @@
-import { AutomationTriggerType } from '@domain/enums/automation.enums';
-import { AutomationActionType } from '@domain/enums/automation.enums';
+import { AutomationActionType, AutomationTriggerType } from '@domain/enums/automation.enums';
 
 export interface AutomationEntityProps {
   _id: string;
@@ -7,10 +6,14 @@ export interface AutomationEntityProps {
   listId: string | null;
   name: string;
   triggerType: AutomationTriggerType;
-  triggerStatus: string | null;
+  triggerValue: string | null;
   actionType: AutomationActionType;
   actionValue: string;
+  actionUserIds: string[];
+  webhookSecretEnc: string | null;
   active: boolean;
+  armedAt: Date;
+  dateCursor: Date | null;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;

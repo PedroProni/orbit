@@ -12,4 +12,8 @@ export class AutomationPersistence extends BaseMongoPersistence<AutomationEntity
   constructor(@InjectModel(Automation.name) model: Model<AutomationDocument>) {
     super(model, DomainAutomationMapper.toDomain, DomainAutomationMapper.toPersistence);
   }
+
+  async moveDateCursor(id: string, armedAt: Date, cursor: Date): Promise<void> {
+    await this.model.updateOne({ _id: id, $or: [{ armed_at: armedAt }, { armed_at: null }] } as any, { $set: { date_cursor: cursor } }, { timestamps: false }).exec();
+  }
 }

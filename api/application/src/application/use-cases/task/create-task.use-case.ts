@@ -111,6 +111,8 @@ export class CreateTaskUseCase {
       actorId: principal.userId,
       status: saved.getStatus(),
       statusChanged: true,
+      priority: saved.getPriority(),
+      addedAssigneeIds: saved.getAssigneeIds(),
     });
     return TaskPresenter.toView(saved);
   }

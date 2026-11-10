@@ -100,6 +100,8 @@ import { TaskAttachmentSummaryService } from '@application/services/task-attachm
 import { FormsUseCase } from '@application/use-cases/form/forms.use-case';
 import { AutomationsUseCase } from '@application/use-cases/automation/automations.use-case';
 import { AutomationRunner } from '@application/services/automation-runner.service';
+import { AutomationDateScheduler } from '@application/services/automation-date-scheduler.service';
+import { AutomationSecretService } from '@application/services/automation-secret.service';
 import { ChatUseCase } from '@application/use-cases/chat/chat.use-case';
 import { UserGroupsUseCase } from '@application/use-cases/group/user-groups.use-case';
 import { GuestAccessUseCase } from '@application/use-cases/user/guest-access.use-case';
@@ -191,6 +193,8 @@ export default [
   FormsUseCase,
   AutomationsUseCase,
   AutomationRunner,
+  AutomationDateScheduler,
+  AutomationSecretService,
   ChatUseCase,
   UserGroupsUseCase,
   GuestAccessUseCase,

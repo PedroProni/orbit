@@ -5,6 +5,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { AttachmentItem } from '@/components/attachments/attachment-item';
 import { Avatar } from '@/components/common/avatar';
+import { AutomationAvatar } from '@/components/common/automation-avatar';
 import { MarkdownView } from '@/components/common/markdown-view';
 import { useCapabilities } from '@/hooks/use-capabilities';
 import { useDeleteComment, useEditComment } from '@/hooks/use-orbit';
@@ -12,6 +13,7 @@ import { collectMentionIds } from './mentions.helpers';
 import { MentionTextarea } from './mention-textarea';
 import { CommentItemProps } from './comment-item.types';
 import { actorName, formatTimelineTime } from './task-timeline.helpers';
+import { AUTOMATION_ACTOR_ID } from './tasks.constants';
 
 export function CommentItem({ taskId, comment, members, attachments, onRemoveAttachment }: CommentItemProps) {
   const t = useTranslations('drawer');
@@ -27,10 +29,10 @@ export function CommentItem({ taskId, comment, members, attachments, onRemoveAtt
     if (!body?.trim()) return;
     edit.mutate({ id: comment.id, bodyMd: body, mentionIds: collectMentionIds(body, members) }, { onSuccess: () => setBody(null) });
   };
-  const authorName = actorName(comment.authorId, members, { github: ta('github'), someone: ta('someone') });
+  const authorName = actorName(comment.authorId, members, { github: ta('github'), automation: ta('automation'), someone: ta('someone') });
   return (
     <li data-kind="comment" className="group flex gap-2.5 rounded px-1 py-2 text-[13px]">
-      <Avatar id={comment.authorId} name={authorName} size={28} />
+      {comment.authorId === AUTOMATION_ACTOR_ID ? <AutomationAvatar name={authorName} size={28} /> : <Avatar id={comment.authorId} name={authorName} size={28} />}
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex items-center gap-2 text-xs">
           <span className="min-w-0 truncate font-semibold text-fg">{authorName}</span>

@@ -9,11 +9,7 @@ import { TaskComment } from '@/types/api.types';
 const mocks = vi.hoisted(() => ({ edit: vi.fn(), remove: vi.fn(), caps: { userId: 'u1', canModerateComments: false } }));
 
 vi.mock('@/hooks/use-capabilities', () => ({ useCapabilities: () => mocks.caps }));
-vi.mock('@/hooks/use-orbit', () => ({
-  useMembers: () => ({ data: MEMBERS }),
-  useEditComment: () => ({ mutate: mocks.edit, isPending: false }),
-  useDeleteComment: () => ({ mutate: mocks.remove, isPending: false }),
-}));
+vi.mock('@/hooks/use-orbit', () => ({ useMembers: () => ({ data: MEMBERS }), useEditComment: () => ({ mutate: mocks.edit, isPending: false }), useDeleteComment: () => ({ mutate: mocks.remove, isPending: false }) }));
 
 const comment: TaskComment = { id: 'c1', taskId: 't1', authorId: 'u1', bodyMd: 'texto original', dailyLogDate: null, editedAt: null, createdAt: '2026-11-04T10:00:00Z' };
 const show = (over: Partial<TaskComment> = {}) => renderWithProviders(<CommentItem taskId="t1" comment={{ ...comment, ...over }} members={MEMBERS} attachments={[]} onRemoveAttachment={vi.fn()} />);
@@ -73,6 +69,16 @@ describe('CommentItem', () => {
     unmount();
     show({ authorId: 'gone' });
     expect(screen.getByText('Someone')).toBeTruthy();
+  });
+
+  it('names Automation as the author of an automation comment with the bot avatar and no edit or delete for a member', () => {
+    show({ authorId: 'automation' });
+    expect(screen.getByText('Automation')).toBeTruthy();
+    const avatar = screen.getByRole('img', { name: 'Automation' });
+    expect(avatar.getAttribute('data-actor')).toBe('automation');
+    expect(avatar.querySelector('svg')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Edit comment' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Delete comment' })).toBeNull();
   });
 
   it('marks an edited comment', () => {

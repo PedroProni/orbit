@@ -1,11 +1,12 @@
 import { Member, TaskActivityEntry, TaskComment, TaskLinks } from '@/types/api.types';
-import { ACTIVITY_FIELDS, ACTIVITY_HIDDEN_FIELDS, GITHUB_ACTOR_ID, PULL_REQUEST_ACTIVITY_FIELD, TASK_LINK_KEYS } from './tasks.constants';
+import { ACTIVITY_FIELDS, ACTIVITY_HIDDEN_FIELDS, AUTOMATION_ACTOR_ID, GITHUB_ACTOR_ID, PULL_REQUEST_ACTIVITY_FIELD, TASK_LINK_KEYS } from './tasks.constants';
 import { ActorLabels, LinkChange, PullRequestChange, TimelineItem } from './task-timeline.types';
 
 export const mergeTimeline = (comments: TaskComment[], activity: TaskActivityEntry[]): TimelineItem[] =>
-  [...comments.map((comment): TimelineItem => ({ kind: 'comment', id: `c-${comment.id}`, createdAt: comment.createdAt, comment })), ...activity.map((entry): TimelineItem => ({ kind: 'activity', id: `a-${entry.id}`, createdAt: entry.createdAt, entry }))].sort(
-    (a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id),
-  );
+  [
+    ...comments.map((comment): TimelineItem => ({ kind: 'comment', id: `c-${comment.id}`, createdAt: comment.createdAt, comment })),
+    ...activity.map((entry): TimelineItem => ({ kind: 'activity', id: `a-${entry.id}`, createdAt: entry.createdAt, entry })),
+  ].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
 
 export const localDayKey = (iso: string): string => {
   const date = new Date(iso);
@@ -29,7 +30,11 @@ const linkValue = (links: unknown, key: keyof TaskLinks): string => {
 
 export const linkChanges = (before: unknown, after: unknown): LinkChange[] => TASK_LINK_KEYS.map((key) => ({ key, before: linkValue(before, key), after: linkValue(after, key) })).filter((change) => change.before !== change.after);
 
-export const actorName = (id: string, members: Member[], labels: ActorLabels): string => (id === GITHUB_ACTOR_ID ? labels.github : (members.find((member) => member.id === id)?.name ?? labels.someone));
+export const actorName = (id: string, members: Member[], labels: ActorLabels): string => {
+  if (id === GITHUB_ACTOR_ID) return labels.github;
+  if (id === AUTOMATION_ACTOR_ID) return labels.automation;
+  return members.find((member) => member.id === id)?.name ?? labels.someone;
+};
 
 export const pullRequestChange = (entry: TaskActivityEntry, fields: string[]): PullRequestChange => {
   if (fields.length !== 1 || fields[0] !== PULL_REQUEST_ACTIVITY_FIELD) return null;

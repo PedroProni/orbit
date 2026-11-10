@@ -29,6 +29,6 @@ export class SearchController {
   @SetMetadata(ALLOW_QUERY_SESSION_KEY, true)
   @Authenticated(SCOPE_TASKS_READ)
   events(@CurrentPrincipal() principal: AuthPrincipal): Observable<MessageEvent> {
-    return this.realtime.stream(principal.workspaceId).pipe(map((event) => ({ type: event.type, data: event })));
+    return this.realtime.stream(principal.workspaceId).pipe(map(event => ({ type: event.type, data: { ...event, addedAssigneeIds: undefined } })));
   }
 }

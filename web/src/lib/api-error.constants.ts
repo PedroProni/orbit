@@ -19,5 +19,12 @@ export const API_ERROR_KEYS: Readonly<Record<string, string>> = {
   'GitHub refresh: GITHUB_REFRESH_COOLDOWN': 'githubCooldown',
   'GitHub refresh: GITHUB_NOT_CONFIGURED': 'githubNotConfigured',
 };
+export const API_ERROR_CODES: Readonly<Record<string, string>> = {
+  AUTOMATION_SECRET_KEY_MISSING: 'automationSecretKeyMissing',
+  AUTOMATION_WEBHOOK_URL_INVALID: 'automationWebhookUrlInvalid',
+  AUTOMATION_WEBHOOK_URL_PRIVATE: 'automationWebhookUrlPrivate',
+  AUTOMATION_INVALID: 'automationInvalid',
+};
+export const API_ERROR_CODE_PATTERN = /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g;
 export const API_ERROR_BY_STATUS: Readonly<Record<number, string>> = { 403: 'forbidden', 404: 'notFound', 409: 'conflict' };
 export const API_ERROR_FALLBACK = 'generic';
