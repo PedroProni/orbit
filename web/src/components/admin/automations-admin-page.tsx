@@ -13,7 +13,7 @@ import { AdminPageFrame } from './admin-page-frame';
 import { AutomationDialog } from './automation-dialog';
 import { AutomationRow } from './automation-row';
 import { AutomationSecretDialog } from './automation-secret-dialog';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function AutomationsAdminPage() {
   const t = useTranslations('admin');

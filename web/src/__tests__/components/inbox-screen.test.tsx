@@ -6,21 +6,24 @@ import { makeTask, resetUiStore } from '../helpers/fixtures';
 import { InboxScreen } from '@/components/workspace/inbox-screen';
 import { useUiStore } from '@/stores/ui.store';
 
-const state = vi.hoisted(() => ({ value: {} as { isLoading?: boolean; data?: unknown } }));
+const state = vi.hoisted(() => ({ value: {} as { isLoading?: boolean; data?: unknown; refetch?: () => unknown } }));
 
 vi.mock('@/hooks/use-workspace', () => ({ useInbox: () => state.value }));
 
 describe('InboxScreen', () => {
   beforeEach(() => resetUiStore());
 
-  it('shows the loading and error states', () => {
+  it('shows a skeleton while loading and an error with a retry that asks again', () => {
     state.value = { isLoading: true };
     const { unmount } = renderWithProviders(<InboxScreen />);
-    expect(screen.getByText('Loading...')).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeTruthy();
     unmount();
-    state.value = { isLoading: false, data: undefined };
+    const refetch = vi.fn();
+    state.value = { isLoading: false, data: undefined, refetch };
     renderWithProviders(<InboxScreen />);
-    expect(screen.getByText('Could not load the inbox')).toBeTruthy();
+    expect(within(screen.getByRole('alert')).getByText('Could not load the inbox')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('shows empty messages for both sections', () => {

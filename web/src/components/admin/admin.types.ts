@@ -19,15 +19,6 @@ export interface NameDialogProps {
   onClose: () => void;
 }
 
-export interface ConfirmDialogProps {
-  open: boolean;
-  title: string;
-  message: string;
-  confirmLabel: string;
-  onConfirm: () => Promise<unknown>;
-  onClose: () => void;
-}
-
 export interface ListDialogProps {
   open: boolean;
   space: SpaceNode | null;

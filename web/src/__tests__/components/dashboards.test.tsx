@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { renderWithProviders } from '../helpers/render-with-providers';
 import { chooseOption } from '../helpers/choose-option';
 import { MEMBERS } from '../helpers/fixtures';
@@ -29,7 +29,7 @@ const data = vi.hoisted(() => ({
 vi.mock('@/hooks/use-workspace', () => ({
   useDashboards: () => ({ data: data.dashboards }),
   useDashboardData: (id: string | null) => ({ data: id ? data.detail : undefined }),
-  useInvalidating: (fn: (args: unknown) => unknown) => ({ mutate: (args: unknown) => fn(args), isPending: false }),
+  useInvalidating: (fn: (args: unknown) => unknown) => ({ mutate: (args: unknown) => fn(args), mutateAsync: async (args: unknown) => fn(args), isPending: false }),
 }));
 
 describe('DashboardsScreen', () => {
@@ -64,7 +64,11 @@ describe('DashboardsScreen', () => {
     chooseOption(screen.getByLabelText('Add widget'), 'Overdue tasks');
     expect(workspaceService.updateDashboard).toHaveBeenCalledWith('d1', {
       name: 'Team',
-      widgets: [{ type: 'tasks_by_status', title: 'Tasks by status' }, { type: 'tasks_by_assignee', title: 'Tasks by assignee' }, { type: 'overdue', title: 'Overdue tasks' }],
+      widgets: [
+        { type: 'tasks_by_status', title: 'Tasks by status' },
+        { type: 'tasks_by_assignee', title: 'Tasks by assignee' },
+        { type: 'overdue', title: 'Overdue tasks' },
+      ],
     });
   });
 
@@ -79,10 +83,16 @@ describe('DashboardsScreen', () => {
     expect(call.widgets.map((w) => w.type)).toEqual(['tasks_by_status', 'tasks_by_assignee', 'overdue', 'time_tracked']);
   });
 
-  it('deletes a dashboard from its remove button', () => {
+  it('asks before deleting a dashboard and deletes only after the confirmation', async () => {
     renderWithProviders(<DashboardsScreen />);
-    fireEvent.click(screen.getByLabelText('Delete dashboard'));
-    expect(workspaceService.deleteDashboard).toHaveBeenCalledWith('d1');
+    fireEvent.click(screen.getByLabelText('Delete dashboard Team'));
+    expect(screen.getByRole('dialog', { name: 'Delete dashboard' })).toBeTruthy();
+    expect(screen.getByText('Delete the dashboard "Team"? Its widgets go with it.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(workspaceService.deleteDashboard).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByLabelText('Delete dashboard Team'));
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Delete dashboard' })).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(workspaceService.deleteDashboard).toHaveBeenCalledWith('d1'));
   });
 });
 

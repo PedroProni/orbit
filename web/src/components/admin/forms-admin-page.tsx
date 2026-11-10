@@ -10,7 +10,7 @@ import { useHierarchy } from '@/hooks/use-orbit';
 import { AdminForm, FormInput } from '@/services/form.types';
 import { ADMIN_PANEL_CLASS, ADMIN_PRIMARY_BUTTON_CLASS } from './admin.constants';
 import { AdminPageFrame } from './admin-page-frame';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { FormDialog } from './form-dialog';
 import { FormRow } from './form-row';
 

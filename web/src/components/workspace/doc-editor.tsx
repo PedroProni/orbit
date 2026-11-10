@@ -33,7 +33,7 @@ export function DocEditor({ value, onChange }: DocEditorProps) {
         })}
       </div>
       <div className="grid md:grid-cols-2">
-        <textarea ref={ref} aria-label={t('bodyField')} value={value} onChange={(e) => onChange(e.target.value)} rows={16} className="w-full resize-none bg-panel2 p-3 font-mono text-sm outline-none md:border-r md:border-line" />
+        <textarea ref={ref} aria-label={t('bodyField')} value={value} onChange={(e) => onChange(e.target.value)} rows={16} className="w-full resize-none bg-panel2 p-3 font-mono text-sm md:border-r md:border-line" />
         <div className="p-3" aria-label={t('preview')}>
           <MarkdownView source={value} />
         </div>

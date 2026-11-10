@@ -320,14 +320,14 @@
   },
   "inbox": {
     "title": "Inbox",
-    "loading": "Loading...",
     "error": "Could not load the inbox",
     "unread": "{count} unread notifications",
     "assigned": "{count} open tasks assigned to you",
     "overdue": "Overdue",
     "dueSoon": "Due soon",
     "emptyOverdue": "Nothing overdue",
-    "emptyDueSoon": "Nothing due soon"
+    "emptyDueSoon": "Nothing due soon",
+    "subtitle": "What is late or due soon among your tasks."
   },
   "docs": {
     "new": "New doc",
@@ -350,7 +350,15 @@
       "code": "Code",
       "link": "Link"
     },
-    "pickOnly": "Pick a doc"
+    "pickOnly": "Pick a doc",
+    "title": "Docs",
+    "subtitle": "Pages the team writes and shares, in Markdown.",
+    "tree": "Docs",
+    "back": "Back to docs",
+    "emptyHint": "Create the first doc with the button above.",
+    "emptyHintReadOnly": "Nobody has written a doc yet.",
+    "archiveTitle": "Archive doc",
+    "confirmArchive": "Archive \"{name}\"? It leaves the docs list."
   },
   "goals": {
     "title": "Goals",
@@ -360,13 +368,18 @@
     "mainTarget": "Main target",
     "create": "Create goal",
     "delete": "Delete",
-    "empty": "No goals yet"
+    "empty": "No goals yet",
+    "subtitle": "Targets the team follows, with the progress of each one.",
+    "emptyHint": "Create a goal with a target to follow its progress.",
+    "emptyHintReadOnly": "Nobody has created a goal yet.",
+    "deleteNamed": "Delete goal {name}",
+    "deleteTitle": "Delete goal",
+    "confirmDelete": "Delete the goal \"{name}\"? Its progress goes with it."
   },
   "dashboards": {
     "title": "Dashboards",
     "name": "Dashboard name",
     "create": "Create dashboard",
-    "delete": "Delete dashboard",
     "empty": "No dashboards yet",
     "noData": "No data",
     "widgets": {
@@ -380,7 +393,16 @@
       "count": "Count"
     },
     "addWidget": "Add widget",
-    "removeWidget": "Remove widget"
+    "removeWidget": "Remove widget",
+    "subtitle": "Charts of the tasks in this workspace, by status, person, delay and time.",
+    "emptyHint": "Create a dashboard to see your tasks as charts.",
+    "emptyHintReadOnly": "Nobody has created a dashboard yet.",
+    "deleteNamed": "Delete dashboard {name}",
+    "deleteTitle": "Delete dashboard",
+    "confirmDelete": "Delete the dashboard \"{name}\"? Its widgets go with it.",
+    "deleteConfirm": "Delete",
+    "noWidgets": "This dashboard has no widgets",
+    "noWidgetsHint": "Add a widget to start."
   },
   "chat": {
     "channelName": "Channel name",
@@ -390,7 +412,15 @@
     "message": "Write a message",
     "send": "Send",
     "readOnlyNotice": "You can read this channel. Your role cannot send messages.",
-    "pickOnly": "Pick a channel"
+    "pickOnly": "Pick a channel",
+    "title": "Chat",
+    "subtitle": "Talk with the team in channels.",
+    "channels": "Channels",
+    "conversation": "Conversation",
+    "back": "Back to channels",
+    "noChannels": "No channels yet",
+    "noChannelsHint": "Create the first channel above.",
+    "noChannelsHintReadOnly": "Nobody has created a channel yet."
   },
   "planning": {
     "title": "Planning",
@@ -467,7 +497,10 @@
     "nextMonth": "Next month",
     "today": "Today",
     "clearDate": "Clear date",
-    "noDate": "No date"
+    "noDate": "No date",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "loadError": "Could not load this page."
   },
   "palette": {
     "title": "Command palette",
@@ -522,7 +555,14 @@
     "statusMissing": "The space \"{space}\" has no status \"{status}\", so this task stays where it was",
     "pullRequestUnlinkFailed": "Could not unlink the pull request",
     "roleChanged": "Role changed.",
-    "roleChangeFailed": "Could not change the role."
+    "roleChangeFailed": "Could not change the role.",
+    "dashboardCreateFailed": "Could not create the dashboard. The name is still there.",
+    "dashboardUpdateFailed": "Could not update the dashboard.",
+    "goalCreateFailed": "Could not create the goal. What you typed is still there.",
+    "channelCreateFailed": "Could not create the channel. The name is still there.",
+    "messageSendFailed": "Could not send the message. Your text is still there.",
+    "docCreateFailed": "Could not create the doc.",
+    "docSaveFailed": "Could not save the doc. Your changes are still on the screen."
   },
   "attachments": {
     "title": "Attachments",
@@ -631,7 +671,8 @@
     "endSession": "End session",
     "endCurrent": "Sign out here",
     "endOthers": "End all other sessions",
-    "endSessionLabel": "End session on {device}"
+    "endSessionLabel": "End session on {device}",
+    "subtitle": "Your password and the devices where you are signed in."
   },
   "people": {
     "title": "People",

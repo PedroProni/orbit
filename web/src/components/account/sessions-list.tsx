@@ -3,7 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccountSessions, useRevokeOtherSessions, useRevokeSession } from '@/hooks/use-account';
 import { useSessionStore } from '@/stores/session.store';
@@ -42,18 +42,24 @@ export function SessionsList() {
         ) : null}
       </div>
       {sessions.isLoading ? <Skeleton className="h-16 w-full" /> : null}
-      {sessions.isError ? <EmptyState title={t('sessionsError')} /> : null}
+      {sessions.isError ? <ErrorState title={t('sessionsError')} onRetry={sessions.refetch} /> : null}
       <ul className="divide-y divide-line">
         {rows.map((session) => (
           <li key={session.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
             <div className="min-w-0">
-              <p className="truncate text-sm" title={session.userAgent ?? undefined}>
+              <p className="break-words text-sm" title={session.userAgent ?? undefined}>
                 {describeDevice(session.userAgent) ?? t('unknownDevice')}
                 {session.current ? <span className="ml-2 rounded bg-panel2 px-1.5 py-0.5 text-xs text-accent">{t('thisDevice')}</span> : null}
               </p>
               <p className="mt-0.5 text-xs text-muted">{t('sessionMeta', { ip: session.ip ?? t('unknownAddress'), date: new Date(session.createdAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) })}</p>
             </div>
-            <button type="button" aria-label={t('endSessionLabel', { device: describeDevice(session.userAgent) ?? t('unknownDevice') })} disabled={revoke.isPending} onClick={() => void end(session.id)} className="rounded border border-line px-2 py-1 text-xs hover:bg-panel2 disabled:opacity-60">
+            <button
+              type="button"
+              aria-label={t('endSessionLabel', { device: describeDevice(session.userAgent) ?? t('unknownDevice') })}
+              disabled={revoke.isPending}
+              onClick={() => void end(session.id)}
+              className="rounded border border-line px-2 py-1 text-xs hover:bg-panel2 disabled:opacity-60"
+            >
               {session.current ? t('endCurrent') : t('endSession')}
             </button>
           </li>

@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCapabilities } from '@/hooks/use-capabilities';
 import { workspaceService } from '@/services/workspace.service';
+import { useToastStore } from '@/stores/toast.store';
 import { CHAT_POLL_MS } from '@/components/workspace/workspace.constants';
 import { InstantiateTemplateArgs } from '@/types/workspace.types';
 
@@ -25,7 +26,7 @@ export const useRecurrence = (id: string) => useQuery({ queryKey: ['recurrence',
 
 export const useInstantiateTemplate = () => useInvalidating(({ id, listId, title }: InstantiateTemplateArgs) => workspaceService.instantiateTemplate(id, { listId, title }), ['tasks']);
 
-export function useInvalidating<TArgs, TResult>(fn: (args: TArgs) => Promise<TResult>, keys: string[]) {
+export function useInvalidating<TArgs, TResult>(fn: (args: TArgs) => Promise<TResult>, keys: string[], failureKey?: string) {
   const client = useQueryClient();
-  return useMutation({ mutationFn: fn, onSuccess: () => Promise.all(keys.map((key) => client.invalidateQueries({ queryKey: [key] }))) });
+  return useMutation({ mutationFn: fn, onSuccess: () => Promise.all(keys.map((key) => client.invalidateQueries({ queryKey: [key] }))), onError: failureKey ? () => useToastStore.getState().push('error', failureKey) : undefined });
 }

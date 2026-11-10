@@ -2,49 +2,65 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { PageHeader } from '@/components/ui/page-header';
 import { useCapabilities } from '@/hooks/use-capabilities';
 import { useGoals, useInvalidating } from '@/hooks/use-workspace';
 import { workspaceService } from '@/services/workspace.service';
+import { Goal } from '@/types/workspace.types';
+import { RowsSkeleton } from './screen-skeletons';
+import { SCREEN_INPUT_CLASS, SCREEN_NARROW_CLASS, SCREEN_PRIMARY_BUTTON_CLASS } from './screens.constants';
 
 export function GoalsScreen() {
   const t = useTranslations('goals');
+  const tu = useTranslations('ui');
   const goals = useGoals();
   const { canWrite } = useCapabilities();
   const [name, setName] = useState('');
   const [target, setTarget] = useState('100');
   const [current, setCurrent] = useState('0');
-  const create = useInvalidating(workspaceService.createGoal, ['goals']);
+  const [removing, setRemoving] = useState<Goal | null>(null);
+  const create = useInvalidating(workspaceService.createGoal, ['goals'], 'goalCreateFailed');
   const remove = useInvalidating(workspaceService.deleteGoal, ['goals']);
   const valid = name.trim() && Number(target) > 0 && Number(current) >= 0;
   return (
-    <div className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-4 text-xl font-semibold">{t('title')}</h1>
+    <div className={SCREEN_NARROW_CLASS}>
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
       {canWrite ? (
         <form
           className="mb-6 flex flex-wrap items-end gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             if (!valid) return;
-            create.mutate({ name: name.trim(), description: '', targets: [{ name: t('mainTarget'), kind: 'number', targetValue: Number(target), currentValue: Number(current) }] });
-            setName('');
+            create.mutate({ name: name.trim(), description: '', targets: [{ name: t('mainTarget'), kind: 'number', targetValue: Number(target), currentValue: Number(current) }] }, { onSuccess: () => setName('') });
           }}
         >
-          <input aria-label={t('name')} placeholder={t('name')} value={name} onChange={(e) => setName(e.target.value)} className="min-w-48 flex-1 rounded border border-line bg-panel2 px-2 py-1.5 text-sm" />
-          <input aria-label={t('targetValue')} type="number" min={1} value={target} onChange={(e) => setTarget(e.target.value)} className="w-24 rounded border border-line bg-panel2 px-2 py-1.5 text-sm" />
-          <input aria-label={t('currentValue')} type="number" min={0} value={current} onChange={(e) => setCurrent(e.target.value)} className="w-24 rounded border border-line bg-panel2 px-2 py-1.5 text-sm" />
-          <button type="submit" disabled={!valid || create.isPending} className="rounded bg-accent px-3 py-1.5 text-sm text-white disabled:opacity-50">
+          <input aria-label={t('name')} placeholder={t('name')} value={name} onChange={(e) => setName(e.target.value)} className={`${SCREEN_INPUT_CLASS} basis-full sm:min-w-48 sm:flex-1 sm:basis-0`} />
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            {t('targetValue')}
+            <input type="number" min={1} value={target} onChange={(e) => setTarget(e.target.value)} className={`${SCREEN_INPUT_CLASS} w-24 text-fg`} />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            {t('currentValue')}
+            <input type="number" min={0} value={current} onChange={(e) => setCurrent(e.target.value)} className={`${SCREEN_INPUT_CLASS} w-24 text-fg`} />
+          </label>
+          <button type="submit" disabled={!valid || create.isPending} className={SCREEN_PRIMARY_BUTTON_CLASS}>
             {t('create')}
           </button>
         </form>
       ) : null}
-      {goals.data?.length === 0 ? <p className="text-sm text-muted">{t('empty')}</p> : null}
+      {goals.isLoading ? <RowsSkeleton rows={3} /> : null}
+      {goals.isError ? <ErrorState title={tu('loadError')} onRetry={goals.refetch} /> : null}
+      {goals.data?.length === 0 ? <EmptyState title={t('empty')} hint={t(canWrite ? 'emptyHint' : 'emptyHintReadOnly')} /> : null}
       <ul className="space-y-3">
         {goals.data?.map((goal) => (
           <li key={goal.id} className="rounded border border-line p-3">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">{goal.name}</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="min-w-0 break-words font-medium">{goal.name}</span>
               {canWrite ? (
-                <button type="button" className="text-xs text-muted hover:text-danger" onClick={() => remove.mutate(goal.id)}>
+                <button type="button" aria-label={t('deleteNamed', { name: goal.name })} className="shrink-0 rounded px-1 text-xs text-muted hover:text-danger" onClick={() => setRemoving(goal)}>
                   {t('delete')}
                 </button>
               ) : null}
@@ -56,6 +72,14 @@ export function GoalsScreen() {
           </li>
         ))}
       </ul>
+      <ConfirmDialog
+        open={removing !== null}
+        title={t('deleteTitle')}
+        message={t('confirmDelete', { name: removing?.name ?? '' })}
+        confirmLabel={t('delete')}
+        onConfirm={() => (removing ? remove.mutateAsync(removing.id) : Promise.resolve())}
+        onClose={() => setRemoving(null)}
+      />
     </div>
   );
 }

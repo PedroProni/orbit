@@ -15,7 +15,7 @@ import { ApiTokenCreatedDialog } from './api-token-created-dialog';
 import { ApiTokenDialog } from './api-token-dialog';
 import { ApiTokenRow } from './api-token-row';
 import { grantableScopes } from './api-tokens.helpers';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function ApiTokensAdminPage() {
   const t = useTranslations('admin');

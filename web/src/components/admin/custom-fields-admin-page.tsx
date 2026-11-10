@@ -12,7 +12,7 @@ import { cn } from '@/lib/cn';
 import { CustomFieldDefinition } from '@/types/api.types';
 import { ADMIN_ICON_BUTTON_CLASS, CUSTOM_FIELD_ICONS, ADMIN_PANEL_CLASS, ADMIN_PRIMARY_BUTTON_CLASS } from './admin.constants';
 import { AdminPageFrame } from './admin-page-frame';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { CustomFieldDialog } from './custom-field-dialog';
 import { CustomFieldListsPicker } from './custom-field-lists-picker';
 import { SpacePicker } from './space-picker';

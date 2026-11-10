@@ -11,7 +11,7 @@ import { TemplateInput } from '@/services/template.types';
 import { TaskTemplate } from '@/types/workspace.types';
 import { ADMIN_PANEL_CLASS, ADMIN_PRIMARY_BUTTON_CLASS } from './admin.constants';
 import { AdminPageFrame } from './admin-page-frame';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { TemplateDialog } from './template-dialog';
 import { TemplateRow } from './template-row';
 

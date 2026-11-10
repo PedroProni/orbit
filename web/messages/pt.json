@@ -320,14 +320,14 @@
   },
   "inbox": {
     "title": "Caixa de entrada",
-    "loading": "Carregando...",
     "error": "Não foi possível carregar a caixa de entrada",
     "unread": "{count} notificações não lidas",
     "assigned": "{count} tarefas abertas atribuídas a você",
     "overdue": "Atrasadas",
     "dueSoon": "Vencem em breve",
     "emptyOverdue": "Nada atrasado",
-    "emptyDueSoon": "Nada vence em breve"
+    "emptyDueSoon": "Nada vence em breve",
+    "subtitle": "O que está atrasado ou vence em breve nas suas tarefas."
   },
   "docs": {
     "new": "Novo documento",
@@ -350,7 +350,15 @@
       "code": "Código",
       "link": "Link"
     },
-    "pickOnly": "Escolha um documento"
+    "pickOnly": "Escolha um documento",
+    "title": "Documentos",
+    "subtitle": "Páginas que o time escreve e compartilha, em Markdown.",
+    "tree": "Documentos",
+    "back": "Voltar aos documentos",
+    "emptyHint": "Crie o primeiro documento com o botão acima.",
+    "emptyHintReadOnly": "Ninguém escreveu um documento ainda.",
+    "archiveTitle": "Arquivar documento",
+    "confirmArchive": "Arquivar \"{name}\"? Ele sai da lista de documentos."
   },
   "goals": {
     "title": "Metas",
@@ -360,13 +368,18 @@
     "mainTarget": "Alvo principal",
     "create": "Criar meta",
     "delete": "Excluir",
-    "empty": "Nenhuma meta ainda"
+    "empty": "Nenhuma meta ainda",
+    "subtitle": "Metas que o time acompanha, com o progresso de cada uma.",
+    "emptyHint": "Crie uma meta com um alvo para acompanhar o progresso.",
+    "emptyHintReadOnly": "Ninguém criou uma meta ainda.",
+    "deleteNamed": "Excluir a meta {name}",
+    "deleteTitle": "Excluir meta",
+    "confirmDelete": "Excluir a meta \"{name}\"? O progresso dela vai junto."
   },
   "dashboards": {
     "title": "Painéis",
     "name": "Nome do painel",
     "create": "Criar painel",
-    "delete": "Excluir painel",
     "empty": "Nenhum painel ainda",
     "noData": "Sem dados",
     "widgets": {
@@ -380,7 +393,16 @@
       "count": "Total"
     },
     "addWidget": "Adicionar widget",
-    "removeWidget": "Remover widget"
+    "removeWidget": "Remover widget",
+    "subtitle": "Gráficos das tarefas deste workspace, por status, pessoa, atraso e tempo.",
+    "emptyHint": "Crie um painel para ver suas tarefas em gráficos.",
+    "emptyHintReadOnly": "Ninguém criou um painel ainda.",
+    "deleteNamed": "Excluir o painel {name}",
+    "deleteTitle": "Excluir painel",
+    "confirmDelete": "Excluir o painel \"{name}\"? Os widgets dele vão junto.",
+    "deleteConfirm": "Excluir",
+    "noWidgets": "Este painel não tem widgets",
+    "noWidgetsHint": "Adicione um widget para começar."
   },
   "chat": {
     "channelName": "Nome do canal",
@@ -390,7 +412,15 @@
     "message": "Escreva uma mensagem",
     "send": "Enviar",
     "readOnlyNotice": "Você pode ler este canal. Seu papel não envia mensagens.",
-    "pickOnly": "Escolha um canal"
+    "pickOnly": "Escolha um canal",
+    "title": "Chat",
+    "subtitle": "Converse com o time em canais.",
+    "channels": "Canais",
+    "conversation": "Conversa",
+    "back": "Voltar aos canais",
+    "noChannels": "Nenhum canal ainda",
+    "noChannelsHint": "Crie o primeiro canal acima.",
+    "noChannelsHintReadOnly": "Ninguém criou um canal ainda."
   },
   "planning": {
     "title": "Planejamento",
@@ -467,7 +497,10 @@
     "nextMonth": "Próximo mês",
     "today": "Hoje",
     "clearDate": "Limpar data",
-    "noDate": "Sem data"
+    "noDate": "Sem data",
+    "cancel": "Cancelar",
+    "retry": "Tentar de novo",
+    "loadError": "Não foi possível carregar esta página."
   },
   "palette": {
     "title": "Paleta de comandos",
@@ -522,7 +555,14 @@
     "statusMissing": "O espaço \"{space}\" não tem o status \"{status}\", então a tarefa continua onde estava",
     "pullRequestUnlinkFailed": "Não foi possível desvincular o pull request",
     "roleChanged": "Papel alterado.",
-    "roleChangeFailed": "Não foi possível alterar o papel."
+    "roleChangeFailed": "Não foi possível alterar o papel.",
+    "dashboardCreateFailed": "Não foi possível criar o painel. O nome continua no campo.",
+    "dashboardUpdateFailed": "Não foi possível atualizar o painel.",
+    "goalCreateFailed": "Não foi possível criar a meta. O que você digitou continua lá.",
+    "channelCreateFailed": "Não foi possível criar o canal. O nome continua no campo.",
+    "messageSendFailed": "Não foi possível enviar a mensagem. Seu texto continua lá.",
+    "docCreateFailed": "Não foi possível criar o documento.",
+    "docSaveFailed": "Não foi possível salvar o documento. Suas alterações continuam na tela."
   },
   "attachments": {
     "title": "Anexos",
@@ -631,7 +671,8 @@
     "endSession": "Encerrar sessão",
     "endCurrent": "Sair aqui",
     "endOthers": "Encerrar todas as outras sessões",
-    "endSessionLabel": "Encerrar sessão em {device}"
+    "endSessionLabel": "Encerrar sessão em {device}",
+    "subtitle": "Sua senha e os aparelhos onde você está conectado."
   },
   "people": {
     "title": "Pessoas",

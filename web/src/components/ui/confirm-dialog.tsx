@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dialog } from '@/components/ui/dialog';
 import { useApiErrorText } from '@/hooks/use-api-error-text';
-import { ADMIN_DANGER_BUTTON_CLASS, ADMIN_DIALOG_PANEL_CLASS, ADMIN_SECONDARY_BUTTON_CLASS } from './admin.constants';
-import { ConfirmDialogProps } from './admin.types';
+import { CONFIRM_DIALOG_CANCEL_CLASS, CONFIRM_DIALOG_DANGER_CLASS, CONFIRM_DIALOG_PANEL_CLASS } from './confirm-dialog.constants';
+import { ConfirmDialogProps } from './confirm-dialog.types';
 
 function ConfirmDialogBody({ title, message, confirmLabel, onConfirm, onClose }: ConfirmDialogProps) {
-  const t = useTranslations('admin');
+  const t = useTranslations('ui');
   const errorText = useApiErrorText();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -36,10 +36,10 @@ function ConfirmDialogBody({ title, message, confirmLabel, onConfirm, onClose }:
         </p>
       ) : null}
       <div className="flex justify-end gap-2">
-        <button type="button" onClick={onClose} className={ADMIN_SECONDARY_BUTTON_CLASS}>
+        <button type="button" onClick={onClose} className={CONFIRM_DIALOG_CANCEL_CLASS}>
           {t('cancel')}
         </button>
-        <button type="button" disabled={busy} onClick={() => void confirm()} className={ADMIN_DANGER_BUTTON_CLASS}>
+        <button type="button" disabled={busy} onClick={() => void confirm()} className={CONFIRM_DIALOG_DANGER_CLASS}>
           {confirmLabel}
         </button>
       </div>
@@ -50,7 +50,7 @@ function ConfirmDialogBody({ title, message, confirmLabel, onConfirm, onClose }:
 export function ConfirmDialog(props: ConfirmDialogProps) {
   const tu = useTranslations('ui');
   return (
-    <Dialog open={props.open} onClose={props.onClose} label={props.title} closeLabel={tu('close')} panelClassName={ADMIN_DIALOG_PANEL_CLASS}>
+    <Dialog open={props.open} onClose={props.onClose} label={props.title} closeLabel={tu('close')} panelClassName={CONFIRM_DIALOG_PANEL_CLASS}>
       <ConfirmDialogBody {...props} />
     </Dialog>
   );

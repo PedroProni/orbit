@@ -1,9 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ChevronLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { MarkdownView } from '@/components/common/markdown-view';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { PageHeader } from '@/components/ui/page-header';
 import { useCapabilities } from '@/hooks/use-capabilities';
 import { useDoc, useDocs, useInvalidating } from '@/hooks/use-workspace';
 import { workspaceService } from '@/services/workspace.service';
@@ -12,9 +17,12 @@ import { DocEditor } from './doc-editor';
 import { DocTree } from './doc-tree';
 import { buildDocTree } from './docs.helpers';
 import { DOC_LINK_PARAM } from './docs.constants';
+import { DocBodySkeleton, DocsSkeleton } from './screen-skeletons';
+import { SCREEN_PRIMARY_BUTTON_CLASS, SCREEN_SECONDARY_BUTTON_CLASS } from './screens.constants';
 
 export function DocsScreen() {
   const t = useTranslations('docs');
+  const tu = useTranslations('ui');
   const docs = useDocs();
   const { canWrite } = useCapabilities();
   const linked = useSearchParams().get(DOC_LINK_PARAM);
@@ -34,9 +42,11 @@ export function DocsScreen() {
   const [syncedKey, setSyncedKey] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const create = useInvalidating(workspaceService.createDoc, ['docs']);
-  const save = useInvalidating((args: DocSaveInput) => workspaceService.saveDoc(args.id, { title: args.title, bodyMd: args.bodyMd }), ['docs', 'doc']);
+  const [archiving, setArchiving] = useState(false);
+  const create = useInvalidating(workspaceService.createDoc, ['docs'], 'docCreateFailed');
+  const save = useInvalidating((args: DocSaveInput) => workspaceService.saveDoc(args.id, { title: args.title, bodyMd: args.bodyMd }), ['docs', 'doc'], 'docSaveFailed');
   const archive = useInvalidating(workspaceService.archiveDoc, ['docs']);
+  const createDoc = (parentId?: string) => create.mutate({ title: t('untitled'), bodyMd: '', ...(parentId ? { parentId } : {}) }, { onSuccess: (created) => setSelected(created.id) });
 
   const loadedKey = doc.data ? `${doc.data.id}:${doc.data.updatedAt}` : null;
   if (loadedKey !== syncedKey) {
@@ -47,47 +57,77 @@ export function DocsScreen() {
     }
   }
 
+  if (docs.isLoading) return <DocsSkeleton />;
+
+  const noDocs = docs.data?.length === 0;
+
   return (
-    <div className="grid h-full grid-cols-1 md:grid-cols-[260px_1fr]">
-      <aside className="border-b border-line p-3 md:border-b-0 md:border-r">
-        {canWrite ? (
-          <button type="button" className="mb-3 w-full rounded bg-accent px-3 py-1.5 text-sm text-white" onClick={() => create.mutate({ title: t('untitled'), bodyMd: '' }, { onSuccess: (created) => setSelected(created.id) })}>
-            {t('new')}
-          </button>
-        ) : null}
-        {docs.data?.length === 0 ? <p className="text-sm text-muted">{t('empty')}</p> : null}
-        <DocTree nodes={buildDocTree(docs.data ?? [])} selected={selected} onSelect={setSelected} onAddChild={canWrite ? (parentId) => create.mutate({ title: t('untitled'), bodyMd: '', parentId }, { onSuccess: (created) => setSelected(created.id) }) : undefined} />
-      </aside>
-      <section className="p-4">
-        {!selected ? <p className="text-sm text-muted">{t(canWrite ? 'pick' : 'pickOnly')}</p> : null}
-        {selected && doc.data && !canWrite ? (
-          <article className="mx-auto max-w-4xl space-y-3">
-            <h1 className="text-2xl font-semibold">{doc.data.title}</h1>
-            <MarkdownView source={doc.data.bodyMd} />
-          </article>
-        ) : null}
-        {selected && doc.data && canWrite ? (
-          <div className="mx-auto max-w-4xl space-y-3">
-            <input aria-label={t('titleField')} value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-transparent text-2xl font-semibold outline-none" />
-            <DocEditor value={body} onChange={setBody} />
-            <div className="flex gap-2">
-              <button type="button" disabled={!title.trim() || save.isPending} className="rounded bg-accent px-3 py-1.5 text-sm text-white disabled:opacity-50" onClick={() => save.mutate({ id: selected, title, bodyMd: body })}>
-                {t('save')}
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="border-b border-line px-4 pt-4 md:px-6">
+        <PageHeader
+          title={t('title')}
+          subtitle={t('subtitle')}
+          action={
+            canWrite ? (
+              <button type="button" disabled={create.isPending} className={SCREEN_PRIMARY_BUTTON_CLASS} onClick={() => createDoc()}>
+                {t('new')}
               </button>
-              <button
-                type="button"
-                className="rounded border border-line px-3 py-1.5 text-sm"
-                onClick={() => {
-                  archive.mutate(selected);
-                  setSelected(null);
-                }}
-              >
-                {t('archive')}
+            ) : null
+          }
+        />
+      </div>
+      {docs.isError ? <ErrorState title={tu('loadError')} onRetry={docs.refetch} /> : null}
+      {noDocs ? <EmptyState title={t('empty')} hint={t(canWrite ? 'emptyHint' : 'emptyHintReadOnly')} /> : null}
+      {docs.data && !noDocs ? (
+        <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)]">
+          <aside aria-label={t('tree')} className={`${selected ? 'hidden md:block' : ''} min-w-0 p-3 md:border-r md:border-line`}>
+            <DocTree nodes={buildDocTree(docs.data)} selected={selected} onSelect={setSelected} onAddChild={canWrite ? (parentId) => createDoc(parentId) : undefined} />
+          </aside>
+          <section className={`${selected ? 'block' : 'hidden md:block'} min-w-0 p-4`}>
+            {selected ? (
+              <button type="button" onClick={() => setSelected(null)} className="mb-3 flex items-center gap-1 rounded px-1 text-sm text-muted hover:text-fg md:hidden">
+                <ChevronLeft size={16} aria-hidden="true" />
+                {t('back')}
               </button>
-            </div>
-          </div>
-        ) : null}
-      </section>
+            ) : null}
+            {!selected ? <p className="text-sm text-muted">{t(canWrite ? 'pick' : 'pickOnly')}</p> : null}
+            {selected && doc.isLoading ? <DocBodySkeleton /> : null}
+            {selected && doc.isError ? <ErrorState title={tu('loadError')} onRetry={doc.refetch} /> : null}
+            {selected && doc.data && !canWrite ? (
+              <article className="mx-auto max-w-4xl space-y-3">
+                <h2 className="break-words text-2xl font-semibold">{doc.data.title}</h2>
+                <MarkdownView source={doc.data.bodyMd} />
+              </article>
+            ) : null}
+            {selected && doc.data && canWrite ? (
+              <div className="mx-auto max-w-4xl space-y-3">
+                <input aria-label={t('titleField')} value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded bg-transparent text-2xl font-semibold" />
+                <DocEditor value={body} onChange={setBody} />
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" disabled={!title.trim() || save.isPending} className={SCREEN_PRIMARY_BUTTON_CLASS} onClick={() => save.mutate({ id: selected, title, bodyMd: body })}>
+                    {t('save')}
+                  </button>
+                  <button type="button" className={SCREEN_SECONDARY_BUTTON_CLASS} onClick={() => setArchiving(true)}>
+                    {t('archive')}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
+      <ConfirmDialog
+        open={archiving && selected !== null}
+        title={t('archiveTitle')}
+        message={t('confirmArchive', { name: doc.data?.title ?? '' })}
+        confirmLabel={t('archive')}
+        onConfirm={async () => {
+          if (!selected) return;
+          await archive.mutateAsync(selected);
+          setSelected(null);
+        }}
+        onClose={() => setArchiving(false)}
+      />
     </div>
   );
 }

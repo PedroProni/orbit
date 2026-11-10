@@ -35,23 +35,27 @@ export function AuditLogAdminPage() {
   return (
     <AdminPageFrame title={t('sections.auditLog')} subtitle={t('auditLog.subtitle')}>
       <AuditLogFilters draft={draft} invalidRange={invalidRange} onChange={change} />
-      <section aria-label={t('sections.auditLog')} className={ADMIN_PANEL_CLASS}>
-        {logs.isLoading ? <Skeleton className="m-3 h-16" /> : null}
-        {logs.isError ? <EmptyState title={t('loadError')} /> : null}
-        {logs.isSuccess && items.length === 0 ? <EmptyState title={t('auditLog.empty')} hint={t('auditLog.emptyHint')} /> : null}
-        <ul className="divide-y divide-line">
-          {items.map((item) => (
-            <AuditLogRow key={item.id} item={item} onOpenTask={openTask} />
-          ))}
-        </ul>
-      </section>
-      {logs.hasNextPage ? (
-        <div className="mt-3 flex justify-center">
-          <button type="button" onClick={() => logs.fetchNextPage()} disabled={logs.isFetchingNextPage} className={ADMIN_SECONDARY_BUTTON_CLASS}>
-            {logs.isFetchingNextPage ? t('loadingMore') : t('loadMore')}
-          </button>
-        </div>
-      ) : null}
+      {invalidRange ? null : (
+        <>
+          <section aria-label={t('sections.auditLog')} className={ADMIN_PANEL_CLASS}>
+            {logs.isLoading ? <Skeleton className="m-3 h-16" /> : null}
+            {logs.isError ? <EmptyState title={t('loadError')} /> : null}
+            {logs.isSuccess && items.length === 0 ? <EmptyState title={t('auditLog.empty')} hint={t('auditLog.emptyHint')} /> : null}
+            <ul className="divide-y divide-line">
+              {items.map((item) => (
+                <AuditLogRow key={item.id} item={item} onOpenTask={openTask} />
+              ))}
+            </ul>
+          </section>
+          {logs.hasNextPage ? (
+            <div className="mt-3 flex justify-center">
+              <button type="button" onClick={() => logs.fetchNextPage()} disabled={logs.isFetchingNextPage} className={ADMIN_SECONDARY_BUTTON_CLASS}>
+                {logs.isFetchingNextPage ? t('loadingMore') : t('loadMore')}
+              </button>
+            </div>
+          ) : null}
+        </>
+      )}
     </AdminPageFrame>
   );
 }

@@ -11,7 +11,7 @@ import { ListInput } from '@/services/admin.types';
 import { ADMIN_PRIMARY_BUTTON_CLASS } from './admin.constants';
 import { ConfirmRequest, ListDraft, NameRequest, StructureActions, StructureTarget } from './admin.types';
 import { AdminPageFrame } from './admin-page-frame';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ListDialog } from './list-dialog';
 import { NameDialog } from './name-dialog';
 import { SpaceCard } from './space-card';
@@ -113,7 +113,14 @@ export function SpacesAdminPage() {
       </div>
       <NameDialog open={naming !== null} title={naming?.title ?? ''} initial={naming?.initial ?? ''} submitLabel={naming?.submitLabel ?? ''} onSubmit={(name) => naming?.submit(name) ?? Promise.resolve()} onClose={() => setNaming(null)} />
       <ListDialog open={draft !== null} space={draft?.space ?? null} list={draft?.list ?? null} defaultKind={draft?.kind ?? 'list'} defaultFolderId={draft?.folderId ?? null} onSubmit={submitList} onClose={() => setDraft(null)} />
-      <ConfirmDialog open={confirming !== null} title={confirming?.title ?? ''} message={confirming?.message ?? ''} confirmLabel={confirming?.confirmLabel ?? ''} onConfirm={() => confirming?.confirm() ?? Promise.resolve()} onClose={() => setConfirming(null)} />
+      <ConfirmDialog
+        open={confirming !== null}
+        title={confirming?.title ?? ''}
+        message={confirming?.message ?? ''}
+        confirmLabel={confirming?.confirmLabel ?? ''}
+        onConfirm={() => confirming?.confirm() ?? Promise.resolve()}
+        onClose={() => setConfirming(null)}
+      />
     </AdminPageFrame>
   );
 }
