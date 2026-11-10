@@ -2,6 +2,10 @@
 
 A self-hosted task manager built as a ClickUp replacement: spaces, folders, lists and sprints, a fast board and list, saved views, an "All tasks" board across every space, and a ClickUp importer.
 
+**Live demo:** [orbit-demo.proni.dev](https://orbit-demo.proni.dev), no sign-in needed. Create tasks, move cards and comment; the data is shared by every visitor and resets every night. The demo runs from my own machine and may be offline. More at [orbit.proni.dev](https://orbit.proni.dev).
+
+![Orbit board view](https://orbit.proni.dev/img/board.png)
+
 ## Highlights
 
 - **Board and list like ClickUp:** inline "+" composer at the top of each column and group, with assignee, dates, priority and tags as chips; Enter saves and keeps the composer open for the next task.
@@ -11,7 +15,9 @@ A self-hosted task manager built as a ClickUp replacement: spaces, folders, list
 - **Saved views:** create, rename, share and duplicate per list.
 - **Admin area:** spaces, folders, lists, sprints, locked default statuses plus extra statuses, rules for new tasks, groups and task types.
 - **Own login:** email and password, single-use invite links, revocable sessions, login throttling.
-- **Guests:** read-only access to shared lists only; inline images visible only when the task text shows them.
+- **Roles:** owner, admin, member, read-only viewer and guests limited to shared lists.
+- **Automations, public forms, task templates and scoped API tokens** shown once and never above the creator's role.
+- **Audit log and GitHub status:** every change on record with filters; webhook deliveries with secrets shown only as set or not set.
 - **GitHub:** pull requests linked to tasks by id in the branch or PR title.
 - **ClickUp importer:** copies spaces, lists, statuses, tasks, comments and custom fields.
 - **English and Portuguese**, light and dark themes, works on mobile.
