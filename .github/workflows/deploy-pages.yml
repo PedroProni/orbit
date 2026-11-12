@@ -1,0 +1,45 @@
+name: Publicar no Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Publicar
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4 pages deploy site --project-name orbit-proni --branch main --commit-hash "$GITHUB_SHA" --commit-dirty=true
+      - name: Conferir o conteúdo publicado
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          LOCAL=$(sha256sum site/index.html | cut -d' ' -f1)
+          for I in $(seq 1 30); do
+            REMOTE=$(curl -fsS "https://orbit.proni.dev/?ci=$GITHUB_SHA" | sha256sum | cut -d' ' -f1)
+            if [ "$LOCAL" = "$REMOTE" ]; then echo "conteúdo publicado confere"; break; fi
+            [ "$I" = "30" ] && { echo "conteúdo publicado diferente do build"; exit 1; }
+            sleep 6
+          done
+          curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/orbit-proni/deployments?per_page=1" | node -e "let s='';process.stdin.on('data',c=>s+=c).on('end',()=>{const d=JSON.parse(s).result[0];console.log('deployment',d.id,d.deployment_trigger.metadata.commit_hash);process.exit(d.deployment_trigger.metadata.commit_hash===process.env.GITHUB_SHA?0:1)})"

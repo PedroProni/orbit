@@ -49,3 +49,11 @@ cd web && npx vitest run
 ## License
 
 All rights reserved.
+
+## CI/CD
+
+Pull requests to `main` run `ci.yml`: `web` (lint, typecheck, tests, build). The `ci` job is the required status check of `main`: a pull request cannot be merged until it passes.
+
+The `api/` and `web/` folders are a scrubbed mirror of the private Orbit repositories, so the API tests are not run here (the scrub changes strings some of them expect; they run in the private repository). The landing page lives in `site/`.
+
+Every push to `main` that touches `site/**` runs `deploy-pages.yml`: it builds, publishes with `wrangler pages deploy` to the `orbit-proni` Cloudflare Pages project (branch `main`), then fetches the served page until it is byte-identical to the build and checks that the latest Pages deployment carries the pushed commit. Needs the repository secrets `CLOUDFLARE_API_TOKEN` (Pages edit only) and `CLOUDFLARE_ACCOUNT_ID`.
